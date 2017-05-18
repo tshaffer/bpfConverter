@@ -9,6 +9,8 @@ import { createStore, applyMiddleware } from 'redux';
 
 import reducers from './store/reducers';
 
+import { bsp } from './app/bsp';
+
 import App from './components/app';
 
 const store = createStore(
@@ -17,6 +19,8 @@ const store = createStore(
         thunkMiddleware
     )
 );
+
+bsp.initialize(store);
 
 ReactDOM.render(
     <Provider store={store}>
