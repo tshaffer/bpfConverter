@@ -1,4 +1,4 @@
-console.log("hello autoReact");
+console.log("hello autoRunTS");
 const electron = require('electron');
 
 // Module to control application life.
