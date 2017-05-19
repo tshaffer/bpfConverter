@@ -10,7 +10,7 @@ import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 let _singleton : BSP = null;
 
-class BSP {
+export class BSP {
 
     store : any;
     dispatch : Function;
@@ -64,6 +64,10 @@ class BSP {
             console.log(err);
             debugger;
         });
+    }
+
+    restartPlayback(presentationName : string) : any {
+
     }
 
     postMessage(event : any) {
