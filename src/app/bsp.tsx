@@ -17,6 +17,7 @@ class BSP {
     getState : Function;
     syncSpec : any;
     hsmList : Array<any>;
+    playerHSM: any; // PlayerHSM
 
     constructor() {
         if (!_singleton) {
@@ -65,9 +66,30 @@ class BSP {
         });
     }
 
+    postMessage(event : any) {
+        return () => {
+            this.dispatchEvent(event);
+        };
+    }
+
+    dispatchEvent(event : any) {
+
+        this.playerHSM.Dispatch(event);
+
+        this.hsmList.forEach( (hsm) => {
+            hsm.Dispatch(event);
+        });
+    }
+
+
+    getAutoschedule(syncSpec : Object, rootPath : string) {
+        return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
+    }
+
+
     openSyncSpec(filePath : string = '') : any {
 
-        return new Promise( (resolve : any, reject : any) => {
+        return new Promise( (resolve : Function, reject : Function) => {
 
             fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
 
@@ -82,7 +104,54 @@ class BSP {
         });
     }
 
-    // FileNameToFilePathLUT
+    getSyncSpecFile(fileName : string, syncSpec : any, rootPath : string) {
+
+        return new Promise( (resolve : Function, reject : Function) => {
+
+            let syncSpecFile = this.getFile(syncSpec, fileName);
+            if (syncSpecFile == null) {
+                debugger;
+                syncSpecFile = {};    // required to eliminate flow warnings
+            }
+
+            // const fileSize = syncSpecFile.size;
+            const filePath : string = path.join(rootPath, syncSpecFile.link);
+
+            fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const fileStr : string = decoder.write(dataBuffer);
+                    const file : Object = JSON.parse(fileStr);
+
+                    // comment out the following code to allow hacking of files -
+                    // that is, overwriting files in the pool without updating the sync spec with updated sha1
+                    // if (fileSize !== fileStr.length) {
+                    //   debugger;
+                    // }
+                    resolve(file);
+                }
+            });
+        });
+    }
+
+    getFile(syncSpec : any, fileName : string) : any {
+
+        let file = null;
+
+        syncSpec.files.download.forEach( (syncSpecFile : any) => {
+            if (syncSpecFile.name === fileName) {
+                file = syncSpecFile;
+                return;
+            }
+        });
+
+        return file;
+    }
+
+
+
+// FileNameToFilePathLUT
     buildPoolAssetFiles(syncSpec : any, pathToPool : string) : any {
 
         let poolAssetFiles : any = {};
@@ -94,6 +163,24 @@ class BSP {
         return poolAssetFiles;
     }
 
+    // queueRetrieveLiveDataFeed(dataFeed : DataFeed) {
+    queueRetrieveLiveDataFeed(dataFeed : any) {
+
+        const liveDataFeed = dataFeed;
+
+        // if (liveDataFeed.usage === DataFeedUsageType.Text) {
+        //     dataFeed.retrieveFeed(this);
+        // }
+        // else {
+        //     // is the following correct? check with autorun classic
+        //     this.liveDataFeedsToDownload.push(liveDataFeed);
+        //
+        //     // launch download of first feed
+        //     if (this.liveDataFeedsToDownload.length === 1) {
+        //         dataFeed.retrieveFeed(this);
+        //     }
+        // }
+    }
 
 }
 
