@@ -178,7 +178,7 @@ export class BSP {
 
     openSyncSpec(filePath : string = '') : any {
 
-        return new Promise( (resolve : Function, reject : Function) => {
+        return new Promise<Object>( (resolve : Function, reject : Function) => {
 
             fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
 
@@ -193,9 +193,9 @@ export class BSP {
         });
     }
 
-    getSyncSpecFile(fileName : string, syncSpec : any, rootPath : string) {
+    getSyncSpecFile(fileName : string, syncSpec : any, rootPath : string) : Promise<Object> {
 
-        return new Promise( (resolve : Function, reject : Function) => {
+        return new Promise<Object>( (resolve : Function, reject : Function) => {
 
             let syncSpecFile = this.getFile(syncSpec, fileName);
             if (syncSpecFile == null) {
