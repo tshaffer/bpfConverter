@@ -11,11 +11,6 @@ import {
     HSMStateData
 } from "../types/index";
 
-// import {
-//     DataFeed
-// } from '../entities/dataFeed';
-// type DataFeedLUT = { [dataFeedId:string]: DataFeed };
-
 export class PlayerHSM extends HSM {
 
     type : string;
@@ -130,12 +125,12 @@ export class PlayerHSM extends HSM {
             // load live data feeds and queue for downloading
             myThis.stateMachine.bsp.liveDataFeedsToDownload = [];
 
-            const dataFeedIds = dmGetDataFeedIdsForSign(myThis.stateMachine.bsdm);
-            const dataFeedsById : any = myThis.stateMachine.getState().dataFeeds.dataFeedsById;
-            dataFeedIds.forEach( (dataFeedId : string) => {
-                const dataFeed = dataFeedsById[dataFeedId];
-                myThis.stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
-            });
+            // const dataFeedIds = dmGetDataFeedIdsForSign(myThis.stateMachine.bsdm);
+            // const dataFeedsById : any = myThis.stateMachine.getState().dataFeeds.dataFeedsById;
+            // dataFeedIds.forEach( (dataFeedId : string) => {
+            //     const dataFeed = dataFeedsById[dataFeedId];
+            //     myThis.stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
+            // });
 
             // launch playback
             const state = myThis.stateMachine.getState();

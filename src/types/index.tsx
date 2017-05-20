@@ -33,3 +33,7 @@ export interface ArState {
 export interface ArSyncSpec {
     files : any;
 }
+
+export interface MediaHState extends HState {
+    setNextState : Function;
+}

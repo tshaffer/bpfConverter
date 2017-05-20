@@ -3,14 +3,20 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+    BsDmId,
     DmMediaStateState,
     DmState,
+    DmZone,
     dmGetZoneById,
     dmGetZoneSimplePlaylist,
     dmGetMediaStateById,
 } from '@brightsign/bsdatamodel';
 
 import ImageState from './imageState';
+
+import {
+    MediaHState
+} from '../types';
 
 export class ZoneHSM extends HSM {
 
@@ -20,7 +26,7 @@ export class ZoneHSM extends HSM {
     bsdm : DmState;
     zoneId : string;
     stTop : HState;
-    bsdmZone : any;
+    bsdmZone : DmZone;
     id : string;
     name : string;
     x : number;
@@ -28,8 +34,8 @@ export class ZoneHSM extends HSM {
     width : number;
     height : number;
     initialMediaStateId : string;
-    mediaStateIds : any;
-    mediaStates : any;
+    mediaStateIds : BsDmId[];
+    mediaStates : MediaHState[];
 
     constructor(dispatch: Function, getState : Function, zoneId : string) {
         super();
@@ -63,14 +69,14 @@ export class ZoneHSM extends HSM {
         this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
         this.mediaStates = [];
 
-        let newState : any = null;
+        let newState : MediaHState = null;
 
-        this.mediaStateIds.forEach( (mediaStateId : any, index : number) => {
+        this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
             const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
             if (bsdmMediaState.contentItem.type === 'Image') {
                 newState = new ImageState(this, bsdmMediaState);
 
-                // hack to have this code here
+                // hack to have this code here - eliminate after adding mrss states
                 this.mediaStates.push(newState);
 
                 if (index > 0) {

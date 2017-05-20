@@ -23,7 +23,7 @@ export default class ImageState extends HState {
     bsdmImageState : DmMediaStateState;
     nextState : HState;
     dispatch : Function;
-    stateMachine : any;
+    stateMachine : ZoneHSM;
 
     constructor(zoneHSM : ZoneHSM, bsdmImageState : DmMediaStateState ) {
 
