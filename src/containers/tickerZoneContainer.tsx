@@ -1,5 +1,3 @@
-// @flow
-
 import { connect } from 'react-redux';
 
 import TickerZone from '../components/tickerZone';
@@ -17,14 +15,14 @@ import {
   TextDataFeed
 } from '../entities/textDataFeed';
 
-function mapStateToProps (state, ownProps) {
+function mapStateToProps (state : any, ownProps : any) {
   return {
     ...ownProps,
     dataFeeds: state.dataFeeds,
     articles : getArticles(state, ownProps.zone.id)
   };
 }
-export const getArticles = (state : Object, zoneId : string) : Array<string> => {
+export const getArticles = (state : any, zoneId : string) : Array<string> => {
 
   let articles : Array<string> = [];
 
@@ -32,7 +30,7 @@ export const getArticles = (state : Object, zoneId : string) : Array<string> => 
 
   mediaStateIds.forEach( (mediaStateId) => {
 
-    const mediaState = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
+    const mediaState : any = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
     console.log(mediaState);
     if (mediaState.contentItem.type === ContentItemType.DataFeed) {
 

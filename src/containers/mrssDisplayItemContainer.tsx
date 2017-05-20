@@ -1,5 +1,3 @@
-// @flow
-
 import { connect } from 'react-redux';
 
 import {
@@ -9,7 +7,7 @@ from '../store/mrssDataFeedItems';
 
 import MrssDisplayItem from '../components/mrssDisplayItem';
 
-function mapStateToProps (state, ownProps) {
+function mapStateToProps (state : any, ownProps : any) {
   return {
     ...ownProps,
     mrssDataFeedItem : getMrssDataFeedItem(state, ownProps.dataFeedId),

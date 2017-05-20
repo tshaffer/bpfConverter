@@ -1,8 +1,13 @@
-// @flow
+import * as React from "react";
 
-import React, { Component } from 'react';
+export interface VideoProps {
+  width : number;
+  height: number;
+  onVideoEnd : Function;
+  resourceIdentifier : string;
+}
 
-export default class Video extends Component {
+export default class Video extends React.Component<any, object> {
 
   render () {
 
@@ -24,10 +29,3 @@ export default class Video extends Component {
     );
   }
 }
-
-Video.propTypes = {
-  width: React.PropTypes.number.isRequired,
-  height: React.PropTypes.number.isRequired,
-  onVideoEnd: React.PropTypes.func.isRequired,
-  resourceIdentifier: React.PropTypes.string.isRequired,
-};

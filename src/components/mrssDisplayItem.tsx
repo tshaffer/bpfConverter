@@ -1,19 +1,18 @@
-// @flow
 
-import React, { Component } from 'react';
+import * as React from "react";
 
-import path from 'path';
+const path = require('path');
 
 import ImageContainer from '../containers/imageContainer';
 
-export default class MrssDisplayItem extends Component {
+export default class MrssDisplayItem extends React.Component<any, object> {
 
   constructor(props : Object) {
     super(props);
     this.timeout = null;
   }
 
-  timeout : ?number;
+  timeout : any;
 
   render () {
 
@@ -36,13 +35,3 @@ export default class MrssDisplayItem extends Component {
     }
   }
 }
-
-MrssDisplayItem.propTypes = {
-  dataFeedId: React.PropTypes.string.isRequired,
-  mrssDataFeedItem : React.PropTypes.object.isRequired,
-  mrssDataFeedItemPath : React.PropTypes.string.isRequired,
-  width: React.PropTypes.number.isRequired,
-  height: React.PropTypes.number.isRequired,
-  duration: React.PropTypes.number.isRequired,
-  onTimeout: React.PropTypes.func.isRequired,
-};

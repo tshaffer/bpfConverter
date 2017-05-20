@@ -1,10 +1,10 @@
-// @flow
+import * as React from "react";
 
-import React, { Component } from 'react';
+import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
-import PlatformService from '../platform';
+export default class TickerZone extends React.Component<any, object> {
 
-export default class TickerZone extends Component {
+  bsTicker : any;
 
   constructor(props : Object) {
     super(props);
@@ -14,17 +14,17 @@ export default class TickerZone extends Component {
 
   componentDidMount() {
 
-    if (PlatformService.default.isTickerSupported()) {
+    if (DesktopPlatformService.isTickerSupported()) {
 
       let { left, top, width, height } = this.props;
 
       // $FlowBrightSignExternalObject
-      this.bsTicker = new BSTicker(left, top, width, height, 0);
-      this.bsTicker.SetPixelsPerSecond(400);
+      // this.bsTicker = new BSTicker(left, top, width, height, 0);
+      // this.bsTicker.SetPixelsPerSecond(400);
     }
   }
 
-  shouldComponentUpdate(nextProps : Object) {
+  shouldComponentUpdate(nextProps : any) {
 
     const currentArticles = this.props.articles;
     const nextArticles = nextProps.articles;
@@ -45,22 +45,20 @@ export default class TickerZone extends Component {
     return false;
   }
 
-  bsTicker : ?Object;
-
-  render() {
+  render() : any {
 
     console.log('TickerZone:: RENDER INVOKED');
 
     if (this.bsTicker) {
 
       // this pattern avoids flow error
-      const bsTicker : Object = this.bsTicker;
+      const bsTicker : any = this.bsTicker;
 
       // const rssStringCount = bsTicker.GetStringCount(); Bug 27743
       const rssStringCount = 100;
       bsTicker.PopStrings(rssStringCount);
 
-      this.props.articles.forEach( (article) => {
+      this.props.articles.forEach( (article : any) => {
         bsTicker.AddString(article);
       });
     }
@@ -68,15 +66,3 @@ export default class TickerZone extends Component {
     return null;
   }
 }
-
-TickerZone.propTypes = {
-  playbackState: React.PropTypes.string.isRequired,
-  bsdm: React.PropTypes.object.isRequired,
-  zone: React.PropTypes.object.isRequired,
-  left: React.PropTypes.number.isRequired,
-  top: React.PropTypes.number.isRequired,
-  width: React.PropTypes.number.isRequired,
-  height: React.PropTypes.number.isRequired,
-  dataFeeds: React.PropTypes.object.isRequired,
-  articles: React.PropTypes.array.isRequired,
-};

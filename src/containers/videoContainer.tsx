@@ -1,11 +1,14 @@
-// @flow
-
 import { connect } from 'react-redux';
 
+import {
+  ArState
+} from '../types';
+
 import Video from '../components/video';
+import { VideoProps } from '../components/video';
 
 
-function mapStateToProps (_, ownProps) {
+function mapStateToProps (_ : ArState, ownProps : VideoProps ) {
   return {
     ...ownProps,
   };

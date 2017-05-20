@@ -5,6 +5,7 @@ import {ActionWithPayload } from '../types/index';
 // Constants
 // ------------------------------------
 export const ADD_DATA_FEED = 'ADD_DATA_FEED';
+export const UPDATE_DATA_FEED = 'UPDATE_DATA_FEED';
 
 // ------------------------------------
 // Actions
@@ -19,6 +20,17 @@ export function addDataFeed(dataFeed : Object){
     };
 }
 
+export function updateDataFeed(dataFeed : Object){
+
+    return {
+        type: UPDATE_DATA_FEED,
+        payload: {
+            dataFeed,
+        }
+    };
+}
+
+
 // ------------------------------------
 // Reducer
 // ------------------------------------
@@ -31,6 +43,19 @@ export default function(state : DataFeedState = initialState, action : ActionWit
     switch (action.type) {
 
         case ADD_DATA_FEED: {
+
+            let newState : DataFeedState = {...state};
+
+            const dataFeed : any = action.payload.dataFeed;
+
+            // newState.dataFeedsById[dataFeed.id] = dataFeed;
+
+            console.log(newState);
+
+            return newState;
+        }
+
+        case UPDATE_DATA_FEED: {
 
             let newState : DataFeedState = {...state};
 

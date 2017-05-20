@@ -8,6 +8,11 @@ class DesktopPlatformService {
         return '/Users/tedshaffer/Desktop/baconTestCard';
     }
 
+    static isTickerSupported() : boolean {
+        return false;
+    }
+
+
 }
 
 export default DesktopPlatformService;
