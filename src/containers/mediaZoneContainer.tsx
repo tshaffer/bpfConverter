@@ -11,8 +11,8 @@ import { MediaZoneProps } from '../components/mediaZone';
 
 import { getActiveMediaStateId } from '../store/activeMediaStates';
 
-export function postBSPMessage(event : Object) : void {
-    bsp.postMessage(event);
+export function postBSPMessage(event : Object) {
+    return bsp.postMessage(event);
 }
 
 function mapStateToProps (state : any, ownProps : MediaZoneProps) {
@@ -22,16 +22,16 @@ function mapStateToProps (state : any, ownProps : MediaZoneProps) {
     };
 }
 
-// const mapDispatchToProps = (dispatch : any) => {
-//     return bindActionCreators({
-//         postBSPMessage,
-//     }, dispatch);
-// };
+const mapDispatchToProps = (dispatch : any) => {
+    return bindActionCreators({
+        postBSPMessage,
+    }, dispatch);
+};
 
 
 const MediaZoneContainer = connect(
     mapStateToProps,
-    // mapDispatchToProps
+    mapDispatchToProps
 )(MediaZone);
 
 export default MediaZoneContainer;

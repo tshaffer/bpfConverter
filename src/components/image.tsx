@@ -34,9 +34,9 @@ export default class Image extends React.Component<ImageProps, object> {
         }
 
         this.timeout = setTimeout( () => {
-                this.timeout = null;
-                self.props.onTimeout();
-            }
+            this.timeout = null;
+            self.props.onTimeout();
+        }
             ,this.props.duration);
 
         console.log('image.js::render, image src: ' + this.props.resourceIdentifier);

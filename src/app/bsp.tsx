@@ -54,8 +54,6 @@ export class BSP {
 
     initialize(reduxStore : any) {
 
-        debugger;
-
         console.log('bsp initialization');
 
         this.store = reduxStore;
@@ -157,9 +155,11 @@ export class BSP {
     }
 
     postMessage(event : any) : () => void {
+
         return () => {
             this.dispatchEvent(event);
         };
+
     }
 
     dispatchEvent(event : any) {

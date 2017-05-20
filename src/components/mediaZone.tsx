@@ -24,7 +24,7 @@ export interface MediaZoneProps {
     width : number;
     height : number;
     activeMediaStateId : string;
-    // postBSPMessage : Function;
+    postBSPMessage : Function;
 }
 
 export default class MediaZone extends React.Component<MediaZoneProps, object> {
@@ -33,7 +33,7 @@ export default class MediaZone extends React.Component<MediaZoneProps, object> {
         let event = {
             'EventType' : 'timeoutEvent'
         };
-        postBSPMessage(event);
+        this.props.postBSPMessage(event);
     }
 
     renderMediaItem(mediaContentItem: any, event : any) {
