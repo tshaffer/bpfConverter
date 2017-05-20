@@ -13,6 +13,9 @@ import {
     dmGetDataFeedById,
 } from '@brightsign/bsdatamodel';
 
+import {
+    ArSyncSpec
+} from '../types';
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
@@ -40,7 +43,7 @@ export class BSP {
     store : any;
     dispatch : Function;
     getState : Function;
-    syncSpec : any;
+    syncSpec : ArSyncSpec;
     hsmList : Array<HSM>;
     playerHSM: PlayerHSM;
 
@@ -65,7 +68,7 @@ export class BSP {
 
         let state : any;
 
-        this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec : any) => {
+        this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec : ArSyncSpec) => {
 
             console.log(cardSyncSpec);
 
@@ -171,14 +174,14 @@ export class BSP {
     }
 
 
-    getAutoschedule(syncSpec : Object, rootPath : string) {
+    getAutoschedule(syncSpec : ArSyncSpec, rootPath : string) {
         return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
     }
 
 
-    openSyncSpec(filePath : string = '') : any {
+    openSyncSpec(filePath : string = '') : Promise<ArSyncSpec> {
 
-        return new Promise<Object>( (resolve : Function, reject : Function) => {
+        return new Promise<ArSyncSpec>( (resolve : Function, reject : Function) => {
 
             fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
 
@@ -186,14 +189,14 @@ export class BSP {
                     reject(err);
                 } else {
                     const syncSpecStr : string = decoder.write(dataBuffer);
-                    const syncSpec : Object = JSON.parse(syncSpecStr);
+                    const syncSpec : ArSyncSpec = JSON.parse(syncSpecStr);
                     resolve(syncSpec);
                 }
             });
         });
     }
 
-    getSyncSpecFile(fileName : string, syncSpec : any, rootPath : string) : Promise<Object> {
+    getSyncSpecFile(fileName : string, syncSpec : ArSyncSpec, rootPath : string) : Promise<Object> {
 
         return new Promise<Object>( (resolve : Function, reject : Function) => {
 
@@ -224,7 +227,7 @@ export class BSP {
         });
     }
 
-    getFile(syncSpec : any, fileName : string) : any {
+    getFile(syncSpec : ArSyncSpec, fileName : string) : any {
 
         let file = null;
 
@@ -241,7 +244,7 @@ export class BSP {
 
 
 // FileNameToFilePathLUT
-    buildPoolAssetFiles(syncSpec : any, pathToPool : string) : any {
+    buildPoolAssetFiles(syncSpec : ArSyncSpec, pathToPool : string) : any {
 
         let poolAssetFiles : any = {};
 

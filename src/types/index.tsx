@@ -18,3 +18,18 @@ export interface ArEventType {
 export interface HSMStateData {
     nextState : HState;
 }
+
+import {
+    DmState
+} from '@brightsign/bsdatamodel';
+
+export interface ArState {
+    bsdm : DmState;
+    stateMachine : any;
+    activeMediaStates : any;
+    dataFeeds : any;
+}
+
+export interface ArSyncSpec {
+    files : any;
+}
