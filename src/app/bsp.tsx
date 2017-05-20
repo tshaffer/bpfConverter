@@ -6,11 +6,12 @@ const decoder = new StringDecoder('utf8');
 
 const Promise = require('core-js/es6/promise');
 
-import {
-    DataFeedUsageType,
-} from '@brightsign/bscore';
+// import {
+//     DataFeedUsageType,
+// } from '@brightsign/bscore';
 
 import {
+    BsDmId,
     dmOpenSign,
     dmGetZonesForSign,
     dmGetZoneById,
@@ -24,6 +25,10 @@ import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 import {
     setPoolAssetFiles
 } from '../utilities/utilities';
+
+import {
+    HSM
+} from '../hsm/HSM';
 
 import {
     PlayerHSM
@@ -42,8 +47,8 @@ export class BSP {
     dispatch : Function;
     getState : Function;
     syncSpec : any;
-    hsmList : Array<any>;
-    playerHSM: any; // PlayerHSM
+    hsmList : Array<HSM>;
+    playerHSM: PlayerHSM;
 
     constructor() {
         if (!_singleton) {
@@ -98,8 +103,8 @@ export class BSP {
 
         let zoneHSMs : Array<ZoneHSM> = [];
 
-        const zoneIds : Array<string> = dmGetZonesForSign(bsdm);
-        zoneIds.forEach( (zoneId : string) => {
+        const zoneIds : Array<BsDmId> = dmGetZonesForSign(bsdm);
+        zoneIds.forEach( (zoneId : BsDmId) => {
 
             const bsdmZone = dmGetZoneById(bsdm, { id: zoneId });
 

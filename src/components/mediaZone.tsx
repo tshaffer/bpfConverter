@@ -8,8 +8,13 @@ import ImageContainer from '../containers/imageContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 
+// import {
+// } from '@brightsign/bscore';
+
 import {
-    dmGetHtmlSiteById,
+    BsDmId,
+    DmEvent,
+    DmMediaStateState,
     dmGetMediaStateById,
     dmGetEventIdsForMediaState,
     dmGetEventById,
@@ -82,12 +87,12 @@ export default class MediaZone extends React.Component<any, object> {
 
     getEvent( bsdm : any, mediaStateId: string ) : any {
 
-        let eventIds : Array<string> = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
+        let eventIds : Array<BsDmId> = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
         if (eventIds.length !== 1) {
             debugger;
         }
 
-        let event : any = dmGetEventById(bsdm, { id : eventIds[0] });
+        let event : DmEvent = dmGetEventById(bsdm, { id : eventIds[0] });
         if (!event) {
             debugger;
         }
@@ -107,7 +112,7 @@ export default class MediaZone extends React.Component<any, object> {
         }
 
         const mediaStateId : string = this.props.activeMediaStateId;
-        const mediaState : any = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
+        const mediaState : DmMediaStateState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
         const event : any = this.getEvent(this.props.bsdm, mediaState.id);
         const mediaContentItem : any = mediaState.contentItem;
 
