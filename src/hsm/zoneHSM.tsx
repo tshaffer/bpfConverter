@@ -1,5 +1,3 @@
-/* @flow */
-
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {

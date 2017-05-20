@@ -1,6 +1,11 @@
-/* @flow */
+import {
+  DmMediaStateState,
+  DmState
+} from '@brightsign/bsdatamodel';
 
-import { HState } from './HSM';
+import { HSM, HState } from './HSM';
+
+import { ZoneHSM } from './zoneHSM';
 
 import {
   setActiveMediaState
@@ -9,17 +14,21 @@ import {
 import {
   setMrssDataFeedItem
 } from '../store/mrssDataFeedItems';
+import {HSMStateData, ArEventType} from "../types/index";
 
 export default class MRSSDataFeedState extends HState {
 
-  bsdmState: Object;
-  state: Object;
-  currentFeed : Object;
-  pendingFeed : Object;
+  bsdm : any;
+  bsdmState: any;
+  state: any;
+  currentFeed : any;
+  pendingFeed : any;
   displayIndex : number;
-  dataFeed : Object;
+  dataFeed : any;
+  stateMachine : any;
+  nextState : HState;
 
-  constructor(zoneHSM: Object, bsdmState: Object) {
+  constructor(zoneHSM: any, bsdmState: any) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;
@@ -32,13 +41,13 @@ export default class MRSSDataFeedState extends HState {
     this.dataFeed = this.stateMachine.getState().dataFeeds.dataFeedsById[bsdmState.contentItem.dataFeedId];
   }
 
-  setNextState( nextState : Object ) {
+  setNextState( nextState : HState ) {
     this.nextState = nextState;
   }
 
   // STPlayingMediaRSSEventHandler in ba classic
 
-  STDisplayingMRSSDataFeedEventHandler(event : Object, stateData : Object) : string {
+  STDisplayingMRSSDataFeedEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
     stateData.nextState = null;
 

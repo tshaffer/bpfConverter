@@ -1,13 +1,21 @@
-/* @flow */
+import {
+  DmMediaStateState,
+  DmState
+} from '@brightsign/bsdatamodel';
 
-import { HState } from './HSM';
+import { HSM, HState } from './HSM';
+
+import { ZoneHSM } from './zoneHSM';
+import {HSMStateData, ArEventType} from "../types/index";
 
 export default class RSSDataFeedState extends HState {
 
-  bsdmState: Object;
-  state: Object;
+  bsdmState: any;
+  state: any;
+  bsdm : any;
+  nextState : any;
 
-  constructor(zoneHSM: Object, bsdmState: Object) {
+  constructor(zoneHSM: any, bsdmState: any) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;
@@ -19,11 +27,11 @@ export default class RSSDataFeedState extends HState {
 
   }
 
-  setNextState( nextState : Object ) {
+  setNextState( nextState : any ) {
     this.nextState = nextState;
   }
 
-  STDisplayingRSSDataFeedEventHandler(event : Object, stateData : Object) : string {
+  STDisplayingRSSDataFeedEventHandler(event : ArEventType, stateData : HSMStateData) : string {
     stateData.nextState = null;
 
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {

@@ -1,26 +1,60 @@
-/* @flow */
-
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
-  dmGetMediaStateById,
-  dmGetZoneSimplePlaylist,
-  dmGetZonePropertiesById,
+  BsDmId,
+  DmState,
+  DmZone,
   dmGetZoneById,
-  // dmGetDataFeedById,
+  dmGetZoneSimplePlaylist,
+  dmGetMediaStateById,
+  dmGetZonePropertiesById,
 } from '@brightsign/bsdatamodel';
+
+import ImageState from './imageState';
+
+import {
+  HSMStateData, ArEventType
+} from '../types';
 
 import {
   updateDataFeed
 } from '../store/dataFeeds';
 
-import {
-  DataFeed
-} from '../entities/dataFeed';
-
-type DataFeedLUT = { [dataFeedId:string]: DataFeed };
 
 export class TickerZoneHSM extends HSM {
+
+  type : string;
+  dispatch : Function;
+  getState : Function;
+  bsdm : DmState;
+  zoneId : string;
+  stTop : HState;
+  bsdmZone : DmZone;
+  id : string;
+  name : string;
+  x : number;
+  y : number;
+  width : number;
+  height : number;
+  mediaStateIds : BsDmId[];
+  numberOfLines : number;
+  delay : number;
+  rotation : any;
+  alignment : any;
+  scrollingMethod : any;
+  scrollSpeed : any;
+  backgroundTextColor : any;
+  backgroundBitmapAssetId : any;
+  font : any;
+  fontSize : any;
+  foregroundTextColor : any;
+  safeTextRegion : any;
+  stretchBitmapFile : any;
+  rssDataFeedItems : any;
+  includesRSSFeeds : boolean;
+  stateMachine : any;
+  stRSSDataFeedInitialLoad : HState;
+  stRSSDataFeedPlaying : HState;
 
   constructor(dispatch: Function, getState: Function, zoneId: string) {
     super();
@@ -39,7 +73,7 @@ export class TickerZoneHSM extends HSM {
     this.constructorHandler = this.tickerZoneConstructor;
     this.initialPseudoStateHandler = this.tickerZoneGetInitialState;
 
-    const zoneProperties = dmGetZonePropertiesById(this.bsdm, {id: zoneId});
+    const zoneProperties : any = dmGetZonePropertiesById(this.bsdm, {id: zoneId});
 
     this.numberOfLines = zoneProperties.textWidget.numberOfLines;
     this.delay = zoneProperties.textWidget.delay;
@@ -96,11 +130,8 @@ export class TickerZoneHSM extends HSM {
     this.safeTextRegion = zoneProperties.widget.safeTextRegion;
     this.stretchBitmapFile = zoneProperties.widget.stretchBitmapFile;
 
-    this.stRSSDataFeedInitialLoad = new HState(this, 'RSSDataFeedInitialLoad');
-    this.stRSSDataFeedInitialLoad.HStateEventHandler = this.STRSSDataFeedInitialLoadEventHandler;
-    this.stRSSDataFeedInitialLoad.superState = this.stTop;
-
-    this.stRSSDataFeedPlaying = new STRSSDataFeedPlaying(this, "RSSDataFeedPlaying");
+    this.stRSSDataFeedInitialLoad = new STRSSDataFeedInitialLoad(this, "RSSDataFeedInitialLoad", this.stTop);
+    this.stRSSDataFeedPlaying = new STRSSDataFeedPlaying(this, "RSSDataFeedPlaying", this.stTop);
 
     // in autorun classic, this is done in newPlaylist as called from newZoneHSM
     let self = this;
@@ -108,13 +139,13 @@ export class TickerZoneHSM extends HSM {
     this.rssDataFeedItems = [];
 
     this.mediaStateIds.forEach( (mediaStateId) => {
-      const bsdmMediaState = dmGetMediaStateById(this.bsdm, {id: mediaStateId});
+      const bsdmMediaState : any = dmGetMediaStateById(this.bsdm, {id: mediaStateId});
       if (bsdmMediaState.contentItem.type === 'DataFeed') {
 
         // BACONTODO - I think this is sufficient to set 'includesRSSFeeds'
         self.includesRSSFeeds = true;
 
-        const dataFeedsById : DataFeedLUT = getState().dataFeeds.dataFeedsById;
+        const dataFeedsById : any = getState().dataFeeds.dataFeedsById;
         const dataFeedId = bsdmMediaState.contentItem.dataFeedId;
         const dataFeed = dataFeedsById[dataFeedId];
         self.rssDataFeedItems.push(dataFeed);
@@ -148,38 +179,20 @@ export class TickerZoneHSM extends HSM {
     }
   }
 
-  STRSSDataFeedInitialLoadEventHandler(event: Object, stateData: Object): string {
-
-    stateData.nextState = null;
-
-    if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-      console.log(this.id + ": entry signal");
-      return "HANDLED";
-    }
-    else if (event.EventType && event.EventType === 'LIVE_DATA_FEED_UPDATE') {
-      this.stateMachine.processLiveDataFeedUpdate(event.EventData);
-      stateData.nextState = this.stateMachine.stRSSDataFeedPlaying;
-      return "TRANSITION";
-    }
-
-    stateData.nextState = this.superState;
-    return "SUPER";
-  }
-
-  processLiveDataFeedUpdate(dataFeed : DataFeed) {
+  processLiveDataFeedUpdate(dataFeed : any) {
     this.dispatch(updateDataFeed(dataFeed));
   }
 }
 
 export class STRSSDataFeedPlaying extends HState {
 
-  constructor(stateMachine : Object, id : string) {
+  constructor(stateMachine : TickerZoneHSM, id : string, superState : HState) {
     super(stateMachine, id);
     this.HStateEventHandler = this.STRSSDataFeedPlayingEventHandler;
-    this.superState = stateMachine.stTop;
+    this.superState = superState;
   }
 
-  STRSSDataFeedPlayingEventHandler(event: Object, stateData: Object): string {
+  STRSSDataFeedPlayingEventHandler(event: ArEventType, stateData: HSMStateData): string {
 
     stateData.nextState = null;
 
@@ -187,6 +200,32 @@ export class STRSSDataFeedPlaying extends HState {
       console.log(this.id + ": entry signal");
       // this.populateRSSDataFeedWidget();
       return "HANDLED";
+    }
+
+    stateData.nextState = this.superState;
+    return "SUPER";
+  }
+}
+
+class STRSSDataFeedInitialLoad extends HState {
+
+  constructor(stateMachine : TickerZoneHSM, id : string, superState : HState) {
+    super(stateMachine, id);
+    this.HStateEventHandler = this.STRSSDataFeedInitialLoadEventHandler;
+    this.superState = superState;
+  }
+
+  STRSSDataFeedInitialLoadEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
+    stateData.nextState = null;
+
+    if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
+      console.log(this.id + ": entry signal");
+      return "HANDLED";
+    }
+    else if (event.EventType && event.EventType === 'LIVE_DATA_FEED_UPDATE') {
+      (this.stateMachine as TickerZoneHSM).processLiveDataFeedUpdate(event.EventData);
+      stateData.nextState = (this.stateMachine as TickerZoneHSM).stRSSDataFeedPlaying;
+      return "TRANSITION";
     }
 
     stateData.nextState = this.superState;

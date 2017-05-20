@@ -32,7 +32,7 @@ export class TextDataFeed extends DataFeed {
       }
     });
 
-    this.rssItems = rssItemSpecs.map(rssItemSpec => {
+    this.rssItems = rssItemSpecs.map( (rssItemSpec : any) => {
       return {
         description: rssItemSpec.description[0],
         title: rssItemSpec.title[0],

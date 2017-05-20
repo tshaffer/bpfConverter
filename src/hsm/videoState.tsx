@@ -1,13 +1,31 @@
-/* @flow */
+import {
+  DmMediaStateState,
+  DmState
+} from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
 
+import { ZoneHSM } from './zoneHSM';
+
+import {
+  setActiveMediaState
+} from '../store/activeMediaStates';
+
+import {
+  ArEventType,
+  HSMStateData,
+} from '../types';
+
 export default class VideoState extends HState {
 
-  bsdmVideoState : Object;
+  bsdm : DmState;
+  bsdmVideoState : any;
   state : Object;
+  nextState : HState;
+  dispatch : Function;
+  stateMachine : ZoneHSM;
 
-  constructor(zoneHSM : Object, bsdmVideoState : Object) {
+  constructor(zoneHSM : any, bsdmVideoState : any) {
 
     super(zoneHSM, bsdmVideoState.id);
     this.bsdmVideoState = bsdmVideoState;
@@ -17,7 +35,7 @@ export default class VideoState extends HState {
     this.HStateEventHandler = this.STDisplayingVideoEventHandler;
   }
 
-  STDisplayingVideoEventHandler(event : Object, stateData : Object) : string {
+  STDisplayingVideoEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
     debugger;
 

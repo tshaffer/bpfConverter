@@ -13,6 +13,7 @@ export interface DataFeedState  {
 export interface ArEventType {
     EventType : string;
     data? : any;
+    EventData? : any;
 }
 
 export interface HSMStateData {
