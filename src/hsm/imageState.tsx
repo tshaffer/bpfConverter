@@ -6,8 +6,10 @@ import {
 } from '../store/activeMediaStates';
 
 import {
-    ArEventType
+    ArEventType,
+    HSMStateData,
 } from '../types';
+
 
 export default class ImageState extends HState {
 
@@ -33,7 +35,7 @@ export default class ImageState extends HState {
         this.nextState = nextState;
     }
 
-    STDisplayingImageEventHandler(event : ArEventType, stateData : any) : string {
+    STDisplayingImageEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
         stateData.nextState = null;
 

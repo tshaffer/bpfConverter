@@ -5,6 +5,10 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import { bsp, BSP } from '../app/bsp';
+import {
+    ArEventType,
+    HSMStateData
+} from "../types/index";
 
 // import {
 //     DataFeed
@@ -84,7 +88,7 @@ export class PlayerHSM extends HSM {
         return this.stWaiting;
     }
 
-    STPlayerEventHandler(event:  any, stateData: any) : string {
+    STPlayerEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
 
         const myThis : any = this;
         
@@ -99,7 +103,7 @@ export class PlayerHSM extends HSM {
         return "SUPER";
     }
 
-    STPlayingEventHandler(event:  any, stateData: any) : string {
+    STPlayingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
 
         const myThis : any = this;
 
@@ -145,7 +149,7 @@ export class PlayerHSM extends HSM {
     }
 
 
-    STWaitingEventHandler(event:  any, stateData: any) : string {
+    STWaitingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
 
         const myThis : any = this;
 

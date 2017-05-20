@@ -1,5 +1,6 @@
 import {
-    ArEventType
+    ArEventType,
+    HSMStateData,
 } from '../types';
 
 export class HSM {
@@ -22,7 +23,7 @@ export class HSM {
 
     initialize () {
 
-        let stateData : any = {};
+        let stateData : HSMStateData = { nextState : null };
 
         // empty event used to get super states
         let emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
@@ -88,28 +89,24 @@ export class HSM {
         }
     }
 
-    Dispatch (event : any) {
+    Dispatch (event : ArEventType) {
 
         // if there is no activeState, the playlist is empty
         if (this.activeState == null) return;
 
-        let stateData : any = {};
+        let stateData : HSMStateData = { nextState : null };
 
         // empty event used to get super states
-        let emptyEvent : any = {};
-        emptyEvent["EventType"] = "EMPTY_SIGNAL";
+        let emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
 
         // entry event
-        let entryEvent : any = {};
-        entryEvent["EventType"] = "ENTRY_SIGNAL";
-
-        // exit event
-        let exitEvent : any = {};
-        exitEvent["EventType"] = "EXIT_SIGNAL";
+        let entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
 
         // init event
-        let initEvent : any = {};
-        initEvent["EventType"] = "INIT_SIGNAL";
+        let initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
+
+        // exit event
+        let exitEvent : ArEventType = { EventType : 'EXIT_SIGNAL' };
 
         let t = this.activeState;                                                      // save the current state
 
@@ -286,7 +283,7 @@ export class HState {
     }
 }
 
-export function STTopEventHandler(_ : any, stateData : any) {
+export function STTopEventHandler(_ : any, stateData : HSMStateData) {
 
     stateData.nextState = null;
     return "IGNORED";
