@@ -4,12 +4,6 @@ const fs = require("fs"),
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
-const Promise = require('core-js/es6/promise');
-
-// import {
-//     DataFeedUsageType,
-// } from '@brightsign/bscore';
-
 import {
     BsDmId,
     dmOpenSign,
