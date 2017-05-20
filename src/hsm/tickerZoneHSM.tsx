@@ -20,6 +20,9 @@ import {
   updateDataFeed
 } from '../store/dataFeeds';
 
+import {
+  MediaHState
+} from '../types';
 
 export class TickerZoneHSM extends HSM {
 
@@ -55,6 +58,8 @@ export class TickerZoneHSM extends HSM {
   stateMachine : any;
   stRSSDataFeedInitialLoad : HState;
   stRSSDataFeedPlaying : HState;
+  initialMediaStateId : string;
+  mediaStates : MediaHState[];
 
   constructor(dispatch: Function, getState: Function, zoneId: string) {
     super();

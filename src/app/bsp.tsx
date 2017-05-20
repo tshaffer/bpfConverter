@@ -7,14 +7,18 @@ const decoder = new StringDecoder('utf8');
 import { Store } from 'redux'
 
 import {
+    DataFeedUsageType,
+} from '@brightsign/bscore';
+
+import {
     BsDmId,
     DmSignState,
     DmState,
     dmOpenSign,
     dmGetZonesForSign,
     dmGetZoneById,
-    // dmGetDataFeedIdsForSign,
-    // dmGetDataFeedById,
+    dmGetDataFeedIdsForSign,
+    dmGetDataFeedById,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -43,6 +47,25 @@ import {
     ZoneHSM
 } from '../hsm/zoneHSM';
 
+import {
+    TickerZoneHSM
+} from '../hsm/tickerZoneHSM';
+
+import {
+    DataFeed
+} from '../entities/dataFeed';
+
+import {
+    MrssDataFeed
+} from '../entities/mrssDataFeed';
+
+import {
+    TextDataFeed
+} from '../entities/textDataFeed';
+
+import {
+    addDataFeed
+} from '../store/dataFeeds';
 
 let _singleton : BSP = null;
 
@@ -54,6 +77,7 @@ export class BSP {
     syncSpec : ArSyncSpec;
     hsmList : Array<HSM>;
     playerHSM: PlayerHSM;
+    liveDataFeedsToDownload : Array<DataFeed>;
 
     constructor() {
         if (!_singleton) {
@@ -113,9 +137,13 @@ export class BSP {
 
             const bsdmZone = dmGetZoneById(bsdm, { id: zoneId });
 
-            let zoneHSM : ZoneHSM;
+            let zoneHSM : any;
 
             switch (bsdmZone.type) {
+                case 'Ticker': {
+                    zoneHSM = new TickerZoneHSM(this.dispatch, this.getState, zoneId);
+                    break;
+                }
                 default: {
                     zoneHSM = new ZoneHSM(this.dispatch, this.getState, zoneId);
                     break;
@@ -151,6 +179,26 @@ export class BSP {
                     console.log(autoPlay);
                     const signState = autoPlay as DmSignState;
                     this.dispatch(dmOpenSign(signState));
+
+                    // get data feeds for the sign
+                    let bsdm : any = this.getState().bsdm;
+                    const dataFeedIds : any = dmGetDataFeedIdsForSign(bsdm);
+                    dataFeedIds.forEach( (dataFeedId : any) => {
+                        const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
+
+                        if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
+                            let dataFeed : MrssDataFeed = new MrssDataFeed(dmDataFeed);
+                            this.dispatch(addDataFeed(dataFeed));
+                        }
+                        else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+                            let dataFeed : TextDataFeed = new TextDataFeed(dmDataFeed);
+                            this.dispatch(addDataFeed(dataFeed));
+                        }
+                        else {
+                            debugger;
+                        }
+                    });
+
                     resolve();
                 });
             });
@@ -243,8 +291,6 @@ export class BSP {
     }
 
 
-
-// FileNameToFilePathLUT
     buildPoolAssetFiles(syncSpec : ArSyncSpec, pathToPool : string) : ArFileLUT {
 
         let poolAssetFiles : ArFileLUT = { };
@@ -256,24 +302,23 @@ export class BSP {
         return poolAssetFiles;
     }
 
-    // queueRetrieveLiveDataFeed(dataFeed : DataFeed) {
-    // queueRetrieveLiveDataFeed(dataFeed : any) {
-    //
-    //     const liveDataFeed = dataFeed;
-    //
-    //     // if (liveDataFeed.usage === DataFeedUsageType.Text) {
-    //     //     dataFeed.retrieveFeed(this);
-    //     // }
-    //     // else {
-    //     //     // is the following correct? check with autorun classic
-    //     //     this.liveDataFeedsToDownload.push(liveDataFeed);
-    //     //
-    //     //     // launch download of first feed
-    //     //     if (this.liveDataFeedsToDownload.length === 1) {
-    //     //         dataFeed.retrieveFeed(this);
-    //     //     }
-    //     // }
-    // }
+    queueRetrieveLiveDataFeed(dataFeed : DataFeed) {
+
+        const liveDataFeed = dataFeed;
+
+        if (liveDataFeed.usage === DataFeedUsageType.Text) {
+            dataFeed.retrieveFeed(this);
+        }
+        else {
+            // is the following correct? check with autorun classic
+            this.liveDataFeedsToDownload.push(liveDataFeed);
+
+            // launch download of first feed
+            if (this.liveDataFeedsToDownload.length === 1) {
+                dataFeed.retrieveFeed(this);
+            }
+        }
+    }
 
 }
 
