@@ -70,7 +70,7 @@ export class BSP {
 
     }
 
-    postMessage(event : any) {
+    postMessage(event : any) : () => void {
         return () => {
             this.dispatchEvent(event);
         };
