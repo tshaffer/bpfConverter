@@ -23,10 +23,16 @@ import {
     DmState
 } from '@brightsign/bsdatamodel';
 
+export type ARMediaStateLUT = { [ zoneId : string] : HState };
+export type ActiveMediaStatesShape = {
+    activeMediaStateByZone : ARMediaStateLUT
+};
+export type StateMachineShape = { playbackState : string };
+
 export interface ArState {
     bsdm : DmState;
-    stateMachine : any;
-    activeMediaStates : any;
+    stateMachine : StateMachineShape;
+    activeMediaStates : ActiveMediaStatesShape;
     dataFeeds : any;
 }
 
@@ -64,9 +70,3 @@ export type ArFileLUT = { [fileName:string]: string };
 //     [fileName : string] : string;
 // };
 
-export type StateMachineShape = { playbackState : string };
-
-export type ARMediaStateLUT = { [ zoneId : string] : HState };
-export type ActiveMediaStatesShape = {
-    activeMediaStateByZone : ARMediaStateLUT
-};

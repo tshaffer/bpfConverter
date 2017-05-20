@@ -1,7 +1,12 @@
 import * as React from "react";
 
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, Dispatch } from 'redux';
+
+import {
+    ArState
+} from '../types';
+
 
 import { setPlaybackState } from '../store/stateMachine';
 // import { postMessage } from '../store/stateMachine';
@@ -42,7 +47,7 @@ class App extends React.Component<any, object> {
     }
 }
 
-function mapStateToProps (state : any) {
+function mapStateToProps (state : ArState) {
 
     return {
         bsdm: state.bsdm,
@@ -52,7 +57,7 @@ function mapStateToProps (state : any) {
 }
 
 
-const mapDispatchToProps = (dispatch : any) => {
+const mapDispatchToProps = (dispatch : Dispatch<ArState>) => {
     return bindActionCreators({
         setPlaybackState,
     }, dispatch);

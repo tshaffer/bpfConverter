@@ -1,9 +1,13 @@
 import { connect } from 'react-redux';
 
+import {
+    ArState
+} from '../types';
+
 import Image from '../components/image';
 import { ImageProps } from '../components/image';
 
-function mapStateToProps (_ : any, ownProps : ImageProps ) {
+function mapStateToProps (_ : ArState, ownProps : ImageProps ) {
     return {
         ...ownProps,
     };
