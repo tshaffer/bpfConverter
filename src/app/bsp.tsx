@@ -4,18 +4,25 @@ const fs = require("fs"),
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
+import { Store } from 'redux'
+
 import {
     BsDmId,
+    DmSignState,
     DmState,
     dmOpenSign,
     dmGetZonesForSign,
     dmGetZoneById,
-    dmGetDataFeedIdsForSign,
-    dmGetDataFeedById,
+    // dmGetDataFeedIdsForSign,
+    // dmGetDataFeedById,
 } from '@brightsign/bsdatamodel';
 
 import {
-    ArSyncSpec
+    ArEventType,
+    ArSyncSpec,
+    ArSyncSpecDownload,
+    ArState,
+    ArFileLUT
 } from '../types';
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
@@ -41,7 +48,7 @@ let _singleton : BSP = null;
 
 export class BSP {
 
-    store : any;
+    store : Store<ArState>;
     dispatch : Function;
     getState : Function;
     syncSpec : ArSyncSpec;
@@ -55,7 +62,7 @@ export class BSP {
         }
     }
 
-    initialize(reduxStore : any) {
+    initialize(reduxStore : Store<ArState>) {
 
         console.log('bsp initialization');
 
@@ -67,7 +74,7 @@ export class BSP {
         const rootPath = DesktopPlatformService.getRootDirectory();
         const pathToPool = DesktopPlatformService.getPathToPool();
 
-        let state : any;
+        let state : ArState;
 
         this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec : ArSyncSpec) => {
 
@@ -76,7 +83,7 @@ export class BSP {
             this.syncSpec = cardSyncSpec;
 
             // FileNameToFilePathLUT
-            const poolAssetFiles : any = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
+            const poolAssetFiles : ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
             console.log(poolAssetFiles);
 
             setPoolAssetFiles(poolAssetFiles);
@@ -89,7 +96,7 @@ export class BSP {
 // Zone state machines are created by the Player state machine when it parses the schedule and autoplay files
             this.playerHSM.initialize();
 
-        }).catch((err : any) => {
+        }).catch((err : Error) => {
             console.log(err);
             debugger;
         });
@@ -124,13 +131,13 @@ export class BSP {
         });
     }
 
-    restartPlayback(presentationName : string) : any {
+    restartPlayback(presentationName : string) : Promise<void> {
 
         console.log('restart: ', presentationName);
 
         const rootPath = DesktopPlatformService.getRootDirectory();
 
-        return new Promise( (resolve : Function) => {
+        return new Promise<void>( (resolve : Function) => {
             this.getAutoschedule(this.syncSpec, rootPath).then( (autoSchedule : any) => {
 
                 // TODO - only a single scheduled item is currently supported
@@ -140,24 +147,17 @@ export class BSP {
                 const presentationName = presentationToSchedule.name;
                 const bmlFileName = presentationName + '.bml';
 
-                this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then( (autoPlay : any) => {
+                this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then( (autoPlay : Object) => {
                     console.log(autoPlay);
-                    this.dispatch(dmOpenSign(autoPlay));
-
-                    // get data feeds for the sign
-                    let bsdm : DmState = this.getState().bsdm;
-                    const dataFeedIds = dmGetDataFeedIdsForSign(bsdm);
-                    dataFeedIds.forEach( (dataFeedId) => {
-                        const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
-
-                    });
+                    const signState = autoPlay as DmSignState;
+                    this.dispatch(dmOpenSign(signState));
                     resolve();
                 });
             });
         });
     }
 
-    postMessage(event : any) : () => void {
+    postMessage(event : ArEventType) : () => void {
 
         return () => {
             this.dispatchEvent(event);
@@ -165,7 +165,7 @@ export class BSP {
 
     }
 
-    dispatchEvent(event : any) {
+    dispatchEvent(event : ArEventType) {
 
         this.playerHSM.Dispatch(event);
 
@@ -184,7 +184,7 @@ export class BSP {
 
         return new Promise<ArSyncSpec>( (resolve : Function, reject : Function) => {
 
-            fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
+            fs.readFile(filePath, (err : Error, dataBuffer : Buffer) => {
 
                 if (err) {
                     reject(err);
@@ -201,23 +201,23 @@ export class BSP {
 
         return new Promise<Object>( (resolve : Function, reject : Function) => {
 
-            let syncSpecFile = this.getFile(syncSpec, fileName);
+            let syncSpecFile : ArSyncSpecDownload = this.getFile(syncSpec, fileName);
             if (syncSpecFile == null) {
                 debugger;
-                syncSpecFile = {};    // required to eliminate flow warnings
+                // syncSpecFile = { };    // required to eliminate flow warnings
             }
 
             // const fileSize = syncSpecFile.size;
             const filePath : string = path.join(rootPath, syncSpecFile.link);
 
-            fs.readFile(filePath, (err : any, dataBuffer : Buffer) => {
+            fs.readFile(filePath, (err : Error, dataBuffer : Buffer) => {
                 if (err) {
                     reject(err);
                 } else {
                     const fileStr : string = decoder.write(dataBuffer);
                     const file : Object = JSON.parse(fileStr);
 
-                    // comment out the following code to allow hacking of files -
+                    // I have commented out the following code to allow hacking of files -
                     // that is, overwriting files in the pool without updating the sync spec with updated sha1
                     // if (fileSize !== fileStr.length) {
                     //   debugger;
@@ -228,11 +228,11 @@ export class BSP {
         });
     }
 
-    getFile(syncSpec : ArSyncSpec, fileName : string) : any {
+    getFile(syncSpec : ArSyncSpec, fileName : string) : ArSyncSpecDownload {
 
-        let file = null;
+        let file : ArSyncSpecDownload = null;
 
-        syncSpec.files.download.forEach( (syncSpecFile : any) => {
+        syncSpec.files.download.forEach( (syncSpecFile : ArSyncSpecDownload) => {
             if (syncSpecFile.name === fileName) {
                 file = syncSpecFile;
                 return;
@@ -245,11 +245,11 @@ export class BSP {
 
 
 // FileNameToFilePathLUT
-    buildPoolAssetFiles(syncSpec : ArSyncSpec, pathToPool : string) : any {
+    buildPoolAssetFiles(syncSpec : ArSyncSpec, pathToPool : string) : ArFileLUT {
 
-        let poolAssetFiles : any = {};
+        let poolAssetFiles : ArFileLUT = { };
 
-        syncSpec.files.download.forEach( (syncSpecFile : any) => {
+        syncSpec.files.download.forEach( (syncSpecFile : ArSyncSpecDownload) => {
             poolAssetFiles[syncSpecFile.name] = path.join(pathToPool, syncSpecFile.link);
         });
 
@@ -257,23 +257,23 @@ export class BSP {
     }
 
     // queueRetrieveLiveDataFeed(dataFeed : DataFeed) {
-    queueRetrieveLiveDataFeed(dataFeed : any) {
-
-        const liveDataFeed = dataFeed;
-
-        // if (liveDataFeed.usage === DataFeedUsageType.Text) {
-        //     dataFeed.retrieveFeed(this);
-        // }
-        // else {
-        //     // is the following correct? check with autorun classic
-        //     this.liveDataFeedsToDownload.push(liveDataFeed);
-        //
-        //     // launch download of first feed
-        //     if (this.liveDataFeedsToDownload.length === 1) {
-        //         dataFeed.retrieveFeed(this);
-        //     }
-        // }
-    }
+    // queueRetrieveLiveDataFeed(dataFeed : any) {
+    //
+    //     const liveDataFeed = dataFeed;
+    //
+    //     // if (liveDataFeed.usage === DataFeedUsageType.Text) {
+    //     //     dataFeed.retrieveFeed(this);
+    //     // }
+    //     // else {
+    //     //     // is the following correct? check with autorun classic
+    //     //     this.liveDataFeedsToDownload.push(liveDataFeed);
+    //     //
+    //     //     // launch download of first feed
+    //     //     if (this.liveDataFeedsToDownload.length === 1) {
+    //     //         dataFeed.retrieveFeed(this);
+    //     //     }
+    //     // }
+    // }
 
 }
 

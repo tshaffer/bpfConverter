@@ -30,10 +30,36 @@ export interface ArState {
     dataFeeds : any;
 }
 
+export interface ArSyncSpecHash {
+    method : string;
+    hex : string;
+}
+
+export interface ArSyncSpecDownload {
+    name : string;
+    hash : ArSyncSpecHash;
+    size : number;
+    link : string;
+}
+
+export interface ArSyncSpecFiles {
+    download : ArSyncSpecDownload[];
+    ignore : any;
+    delete : any;
+}
+
 export interface ArSyncSpec {
+    meta : any;
     files : any;
 }
 
 export interface MediaHState extends HState {
     setNextState : Function;
 }
+
+// export type DataFeedLUT = { [dataFeedId:string]: DataFeed };
+export type ArFileLUT = { [fileName:string]: string };
+
+// export interface ArFileLUT {
+//     [fileName : string] : string;
+// };

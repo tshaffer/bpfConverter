@@ -1,9 +1,11 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import MediaZone from '../components/mediaZone';
+import {
+    ArEventType
+} from '../types';
 
-// import { getActiveMediaStateId } from '../store/activeMediaStates';
+import MediaZone from '../components/mediaZone';
 
 import { bsp } from '../app/bsp';
 
@@ -11,7 +13,7 @@ import { MediaZoneProps } from '../components/mediaZone';
 
 import { getActiveMediaStateId } from '../store/activeMediaStates';
 
-export function postBSPMessage(event : Object) {
+export function postBSPMessage(event : ArEventType) {
     return bsp.postMessage(event);
 }
 
