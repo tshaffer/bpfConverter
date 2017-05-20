@@ -39,17 +39,9 @@ export class PlayerHSM extends HSM {
 
         this.initialPseudoStateHandler = this.initializePlayerStateMachine;
 
-        this.stPlayer = new HState(this, "Player");
-        this.stPlayer.HStateEventHandler = this.STPlayerEventHandler;
-        this.stPlayer.superState = this.stTop;
-
-        this.stPlaying = new HState(this, "Playing");
-        this.stPlaying.HStateEventHandler = this.STPlayingEventHandler;
-        this.stPlaying.superState = this.stPlayer;
-
-        this.stWaiting = new HState(this, "Waiting");
-        this.stWaiting.HStateEventHandler = this.STWaitingEventHandler;
-        this.stWaiting.superState = this.stPlayer;
+        this.stPlayer = new STPlayer(this, 'Player', this.stTop);
+        this.stPlaying = new STPlaying(this, 'Playing', this.stPlayer);
+        this.stWaiting = new STWaiting(this, 'Waiting', this.stPlayer);
 
         this.topState = this.stTop;
     }
@@ -83,31 +75,47 @@ export class PlayerHSM extends HSM {
         // because of issue above
         return this.stWaiting;
     }
+}
+
+class STPlayer extends HState {
+    
+    constructor(stateMachine : PlayerHSM, id : string, superState : HState) {
+        super(stateMachine, id);
+
+        this.HStateEventHandler = this.STPlayerEventHandler;
+        this.superState = superState;
+    }
 
     STPlayerEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-
-        const myThis : any = this;
         
         stateData.nextState = null;
 
         if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-            console.log(myThis.id + ": entry signal");
+            console.log(this.id + ": entry signal");
             return 'HANDLED';
         }
 
-        stateData.nextState = myThis.superState;
+        stateData.nextState = this.superState;
         return "SUPER";
+    }
+}
+
+class STPlaying extends HState {
+
+    constructor(stateMachine : PlayerHSM, id : string, superState : HState) {
+        super(stateMachine, id);
+
+        this.HStateEventHandler = this.STPlayingEventHandler;
+        this.superState = superState;
     }
 
     STPlayingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-
-        const myThis : any = this;
-
+        
         stateData.nextState = null;
 
         if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
 
-            console.log(myThis.id + ": entry signal");
+            console.log(this.id + ": entry signal");
 
             // TODO
             // set a timer for when the current presentation should end
@@ -119,49 +127,59 @@ export class PlayerHSM extends HSM {
             //check for live data feeds that include content (either MRSS or content for Media Lists / PlayFiles).
             // for each of them, check to see if the feed and/or content already exists.
 
+            let stateMachine = this.stateMachine as PlayerHSM;
+            
             // update bsdm
-            myThis.stateMachine.bsdm = myThis.stateMachine.getState().bsdm;
+            stateMachine.bsdm = stateMachine.getState().bsdm;
 
             // load live data feeds and queue for downloading
-            myThis.stateMachine.bsp.liveDataFeedsToDownload = [];
+            // stateMachine.bsp.liveDataFeedsToDownload = [];
 
-            // const dataFeedIds = dmGetDataFeedIdsForSign(myThis.stateMachine.bsdm);
-            // const dataFeedsById : any = myThis.stateMachine.getState().dataFeeds.dataFeedsById;
+            // const dataFeedIds = dmGetDataFeedIdsForSign(stateMachine.bsdm);
+            // const dataFeedsById : any = stateMachine.getState().dataFeeds.dataFeedsById;
             // dataFeedIds.forEach( (dataFeedId : string) => {
             //     const dataFeed = dataFeedsById[dataFeedId];
-            //     myThis.stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
+            //     stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
             // });
 
             // launch playback
-            const state = myThis.stateMachine.getState();
-            myThis.stateMachine.bsdm = state.bsdm;
-            myThis.stateMachine.bsp.startPlayback();
+            const state = stateMachine.getState();
+            stateMachine.bsdm = state.bsdm;
+            stateMachine.bsp.startPlayback();
 
             return 'HANDLED';
         }
 
-        stateData.nextState = myThis.superState;
-        return "SUPER";
-    }
-
-
-    STWaitingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-
-        const myThis : any = this;
-
-        stateData.nextState = null;
-
-        if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-            console.log(myThis.id + ": entry signal");
-            return "HANDLED";
-        }
-        else if (event.EventType && event.EventType === 'TRANSITION_TO_PLAYING') {
-            console.log(myThis.id + ": TRANSITION_TO_PLAYING event received");
-            stateData.nextState = myThis.stateMachine.stPlaying;
-            return "TRANSITION";
-        }
-
-        stateData.nextState = myThis.superState;
+        stateData.nextState = this.superState;
         return "SUPER";
     }
 }
+
+class STWaiting extends HState {
+
+    constructor(stateMachine : PlayerHSM, id : string, superState : HState) {
+        super(stateMachine, id);
+        
+        this.HStateEventHandler = this.STWaitingEventHandler;
+        this.superState = superState;
+    }
+    
+    STWaitingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
+        
+        stateData.nextState = null;
+
+        if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
+            console.log(this.id + ": entry signal");
+            return "HANDLED";
+        }
+        else if (event.EventType && event.EventType === 'TRANSITION_TO_PLAYING') {
+            console.log(this.id + ": TRANSITION_TO_PLAYING event received");
+            stateData.nextState = (this.stateMachine as PlayerHSM).stPlaying;
+            return "TRANSITION";
+        }
+
+        stateData.nextState = this.superState;
+        return "SUPER";
+    }
+}
+
