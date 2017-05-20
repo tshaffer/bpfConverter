@@ -9,12 +9,10 @@ import { bsp } from '../app/bsp';
 
 import { MediaZoneProps } from '../components/mediaZone';
 
+import { getActiveMediaStateId } from '../store/activeMediaStates';
+
 export function postBSPMessage(event : Object) : void {
     bsp.postMessage(event);
-}
-
-function getActiveMediaStateId(state : any, props : any) : string {
-    return '69';
 }
 
 function mapStateToProps (state : any, ownProps : MediaZoneProps) {

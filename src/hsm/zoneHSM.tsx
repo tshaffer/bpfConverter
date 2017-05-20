@@ -67,18 +67,28 @@ export class ZoneHSM extends HSM {
             const bsdmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
             if (bsdmMediaState.contentItem.type === 'Image') {
                 newState = new ImageState(this, bsdmMediaState);
+
+                // hack to have this code here
+                this.mediaStates.push(newState);
+
+                if (index > 0) {
+                    this.mediaStates[index - 1].setNextState(newState);
+                }
             }
             else {
-                debugger;
+                // debugger;
             }
 
-            this.mediaStates.push(newState);
-
-            if (index > 0) {
-                this.mediaStates[index - 1].setNextState(newState);
-            }
+            // this.mediaStates.push(newState);
+            //
+            // if (index > 0) {
+            //     this.mediaStates[index - 1].setNextState(newState);
+            // }
         });
-        this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
+        // hack
+        if (this.mediaStates.length > 0) {
+            this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
+        }
     }
 
     videoOrImagesZoneConstructor() {

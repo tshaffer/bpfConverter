@@ -50,7 +50,8 @@ export default class Sign extends React.Component<SignProps, object> {
                 return mediaZoneJSX;
             }
             case 'Ticker': {
-                debugger;
+                // debugger;
+                return null;
                 // const tickerZoneJSX  = this.getTickerZoneJSX(zone);
                 // return tickerZoneJSX;
             }
