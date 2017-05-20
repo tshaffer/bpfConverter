@@ -1,6 +1,7 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+    DmState,
     dmGetDataFeedIdsForSign,
 } from '@brightsign/bsdatamodel';
 
@@ -21,13 +22,13 @@ export class PlayerHSM extends HSM {
     bsp : BSP;
     dispatch : Function;
     getState : Function;
-    bsdm : any;
+    bsdm : DmState;
     stTop : HState;
     stPlayer : HState;
     stPlaying : HState;
     stWaiting : HState;
 
-    constructor(bsp : BSP, dispatch: Function, getState : Function, bsdm: Object) {
+    constructor(bsp : BSP, dispatch: Function, getState : Function, bsdm: DmState) {
 
         super();
 

@@ -42,13 +42,6 @@ class App extends React.Component<any, object> {
     }
 }
 
-// const mapStateToProps = (state : any) => {
-//     return (
-//         bsdm: state.bsdm,
-//         playbackState: state.stateMachine.playbackState,
-//         activeMediaStates : state.activeMediaStates
-//     );
-// }
 function mapStateToProps (state : any) {
 
     return {
@@ -61,21 +54,8 @@ function mapStateToProps (state : any) {
 
 const mapDispatchToProps = (dispatch : any) => {
     return bindActionCreators({
-        // initBSP,
-        // restartPresentation,
         setPlaybackState,
-        // postMessage,
     }, dispatch);
 };
-
-// App.propTypes = {
-//     playbackState: React.PropTypes.string.isRequired,
-//     // initBSP: React.PropTypes.func.isRequired,
-//     setPlaybackState: React.PropTypes.func.isRequired,
-//     // restartPresentation: React.PropTypes.func.isRequired,
-//     // postMessage: React.PropTypes.func.isRequired,
-//     bsdm: React.PropTypes.object.isRequired,
-//     activeMediaStates: React.PropTypes.object.isRequired,
-// };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

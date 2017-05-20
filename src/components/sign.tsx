@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import {
+    DmState,
     dmGetZoneById,
     dmGetZonesForSign,
 } from '@brightsign/bsdatamodel';
@@ -8,7 +9,7 @@ import {
 import MediaZoneContainer from '../containers/mediaZoneContainer';
 
 export interface SignProps {
-    bsdm: any;
+    bsdm: DmState;
     playbackState : string;
 }
 

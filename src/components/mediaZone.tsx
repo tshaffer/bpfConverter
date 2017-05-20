@@ -20,6 +20,7 @@ import {
     BsDmId,
     DmEvent,
     DmMediaStateState,
+    DmState,
     dmGetMediaStateById,
     dmGetEventIdsForMediaState,
     dmGetEventById,
@@ -27,7 +28,7 @@ import {
 
 export interface MediaZoneProps {
     playbackState : string;
-    bsdm : any;
+    bsdm : DmState;
     zone : any;
     width : number;
     height : number;
@@ -90,7 +91,7 @@ export default class MediaZone extends React.Component<any, object> {
         }
     }
 
-    getEvent( bsdm : any, mediaStateId: string ) : DmEvent {
+    getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
         let eventIds : Array<BsDmId> = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
         if (eventIds.length !== 1) {

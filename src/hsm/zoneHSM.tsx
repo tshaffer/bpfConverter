@@ -3,6 +3,7 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+    DmState,
     dmGetZoneById,
     dmGetZoneSimplePlaylist,
     dmGetMediaStateById,
@@ -15,7 +16,7 @@ export class ZoneHSM extends HSM {
     type : string;
     dispatch : Function;
     getState : Function;
-    bsdm : any;
+    bsdm : DmState;
     zoneId : string;
     stTop : HState;
     bsdmZone : any;

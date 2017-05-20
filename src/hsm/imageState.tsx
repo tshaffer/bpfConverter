@@ -1,3 +1,6 @@
+import {
+    DmState
+} from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
 
@@ -13,7 +16,7 @@ import {
 
 export default class ImageState extends HState {
 
-    bsdm : any
+    bsdm : DmState;
     bsdmImageState : any;
     state : any;
     nextState : any;

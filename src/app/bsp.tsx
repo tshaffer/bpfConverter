@@ -6,6 +6,7 @@ const decoder = new StringDecoder('utf8');
 
 import {
     BsDmId,
+    DmState,
     dmOpenSign,
     dmGetZonesForSign,
     dmGetZoneById,
@@ -96,7 +97,7 @@ export class BSP {
 
     startPlayback() {
 
-        const bsdm = this.getState().bsdm;
+        const bsdm : DmState = this.getState().bsdm;
 
         let zoneHSMs : Array<ZoneHSM> = [];
 
@@ -144,7 +145,7 @@ export class BSP {
                     this.dispatch(dmOpenSign(autoPlay));
 
                     // get data feeds for the sign
-                    let bsdm = this.getState().bsdm;
+                    let bsdm : DmState = this.getState().bsdm;
                     const dataFeedIds = dmGetDataFeedIdsForSign(bsdm);
                     dataFeedIds.forEach( (dataFeedId) => {
                         const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
