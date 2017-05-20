@@ -6,7 +6,33 @@ const decoder = new StringDecoder('utf8');
 
 const Promise = require('core-js/es6/promise');
 
+import {
+    DataFeedUsageType,
+} from '@brightsign/bscore';
+
+import {
+    dmOpenSign,
+    dmGetZonesForSign,
+    dmGetZoneById,
+    dmGetDataFeedIdsForSign,
+    dmGetDataFeedById,
+} from '@brightsign/bsdatamodel';
+
+
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
+
+import {
+    setPoolAssetFiles
+} from '../utilities/utilities';
+
+import {
+    PlayerHSM
+} from '../hsm/playerHSM';
+
+import {
+    ZoneHSM
+} from '../hsm/zoneHSM';
+
 
 let _singleton : BSP = null;
 
@@ -28,6 +54,8 @@ export class BSP {
 
     initialize(reduxStore : any) {
 
+        debugger;
+
         console.log('bsp initialization');
 
         this.store = reduxStore;
@@ -38,7 +66,7 @@ export class BSP {
         const rootPath = DesktopPlatformService.getRootDirectory();
         const pathToPool = DesktopPlatformService.getPathToPool();
 
-        let state : Object;
+        let state : any;
 
         this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec : any) => {
 
@@ -50,15 +78,15 @@ export class BSP {
             const poolAssetFiles : any = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
             console.log(poolAssetFiles);
 
-//             setPoolAssetFiles(poolAssetFiles);
-//
-//             state = this.store.getState();
-//
-// // Create player state machine
-//             this.playerHSM = new PlayerHSM(this, this.dispatch, this.getState, state.bsdm);
-//
-// // Zone state machines are created by the Player state machine when it parses the schedule and autoplay files
-//             this.playerHSM.initialize();
+            setPoolAssetFiles(poolAssetFiles);
+
+            state = this.store.getState();
+
+// Create player state machine
+            this.playerHSM = new PlayerHSM(this, this.dispatch, this.getState, state.bsdm);
+
+// Zone state machines are created by the Player state machine when it parses the schedule and autoplay files
+            this.playerHSM.initialize();
 
         }).catch((err : any) => {
             console.log(err);
@@ -66,8 +94,66 @@ export class BSP {
         });
     }
 
+    startPlayback() {
+
+        const bsdm = this.getState().bsdm;
+
+        let zoneHSMs : Array<ZoneHSM> = [];
+
+        const zoneIds : Array<string> = dmGetZonesForSign(bsdm);
+        zoneIds.forEach( (zoneId : string) => {
+
+            const bsdmZone = dmGetZoneById(bsdm, { id: zoneId });
+
+            let zoneHSM : ZoneHSM;
+
+            switch (bsdmZone.type) {
+                default: {
+                    zoneHSM = new ZoneHSM(this.dispatch, this.getState, zoneId);
+                    break;
+                }
+            }
+            zoneHSMs.push(zoneHSM);
+            this.hsmList.push(zoneHSM);
+        });
+
+        zoneHSMs.forEach( (zoneHSM : ZoneHSM) => {
+            zoneHSM.constructorFunction();
+            zoneHSM.initialize();
+        });
+    }
+
     restartPlayback(presentationName : string) : any {
 
+        console.log('restart: ', presentationName);
+
+        const rootPath = DesktopPlatformService.getRootDirectory();
+
+        return new Promise( (resolve : Function) => {
+            this.getAutoschedule(this.syncSpec, rootPath).then( (autoSchedule : any) => {
+
+                // TODO - only a single scheduled item is currently supported
+
+                const scheduledPresentation = autoSchedule.scheduledPresentations[0];
+                const presentationToSchedule = scheduledPresentation.presentationToSchedule;
+                const presentationName = presentationToSchedule.name;
+                const bmlFileName = presentationName + '.bml';
+
+                this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then( (autoPlay : any) => {
+                    console.log(autoPlay);
+                    this.dispatch(dmOpenSign(autoPlay));
+
+                    // get data feeds for the sign
+                    let bsdm = this.getState().bsdm;
+                    const dataFeedIds = dmGetDataFeedIdsForSign(bsdm);
+                    dataFeedIds.forEach( (dataFeedId) => {
+                        const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
+
+                    });
+                    resolve();
+                });
+            });
+        });
     }
 
     postMessage(event : any) : () => void {

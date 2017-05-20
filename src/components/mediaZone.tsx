@@ -2,7 +2,7 @@ import * as React from "react";
 
 const path = require("path");
 
-import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
+// import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import ImageContainer from '../containers/imageContainer';
 
