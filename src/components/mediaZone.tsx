@@ -15,8 +15,6 @@ import {
     dmGetEventById,
 } from '@brightsign/bsdatamodel';
 
-import { postBSPMessage } from '../containers/mediaZoneContainer';
-
 export interface MediaZoneProps {
     playbackState : string;
     bsdm : any;
@@ -24,10 +22,10 @@ export interface MediaZoneProps {
     width : number;
     height : number;
     activeMediaStateId : string;
-    postBSPMessage : Function;
+    // postBSPMessage : Function;
 }
 
-export default class MediaZone extends React.Component<MediaZoneProps, object> {
+export default class MediaZone extends React.Component<any, object> {
 
     nextAsset()  {
         let event = {
