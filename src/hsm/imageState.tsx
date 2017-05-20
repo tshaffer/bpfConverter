@@ -5,6 +5,10 @@ import {
     setActiveMediaState
 } from '../store/activeMediaStates';
 
+import {
+    ArEventType
+} from '../types';
+
 export default class ImageState extends HState {
 
     bsdm : any
@@ -29,20 +33,20 @@ export default class ImageState extends HState {
         this.nextState = nextState;
     }
 
-    STDisplayingImageEventHandler(event : any, stateData : any) : string {
+    STDisplayingImageEventHandler(event : ArEventType, stateData : any) : string {
 
         stateData.nextState = null;
 
-        if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
+        if (event.EventType === 'ENTRY_SIGNAL') {
             console.log(this.id + ": entry signal");
             this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
             return 'HANDLED';
         }
-        else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
+        else if (event.EventType === 'EXIT_SIGNAL') {
             console.log(this.id + ": exit signal");
         }
 
-        else if (event.EventType && event.EventType === 'timeoutEvent') {
+        else if (event.EventType === 'timeoutEvent') {
             console.log(this.id + ": timeoutEvent");
 
             if (event.EventType === 'timeoutEvent') {

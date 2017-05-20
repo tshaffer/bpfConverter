@@ -8,3 +8,7 @@ export interface DataFeedState  {
     dataFeedsById : Object
 };
 
+export interface ArEventType {
+    EventType : string;
+    data? : any;
+}

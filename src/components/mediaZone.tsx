@@ -2,14 +2,19 @@ import * as React from "react";
 
 const path = require("path");
 
+import {
+    ArEventType
+} from '../types';
+
 // import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import ImageContainer from '../containers/imageContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 
-// import {
-// } from '@brightsign/bscore';
+import {
+    EventType,
+} from '@brightsign/bscore';
 
 import {
     BsDmId,
@@ -33,13 +38,13 @@ export interface MediaZoneProps {
 export default class MediaZone extends React.Component<any, object> {
 
     nextAsset()  {
-        let event = {
+        let event : ArEventType = {
             'EventType' : 'timeoutEvent'
         };
         this.props.postBSPMessage(event);
     }
 
-    renderMediaItem(mediaContentItem: any, event : any) {
+    renderMediaItem(mediaContentItem: any, event : DmEvent) {
 
         let duration : number = 10;
 
@@ -51,7 +56,7 @@ export default class MediaZone extends React.Component<any, object> {
 
         const resourceIdentifier : string = path.basename(assetId);
 
-        const eventName : string = event.type;
+        const eventName : EventType = event.type;
         switch(eventName) {
             case 'Timer': {
                 duration = event.data.interval;
@@ -85,7 +90,7 @@ export default class MediaZone extends React.Component<any, object> {
         }
     }
 
-    getEvent( bsdm : any, mediaStateId: string ) : any {
+    getEvent( bsdm : any, mediaStateId: string ) : DmEvent {
 
         let eventIds : Array<BsDmId> = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
         if (eventIds.length !== 1) {
@@ -113,7 +118,7 @@ export default class MediaZone extends React.Component<any, object> {
 
         const mediaStateId : string = this.props.activeMediaStateId;
         const mediaState : DmMediaStateState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
-        const event : any = this.getEvent(this.props.bsdm, mediaState.id);
+        const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
         const mediaContentItem : any = mediaState.contentItem;
 
         switch(mediaContentItem.type) {

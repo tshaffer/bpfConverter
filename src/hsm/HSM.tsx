@@ -1,7 +1,11 @@
+import {
+    ArEventType
+} from '../types';
+
 export class HSM {
 
-    topState : any;
-    activeState : any;
+    topState : HState;
+    activeState : HState;
     constructorHandler : Function;
     initialPseudoStateHandler : Function;
 
@@ -21,20 +25,16 @@ export class HSM {
         let stateData : any = {};
 
         // empty event used to get super states
-        let emptyEvent : any = {};
-        emptyEvent["EventType"] = "EMPTY_SIGNAL";
+        let emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
 
         // entry event
-        let entryEvent : any = {};
-        entryEvent["EventType"] = "ENTRY_SIGNAL";
+        let entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
 
         // init event
-        let initEvent : any = {};
-        initEvent["EventType"] = "INIT_SIGNAL";
+        let initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
 
         // execute initial transition
         // this.activeState = this.initialPseudoStateHandler(...arguments);
-        // var [a] = Array.from(arguments);
         const [a] = Array.prototype.slice.call(arguments);
         this.activeState = this.initialPseudoStateHandler(a);
 
