@@ -1,3 +1,8 @@
+import {
+    ActionWithPayload,
+    StateMachineShape
+} from '../types/index';
+
 // ------------------------------------
 // Constants
 // ------------------------------------
@@ -17,11 +22,11 @@ export function setPlaybackState(playbackState : string){
 // ------------------------------------
 // Reducer
 // ------------------------------------
-const initialState = {
+const initialState : StateMachineShape = {
     playbackState: 'active',
 };
 
-export default function(state : Object = initialState, action : any) {
+export default function(state : StateMachineShape = initialState, action : ActionWithPayload) {
 
     switch (action.type) {
 

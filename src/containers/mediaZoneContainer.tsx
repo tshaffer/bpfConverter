@@ -1,8 +1,9 @@
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
 import {
-    ArEventType
+    ArEventType,
+    ArState
 } from '../types';
 
 import MediaZone from '../components/mediaZone';
@@ -17,14 +18,14 @@ export function postBSPMessage(event : ArEventType) {
     return bsp.postMessage(event);
 }
 
-function mapStateToProps (state : any, ownProps : MediaZoneProps) {
+function mapStateToProps (state : ArState, ownProps : MediaZoneProps) {
     return {
         ...ownProps,
         activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
     };
 }
 
-const mapDispatchToProps = (dispatch : any) => {
+const mapDispatchToProps = (dispatch : Dispatch<ArState>) => {
     return bindActionCreators({
         postBSPMessage,
     }, dispatch);

@@ -1,4 +1,8 @@
-import {ActionWithPayload } from '../types/index';
+import {
+    ActionWithPayload,
+    ActiveMediaStatesShape,
+    ArState,
+} from '../types/index';
 
 // ------------------------------------
 // Constants
@@ -22,17 +26,17 @@ export function setActiveMediaState(zoneId : string, mediaStateId : string){
 // ------------------------------------
 // Reducer
 // ------------------------------------
-const initialState = {
+const initialState : ActiveMediaStatesShape = {
     activeMediaStateByZone : {}
 };
 
-export default function(state : Object = initialState, action : ActionWithPayload) {
+export default function(state : ActiveMediaStatesShape = initialState, action : ActionWithPayload) {
 
     switch (action.type) {
 
         case SET_ACTIVE_MEDIA_STATE: {
 
-            let newState : any = Object.assign({}, state);
+            let newState : ActiveMediaStatesShape = Object.assign({}, state);
 
             let { zoneId, mediaStateId } = action.payload;
             newState.activeMediaStateByZone[zoneId] = mediaStateId;
@@ -50,7 +54,7 @@ export default function(state : Object = initialState, action : ActionWithPayloa
 // ------------------------------------
 // Selectors
 // ------------------------------------
-export function getActiveMediaStateId(state : any, zoneId : string) {
+export function getActiveMediaStateId(state : ArState, zoneId : string) {
 
     const activeMediaStateByZone = state.activeMediaStates.activeMediaStateByZone;
     const activeMediaStateId = activeMediaStateByZone[zoneId];

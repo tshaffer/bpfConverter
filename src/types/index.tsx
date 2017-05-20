@@ -63,3 +63,10 @@ export type ArFileLUT = { [fileName:string]: string };
 // export interface ArFileLUT {
 //     [fileName : string] : string;
 // };
+
+export type StateMachineShape = { playbackState : string };
+
+export type ARMediaStateLUT = { [ zoneId : string] : HState };
+export type ActiveMediaStatesShape = {
+    activeMediaStateByZone : ARMediaStateLUT
+};
