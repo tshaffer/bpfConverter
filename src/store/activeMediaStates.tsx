@@ -1,3 +1,5 @@
+import {ActionWithPayload } from '../types/index';
+
 // ------------------------------------
 // Constants
 // ------------------------------------
@@ -24,7 +26,7 @@ const initialState = {
     activeMediaStateByZone : {}
 };
 
-export default function(state : Object = initialState, action : any) {
+export default function(state : Object = initialState, action : ActionWithPayload) {
 
     switch (action.type) {
 

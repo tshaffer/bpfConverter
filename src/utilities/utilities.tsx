@@ -1,6 +1,10 @@
-let poolAssetFiles : any = {};
+import {
+    ArFileLUT
+} from '../types';
 
-export function setPoolAssetFiles(poolAssetFilesIn : any) {
+let poolAssetFiles : ArFileLUT = {};
+
+export function setPoolAssetFiles(poolAssetFilesIn : ArFileLUT) {
     poolAssetFiles = poolAssetFilesIn;
 }
 
@@ -10,7 +14,7 @@ export function addPoolAssetFile(fileName : string, filePath : string) {
 
 export function getPoolFilePath(resourceIdentifier : string) {
 
-    const filePath =  poolAssetFiles[resourceIdentifier];
+    const filePath : string =  poolAssetFiles[resourceIdentifier];
     console.log('resourceIdentifier: ' + resourceIdentifier + ', filePath: ' +  filePath);
     return filePath;
 }

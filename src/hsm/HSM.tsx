@@ -283,7 +283,7 @@ export class HState {
     }
 }
 
-export function STTopEventHandler(_ : any, stateData : HSMStateData) {
+export function STTopEventHandler(_ : ArEventType, stateData : HSMStateData) {
 
     stateData.nextState = null;
     return "IGNORED";
