@@ -3,6 +3,7 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+    DmMediaStateState,
     DmState,
     dmGetZoneById,
     dmGetZoneSimplePlaylist,
@@ -65,7 +66,7 @@ export class ZoneHSM extends HSM {
         let newState : any = null;
 
         this.mediaStateIds.forEach( (mediaStateId : any, index : number) => {
-            const bsdmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
+            const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
             if (bsdmMediaState.contentItem.type === 'Image') {
                 newState = new ImageState(this, bsdmMediaState);
 

@@ -1,8 +1,11 @@
 import {
+    DmMediaStateState,
     DmState
 } from '@brightsign/bsdatamodel';
 
-import { HState } from './HSM';
+import { HSM, HState } from './HSM';
+
+import { ZoneHSM } from './zoneHSM';
 
 import {
     setActiveMediaState
@@ -17,13 +20,12 @@ import {
 export default class ImageState extends HState {
 
     bsdm : DmState;
-    bsdmImageState : any;
-    state : any;
-    nextState : any;
+    bsdmImageState : DmMediaStateState;
+    nextState : HState;
     dispatch : Function;
     stateMachine : any;
 
-    constructor(zoneHSM : any, bsdmImageState : any) {
+    constructor(zoneHSM : ZoneHSM, bsdmImageState : DmMediaStateState ) {
 
         super(zoneHSM, bsdmImageState.id);
         this.bsdm = zoneHSM.bsdm;
@@ -34,7 +36,7 @@ export default class ImageState extends HState {
         this.HStateEventHandler = this.STDisplayingImageEventHandler;
     }
 
-    setNextState( nextState : Object ) {
+    setNextState( nextState : HState ) {
         this.nextState = nextState;
     }
 
