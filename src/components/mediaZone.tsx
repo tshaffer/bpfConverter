@@ -13,11 +13,15 @@ import ImageContainer from '../containers/imageContainer';
 import { getPoolFilePath } from '../utilities/utilities';
 
 import {
+    ContentItemType,
     EventType,
 } from '@brightsign/bscore';
 
 import {
     BsDmId,
+    DmDerivedContentItem,
+    DmMediaContentItem,
+    DmZone,
     DmEvent,
     DmMediaStateState,
     DmState,
@@ -29,7 +33,7 @@ import {
 export interface MediaZoneProps {
     playbackState : string;
     bsdm : DmState;
-    zone : any;
+    zone : DmZone;
     width : number;
     height : number;
     activeMediaStateId : string;
@@ -45,15 +49,18 @@ export default class MediaZone extends React.Component<any, object> {
         this.props.postBSPMessage(event);
     }
 
-    renderMediaItem(mediaContentItem: any, event : DmEvent) {
+    renderMediaItem(contentItem: DmDerivedContentItem, event : DmEvent) {
 
         let duration : number = 10;
 
         let self = this;
 
+        // unsafe cast
+        const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
+
         const assetId : string = mediaContentItem.assetId;
         // TODO - HACK - need FileName!!
-        const mediaType : string = mediaContentItem.type;
+        const mediaType : ContentItemType = mediaContentItem.type;
 
         const resourceIdentifier : string = path.basename(assetId);
 
@@ -120,7 +127,10 @@ export default class MediaZone extends React.Component<any, object> {
         const mediaStateId : string = this.props.activeMediaStateId;
         const mediaState : DmMediaStateState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
         const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
-        const mediaContentItem : any = mediaState.contentItem;
+        const contentItem : DmDerivedContentItem = mediaState.contentItem;
+
+        // unsafe cast
+        const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
 
         switch(mediaContentItem.type) {
             case 'Image': {

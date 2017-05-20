@@ -2,6 +2,7 @@ import * as React from "react";
 
 import {
     DmState,
+    DmZone,
     dmGetZoneById,
     dmGetZonesForSign,
 } from '@brightsign/bsdatamodel';
@@ -15,7 +16,7 @@ export interface SignProps {
 
 export default class Sign extends React.Component<SignProps, object> {
 
-    getMediaZoneJSX(zone : any) : any {
+    getMediaZoneJSX(zone : DmZone) : Object {
 
         return (
             <div
@@ -41,9 +42,9 @@ export default class Sign extends React.Component<SignProps, object> {
         );
     }
 
-    getZoneJSX(zoneId : string) : any {
+    getZoneJSX(zoneId : string) : Object {
 
-        const zone : any = dmGetZoneById(this.props.bsdm, { id: zoneId });
+        const zone : DmZone = dmGetZoneById(this.props.bsdm, { id: zoneId });
 
         switch (zone.type) {
             case 'VideoOrImages': {
