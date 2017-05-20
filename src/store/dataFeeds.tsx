@@ -44,11 +44,11 @@ export default function(state : DataFeedState = initialState, action : ActionWit
 
         case ADD_DATA_FEED: {
 
-            let newState : DataFeedState = {...state};
+            let newState : any = {...state};
 
             const dataFeed : any = action.payload.dataFeed;
 
-            // newState.dataFeedsById[dataFeed.id] = dataFeed;
+            newState.dataFeedsById[dataFeed.id] = dataFeed;
 
             console.log(newState);
 
@@ -57,11 +57,11 @@ export default function(state : DataFeedState = initialState, action : ActionWit
 
         case UPDATE_DATA_FEED: {
 
-            let newState : DataFeedState = {...state};
+            let newState : any = {...state};
 
             const dataFeed : any = action.payload.dataFeed;
 
-            // newState.dataFeedsById[dataFeed.id] = dataFeed;
+            newState.dataFeedsById[dataFeed.id] = dataFeed;
 
             console.log(newState);
 

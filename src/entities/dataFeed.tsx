@@ -13,7 +13,7 @@ export class DataFeed {
   id : string;
   type : string;
   usage : string;
-  url : string;
+  url : any;
   updateInterval : number;
   name : string;
 
@@ -39,7 +39,9 @@ export class DataFeed {
 
   retrieveFeed(bsp : Object) {
 
-    const url = dmGetSimpleStringFromParameterizedString(dmGetParameterizedStringFromString(this.url));
+    // const url = dmGetSimpleStringFromParameterizedString(dmGetParameterizedStringFromString(this.url)).params[0].value;
+    // any poop
+    const url = this.url.params[0].value;
 
     console.log('retrieveFeed: ' + url);
 

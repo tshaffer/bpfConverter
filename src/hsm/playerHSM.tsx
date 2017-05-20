@@ -5,11 +5,15 @@ import {
     dmGetDataFeedIdsForSign,
 } from '@brightsign/bsdatamodel';
 
-import { bsp, BSP } from '../app/bsp';
+import { BSP } from '../app/bsp';
 import {
     ArEventType,
     HSMStateData
 } from "../types/index";
+
+import {
+    DataFeed
+} from '../entities/dataFeed';
 
 export class PlayerHSM extends HSM {
 
@@ -133,14 +137,20 @@ class STPlaying extends HState {
             stateMachine.bsdm = stateMachine.getState().bsdm;
 
             // load live data feeds and queue for downloading
-            // stateMachine.bsp.liveDataFeedsToDownload = [];
+            stateMachine.bsp.liveDataFeedsToDownload = [];
 
-            // const dataFeedIds = dmGetDataFeedIdsForSign(stateMachine.bsdm);
-            // const dataFeedsById : any = stateMachine.getState().dataFeeds.dataFeedsById;
-            // dataFeedIds.forEach( (dataFeedId : string) => {
-            //     const dataFeed = dataFeedsById[dataFeedId];
-            //     stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
-            // });
+            const dataFeedIds = dmGetDataFeedIdsForSign(stateMachine.bsdm);
+
+            // debugger;
+            // const aState = stateMachine.getState();
+            // const aDataFeeds = aState.dataFeeds;
+            // const aDataFeedsById = aDataFeeds.dataFeedsById;
+
+            const dataFeedsById : any = stateMachine.getState().dataFeeds.dataFeedsById;
+            dataFeedIds.forEach( (dataFeedId : string) => {
+                const dataFeed = dataFeedsById[dataFeedId];
+                stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
+            });
 
             // launch playback
             const state = stateMachine.getState();

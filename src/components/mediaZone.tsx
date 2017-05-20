@@ -9,6 +9,8 @@ import {
 // import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import ImageContainer from '../containers/imageContainer';
+import VideoContainer from '../containers/videoContainer';
+import MrssDisplayItemContainer from '../containers/mrssDisplayItemContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 
@@ -92,10 +94,39 @@ export default class MediaZone extends React.Component<any, object> {
                     />
                 );
             }
+            case 'Video': {
+                return (
+                    <VideoContainer
+                        resourceIdentifier={src}
+                        width={this.props.width}
+                        height={this.props.height}
+                        onVideoEnd={self.nextAsset.bind(this)}
+                    />
+                );
+            }
             default: {
                 debugger;
             }
         }
+    }
+
+    renderMrssItem(mrssContentItem : any) {
+
+        let duration : number = 3;
+
+        let self = this;
+
+        const dataFeedId : string = mrssContentItem.dataFeedId;
+
+        return (
+            <MrssDisplayItemContainer
+                dataFeedId={dataFeedId}
+                width={this.props.width}
+                height={this.props.height}
+                duration={duration * 1000}
+                onTimeout={self.nextAsset.bind(this)}
+            />
+        );
     }
 
     getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
@@ -133,8 +164,12 @@ export default class MediaZone extends React.Component<any, object> {
         const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
 
         switch(mediaContentItem.type) {
+            case'Video':
             case 'Image': {
                 return this.renderMediaItem(mediaContentItem, event);
+            }
+            case 'MrssFeed': {
+                return this.renderMrssItem(mediaContentItem);
             }
             default: {
                 break;

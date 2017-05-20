@@ -11,6 +11,9 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import ImageState from './imageState';
+import VideoState from './videoState';
+import RSSDataFeedState from './rssDataFeedState';
+import MRSSDataFeedState from './mrssDataFeedState';
 
 import {
     MediaHState
@@ -67,34 +70,33 @@ export class ZoneHSM extends HSM {
         this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
         this.mediaStates = [];
 
-        let newState : MediaHState = null;
+        let newState : any = null;
 
         this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
             const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
             if (bsdmMediaState.contentItem.type === 'Image') {
                 newState = new ImageState(this, bsdmMediaState);
-
-                // hack to have this code here - eliminate after adding mrss states
-                this.mediaStates.push(newState);
-
-                if (index > 0) {
-                    this.mediaStates[index - 1].setNextState(newState);
-                }
+            }
+            else if (bsdmMediaState.contentItem.type === 'Video') {
+                newState = new VideoState(this, bsdmMediaState);
+            }
+            else if (bsdmMediaState.contentItem.type === 'DataFeed') {
+                newState = new RSSDataFeedState(this, bsdmMediaState);
+            }
+            else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
+                newState = new MRSSDataFeedState(this, bsdmMediaState);
             }
             else {
-                // debugger;
+                debugger;
             }
 
-            // this.mediaStates.push(newState);
-            //
-            // if (index > 0) {
-            //     this.mediaStates[index - 1].setNextState(newState);
-            // }
+            this.mediaStates.push(newState);
+
+            if (index > 0) {
+                this.mediaStates[index - 1].setNextState(newState);
+            }
         });
-        // hack
-        if (this.mediaStates.length > 0) {
-            this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
-        }
+        this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
     }
 
     videoOrImagesZoneConstructor() {

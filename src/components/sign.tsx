@@ -8,6 +8,7 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import MediaZoneContainer from '../containers/mediaZoneContainer';
+import TickerZoneContainer from '../containers/tickerZoneContainer';
 
 export interface SignProps {
     bsdm: DmState;
@@ -42,6 +43,33 @@ export default class Sign extends React.Component<SignProps, object> {
         );
     }
 
+    getTickerZoneJSX(zone : any) {
+
+        return (
+            <div
+                key={zone.id}
+                style={{
+          position: 'absolute',
+          left: zone.absolutePosition.x,
+          top: zone.absolutePosition.y,
+          width: zone.absolutePosition.width,
+          height: zone.absolutePosition.height
+        }}
+            >
+                <TickerZoneContainer
+                    key={zone.id}
+                    playbackState={this.props.playbackState}
+                    bsdm={this.props.bsdm}
+                    zone={zone}
+                    left={Number(zone.absolutePosition.x)}
+                    top={Number(zone.absolutePosition.y)}
+                    width={Number(zone.absolutePosition.width)}
+                    height={Number(zone.absolutePosition.height)}
+                />
+            </div>
+        );
+    }
+
     getZoneJSX(zoneId : string) : Object {
 
         const zone : DmZone = dmGetZoneById(this.props.bsdm, { id: zoneId });
@@ -52,10 +80,8 @@ export default class Sign extends React.Component<SignProps, object> {
                 return mediaZoneJSX;
             }
             case 'Ticker': {
-                // debugger;
-                return null;
-                // const tickerZoneJSX  = this.getTickerZoneJSX(zone);
-                // return tickerZoneJSX;
+                const tickerZoneJSX  = this.getTickerZoneJSX(zone);
+                return tickerZoneJSX;
             }
             default: {
                 debugger;
