@@ -14,6 +14,7 @@ import {
     BsDmId,
     DmSignState,
     DmState,
+    DmZone,
     dmOpenSign,
     dmGetZonesForSign,
     dmGetZoneById,
@@ -46,6 +47,10 @@ import {
 import {
     ZoneHSM
 } from '../hsm/zoneHSM';
+
+import {
+    MediaZoneHSM
+} from '../hsm/mediaZoneHSM';
 
 import {
     TickerZoneHSM
@@ -135,9 +140,9 @@ export class BSP {
         const zoneIds : Array<BsDmId> = dmGetZonesForSign(bsdm);
         zoneIds.forEach( (zoneId : BsDmId) => {
 
-            const bsdmZone = dmGetZoneById(bsdm, { id: zoneId });
+            const bsdmZone : DmZone = dmGetZoneById(bsdm, { id: zoneId });
 
-            let zoneHSM : any;
+            let zoneHSM : ZoneHSM;
 
             switch (bsdmZone.type) {
                 case 'Ticker': {
@@ -145,7 +150,7 @@ export class BSP {
                     break;
                 }
                 default: {
-                    zoneHSM = new ZoneHSM(this.dispatch, this.getState, zoneId);
+                    zoneHSM = new MediaZoneHSM(this.dispatch, this.getState, zoneId);
                     break;
                 }
             }
@@ -181,9 +186,9 @@ export class BSP {
                     this.dispatch(dmOpenSign(signState));
 
                     // get data feeds for the sign
-                    let bsdm : any = this.getState().bsdm;
-                    const dataFeedIds : any = dmGetDataFeedIdsForSign(bsdm);
-                    dataFeedIds.forEach( (dataFeedId : any) => {
+                    let bsdm : DmState = this.getState().bsdm;
+                    const dataFeedIds : BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
+                    dataFeedIds.forEach( (dataFeedId : BsDmId) => {
                         const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
 
                         if (dmDataFeed.usage === DataFeedUsageType.Mrss) {

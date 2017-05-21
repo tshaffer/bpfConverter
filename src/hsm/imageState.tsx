@@ -3,7 +3,7 @@ import {
     DmState
 } from '@brightsign/bsdatamodel';
 
-import { HSM, HState } from './HSM';
+import { HState } from './HSM';
 
 import { ZoneHSM } from './zoneHSM';
 

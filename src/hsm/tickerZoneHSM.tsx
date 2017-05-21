@@ -1,4 +1,10 @@
-import { HSM, HState, STTopEventHandler } from './HSM';
+import { HState } from './HSM';
+
+import {
+  ZoneHSM
+} from './zoneHSM';
+
+import RSSDataFeedState from './rssDataFeedState';
 
 import {
   RotationType,
@@ -12,17 +18,12 @@ import {
   BsDmId,
   DmMediaStateState,
   DmDataFeedContentItem,
-  DmState,
   DmTickerZoneProperties,
-  DmZone,
-  DmZoneSpecificProperties,
   dmGetZoneById,
   dmGetZoneSimplePlaylist,
   dmGetMediaStateById,
   dmGetZonePropertiesById,
 } from '@brightsign/bsdatamodel';
-
-import ImageState from './imageState';
 
 import {
   HSMStateData, ArEventType
@@ -32,26 +33,8 @@ import {
   updateDataFeed
 } from '../store/dataFeeds';
 
-import {
-  MediaHState
-} from '../types';
+export class TickerZoneHSM extends ZoneHSM {
 
-export class TickerZoneHSM extends HSM {
-
-  type : string;
-  dispatch : Function;
-  getState : Function;
-  bsdm : DmState;
-  zoneId : string;
-  stTop : HState;
-  bsdmZone : DmZone;
-  id : string;
-  name : string;
-  x : number;
-  y : number;
-  width : number;
-  height : number;
-  mediaStateIds : BsDmId[];
   numberOfLines : number;
   delay : number;
   rotation : RotationType;
@@ -67,25 +50,14 @@ export class TickerZoneHSM extends HSM {
   stretchBitmapFile : boolean;
   rssDataFeedItems : any;
   includesRSSFeeds : boolean;
-  stateMachine : any;
   stRSSDataFeedInitialLoad : HState;
   stRSSDataFeedPlaying : HState;
-  initialMediaStateId : string;
-  mediaStates : MediaHState[];
 
   constructor(dispatch: Function, getState: Function, zoneId: string) {
-    super();
+
+    super(dispatch, getState, zoneId);
 
     this.type = 'ticker';
-
-    this.dispatch = dispatch;
-    this.getState = getState;
-    this.bsdm = getState().bsdm;
-    this.zoneId = zoneId;
-
-    this.stTop = new HState(this, "Top");
-    this.stTop.HStateEventHandler = STTopEventHandler;
-    this.topState = this.stTop;
 
     this.constructorHandler = this.tickerZoneConstructor;
     this.initialPseudoStateHandler = this.tickerZoneGetInitialState;
@@ -170,6 +142,26 @@ export class TickerZoneHSM extends HSM {
         self.rssDataFeedItems.push(dataFeed);
       }
     });
+
+    let newState : any = HState;
+
+    this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
+      const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
+      if (bsdmMediaState.contentItem.type === 'DataFeed') {
+        newState = new RSSDataFeedState(this, bsdmMediaState);
+      }
+      else {
+        debugger;
+      }
+
+      this.mediaStates.push(newState);
+
+      if (index > 0) {
+        this.mediaStates[index - 1].setNextState(newState);
+      }
+    });
+    this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
+
   }
 
   tickerZoneConstructor() {
