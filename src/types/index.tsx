@@ -1,13 +1,20 @@
 import {Action} from 'redux';
 
+import {
+    DmState
+} from '@brightsign/bsdatamodel';
+
 import { HState } from '../HSM/HSM';
+
+import { DataFeed } from '../entities/dataFeed';
 
 export interface ActionWithPayload extends Action {
     payload : any
 };
 
+export type ArDataFeedLUT = { [ dataFeedId: string ] : DataFeed };
 export interface DataFeedState  {
-    dataFeedsById : Object
+    dataFeedsById : ArDataFeedLUT
 };
 
 export interface ArEventType {
@@ -20,14 +27,12 @@ export interface HSMStateData {
     nextState : HState;
 }
 
-import {
-    DmState
-} from '@brightsign/bsdatamodel';
-
 export type ARMediaStateLUT = { [ zoneId : string] : HState };
 export type ActiveMediaStatesShape = {
     activeMediaStateByZone : ARMediaStateLUT
 };
+
+
 export type StateMachineShape = { playbackState : string };
 
 export interface ArState {

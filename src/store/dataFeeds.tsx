@@ -1,6 +1,8 @@
 import { DataFeedState } from '../types/index';
 import {ActionWithPayload } from '../types/index';
 
+import { DataFeed } from '../entities/dataFeed';
+
 // ------------------------------------
 // Constants
 // ------------------------------------
@@ -10,7 +12,7 @@ export const UPDATE_DATA_FEED = 'UPDATE_DATA_FEED';
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function addDataFeed(dataFeed : Object){
+export function addDataFeed(dataFeed : DataFeed){
 
     return {
         type: ADD_DATA_FEED,
@@ -20,7 +22,7 @@ export function addDataFeed(dataFeed : Object){
     };
 }
 
-export function updateDataFeed(dataFeed : Object){
+export function updateDataFeed(dataFeed : DataFeed){
 
     return {
         type: UPDATE_DATA_FEED,
@@ -44,9 +46,9 @@ export default function(state : DataFeedState = initialState, action : ActionWit
 
         case ADD_DATA_FEED: {
 
-            let newState : any = {...state};
+            let newState : DataFeedState = {...state};
 
-            const dataFeed : any = action.payload.dataFeed;
+            const dataFeed : DataFeed = action.payload.dataFeed;
 
             newState.dataFeedsById[dataFeed.id] = dataFeed;
 
@@ -57,9 +59,9 @@ export default function(state : DataFeedState = initialState, action : ActionWit
 
         case UPDATE_DATA_FEED: {
 
-            let newState : any = {...state};
+            let newState : DataFeedState = {...state};
 
-            const dataFeed : any = action.payload.dataFeed;
+            const dataFeed : DataFeed = action.payload.dataFeed;
 
             newState.dataFeedsById[dataFeed.id] = dataFeed;
 

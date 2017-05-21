@@ -26,7 +26,7 @@ function mapStateToProps (state : ArState, ownProps : any) {
     articles : getArticles(state, ownProps.zone.id)
   };
 }
-export const getArticles = (state : any, zoneId : string) : Array<string> => {
+export const getArticles = (state : ArState, zoneId : string) : Array<string> => {
 
   let articles : Array<string> = [];
 
