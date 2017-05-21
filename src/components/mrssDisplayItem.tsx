@@ -5,9 +5,20 @@ const path = require('path');
 
 import ImageContainer from '../containers/imageContainer';
 
+export interface MrssDisplayItemProps {
+  width : number;
+  height: number;
+  duration : number;
+  onTimeout : Function;
+  dataFeedId: string;
+  mrssDataFeedItem: any;
+  mrssDataFeedItemPath: string;
+}
+
+
 export default class MrssDisplayItem extends React.Component<any, object> {
 
-  constructor(props : Object) {
+  constructor(props : MrssDisplayItemProps) {
     super(props);
     this.timeout = null;
   }

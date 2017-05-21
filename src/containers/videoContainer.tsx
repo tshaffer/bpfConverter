@@ -7,7 +7,6 @@ import {
 import Video from '../components/video';
 import { VideoProps } from '../components/video';
 
-
 function mapStateToProps (_ : ArState, ownProps : VideoProps ) {
   return {
     ...ownProps,

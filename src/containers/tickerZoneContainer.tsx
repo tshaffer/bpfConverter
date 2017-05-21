@@ -12,10 +12,14 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  ArState
+} from '../types';
+
+import {
   TextDataFeed
 } from '../entities/textDataFeed';
 
-function mapStateToProps (state : any, ownProps : any) {
+function mapStateToProps (state : ArState, ownProps : any) {
   return {
     ...ownProps,
     dataFeeds: state.dataFeeds,

@@ -7,7 +7,15 @@ from '../store/mrssDataFeedItems';
 
 import MrssDisplayItem from '../components/mrssDisplayItem';
 
-function mapStateToProps (state : any, ownProps : any) {
+import {
+  ArState
+} from '../types';
+
+import {
+  MrssDisplayItemProps
+} from '../components/mrssDisplayItem';
+
+function mapStateToProps (state : ArState, ownProps : any) {
   return {
     ...ownProps,
     mrssDataFeedItem : getMrssDataFeedItem(state, ownProps.dataFeedId),

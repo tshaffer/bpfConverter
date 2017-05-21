@@ -7,7 +7,7 @@ export interface VideoProps {
   resourceIdentifier : string;
 }
 
-export default class Video extends React.Component<any, object> {
+export default class Video extends React.Component<VideoProps, object> {
 
   render () {
 

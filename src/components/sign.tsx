@@ -43,7 +43,7 @@ export default class Sign extends React.Component<SignProps, object> {
         );
     }
 
-    getTickerZoneJSX(zone : any) {
+    getTickerZoneJSX(zone : DmZone) {
 
         return (
             <div

@@ -2,6 +2,15 @@ import * as React from "react";
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
+export interface TickerZoneProps {
+  left : number;
+  top : number;
+  width : number;
+  height: number;
+  articles : any;
+}
+
+
 export default class TickerZone extends React.Component<any, object> {
 
   bsTicker : any;
