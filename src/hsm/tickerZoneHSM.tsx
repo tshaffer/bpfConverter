@@ -1,9 +1,21 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+  RotationType,
+  TextHAlignmentType,
+  TextScrollingMethodType,
+  DmColor,
+  DmRect,
+} from '@brightsign/bscore';
+
+import {
   BsDmId,
+  DmMediaStateState,
+  DmDataFeedContentItem,
   DmState,
+  DmTickerZoneProperties,
   DmZone,
+  DmZoneSpecificProperties,
   dmGetZoneById,
   dmGetZoneSimplePlaylist,
   dmGetMediaStateById,
@@ -42,17 +54,17 @@ export class TickerZoneHSM extends HSM {
   mediaStateIds : BsDmId[];
   numberOfLines : number;
   delay : number;
-  rotation : any;
-  alignment : any;
-  scrollingMethod : any;
-  scrollSpeed : any;
-  backgroundTextColor : any;
-  backgroundBitmapAssetId : any;
-  font : any;
-  fontSize : any;
-  foregroundTextColor : any;
-  safeTextRegion : any;
-  stretchBitmapFile : any;
+  rotation : RotationType;
+  alignment : TextHAlignmentType;
+  scrollingMethod : TextScrollingMethodType;
+  scrollSpeed : number;
+  backgroundTextColor : DmColor;
+  backgroundBitmapAssetId : string;
+  font : string;
+  fontSize : number;
+  foregroundTextColor : DmColor;
+  safeTextRegion : DmRect;
+  stretchBitmapFile : boolean;
   rssDataFeedItems : any;
   includesRSSFeeds : boolean;
   stateMachine : any;
@@ -78,7 +90,7 @@ export class TickerZoneHSM extends HSM {
     this.constructorHandler = this.tickerZoneConstructor;
     this.initialPseudoStateHandler = this.tickerZoneGetInitialState;
 
-    const zoneProperties : any = dmGetZonePropertiesById(this.bsdm, {id: zoneId});
+    const zoneProperties : DmTickerZoneProperties = dmGetZonePropertiesById(this.bsdm, {id: zoneId}) as DmTickerZoneProperties;
 
     this.numberOfLines = zoneProperties.textWidget.numberOfLines;
     this.delay = zoneProperties.textWidget.delay;
@@ -128,7 +140,7 @@ export class TickerZoneHSM extends HSM {
     // zoneHSM.rssDownloadTimer = CreateObject("roTimer")
 
     this.backgroundTextColor = zoneProperties.widget.backgroundTextColor;
-    this.backgroundBitmapAssetId = zoneProperties.backgroundBitmapAssetId;
+    this.backgroundBitmapAssetId = zoneProperties.widget.backgroundBitmapAssetId;
     this.font = zoneProperties.widget.font;
     this.fontSize = zoneProperties.widget.fontSize;
     this.foregroundTextColor = zoneProperties.widget.foregroundTextColor;
@@ -144,14 +156,16 @@ export class TickerZoneHSM extends HSM {
     this.rssDataFeedItems = [];
 
     this.mediaStateIds.forEach( (mediaStateId) => {
-      const bsdmMediaState : any = dmGetMediaStateById(this.bsdm, {id: mediaStateId});
+      const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'DataFeed') {
+
+        const dataFeedContentItem : DmDataFeedContentItem = bsdmMediaState.contentItem as DmDataFeedContentItem;
 
         // BACONTODO - I think this is sufficient to set 'includesRSSFeeds'
         self.includesRSSFeeds = true;
 
         const dataFeedsById : any = getState().dataFeeds.dataFeedsById;
-        const dataFeedId = bsdmMediaState.contentItem.dataFeedId;
+        const dataFeedId = dataFeedContentItem.dataFeedId;
         const dataFeed = dataFeedsById[dataFeedId];
         self.rssDataFeedItems.push(dataFeed);
       }

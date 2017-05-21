@@ -1,13 +1,26 @@
 import { HSM, HState, STTopEventHandler } from './HSM';
 
 import {
+    RotationType,
+    TextHAlignmentType,
+    TextScrollingMethodType,
+    DmColor,
+    DmRect,
+} from '@brightsign/bscore';
+
+
+import {
     BsDmId,
     DmMediaStateState,
+    DmDataFeedContentItem,
     DmState,
+    DmTickerZoneProperties,
     DmZone,
+    DmZoneSpecificProperties,
     dmGetZoneById,
     dmGetZoneSimplePlaylist,
     dmGetMediaStateById,
+    dmGetZonePropertiesById,
 } from '@brightsign/bsdatamodel';
 
 import ImageState from './imageState';
@@ -37,6 +50,29 @@ export class ZoneHSM extends HSM {
     initialMediaStateId : string;
     mediaStateIds : BsDmId[];
     mediaStates : MediaHState[];
+    tickerZoneConstructor: any;
+    tickerZoneGetInitialState : any;
+    processLiveDataFeedUpdate: any;
+
+    numberOfLines : number;
+    delay : number;
+    rotation : RotationType;
+    alignment : TextHAlignmentType;
+    scrollingMethod : TextScrollingMethodType;
+    scrollSpeed : number;
+    backgroundTextColor : DmColor;
+    backgroundBitmapAssetId : string;
+    font : string;
+    fontSize : number;
+    foregroundTextColor : DmColor;
+    safeTextRegion : DmRect;
+    stretchBitmapFile : boolean;
+    rssDataFeedItems : any;
+    includesRSSFeeds : boolean;
+    stateMachine : any;
+    stRSSDataFeedInitialLoad : HState;
+    stRSSDataFeedPlaying : HState;
+
 
     constructor(dispatch: Function, getState : Function, zoneId : string) {
         super();

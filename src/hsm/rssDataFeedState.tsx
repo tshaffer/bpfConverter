@@ -7,15 +7,15 @@ import { HSM, HState } from './HSM';
 
 import { ZoneHSM } from './zoneHSM';
 import {HSMStateData, ArEventType} from "../types/index";
+import {TickerZoneHSM} from "./tickerZoneHSM";
 
 export default class RSSDataFeedState extends HState {
 
-  bsdmState: any;
-  state: any;
-  bsdm : any;
-  nextState : any;
+  bsdmState: DmMediaStateState;
+  bsdm : DmState;
+  nextState : HState;
 
-  constructor(zoneHSM: any, bsdmState: any) {
+  constructor(zoneHSM: TickerZoneHSM, bsdmState: DmMediaStateState) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;
@@ -27,7 +27,7 @@ export default class RSSDataFeedState extends HState {
 
   }
 
-  setNextState( nextState : any ) {
+  setNextState( nextState : HState ) {
     this.nextState = nextState;
   }
 

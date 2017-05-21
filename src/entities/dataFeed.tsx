@@ -40,9 +40,6 @@ export class DataFeed {
 
   retrieveFeed(bsp : Object) {
 
-    // const url = dmGetSimpleStringFromParameterizedString(dmGetParameterizedStringFromString(this.url)).params[0].value;
-    // any poop
-    // const url = this.url.params[0].value;
     const url = dmGetSimpleStringFromParameterizedString(this.url);
 
     console.log('retrieveFeed: ' + url);
