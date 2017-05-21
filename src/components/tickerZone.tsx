@@ -33,7 +33,7 @@ export default class TickerZone extends React.Component<any, object> {
     }
   }
 
-  shouldComponentUpdate(nextProps : any) {
+  shouldComponentUpdate(nextProps : TickerZoneProps) {
 
     const currentArticles = this.props.articles;
     const nextArticles = nextProps.articles;
@@ -54,7 +54,7 @@ export default class TickerZone extends React.Component<any, object> {
     return false;
   }
 
-  render() : any {
+  render() {
 
     console.log('TickerZone:: RENDER INVOKED');
 
@@ -72,6 +72,8 @@ export default class TickerZone extends React.Component<any, object> {
       });
     }
 
-    return null;
+    return (
+        <div>tickerHere</div>
+    )
   }
 }

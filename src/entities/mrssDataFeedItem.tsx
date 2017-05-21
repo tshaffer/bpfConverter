@@ -1,6 +1,15 @@
-/* @flow */
-
 export class MRSSDataFeedItem {
+
+  guid : string;
+  url : string;
+  title : string;
+  description : string;
+  duration : number;
+  fileSize : number;
+  medium : string;
+  type : string;
+  thumbnailUrl : string;
+  pubDate : string;
 
   constructor (feedItem : any) {
 
@@ -27,17 +36,6 @@ export class MRSSDataFeedItem {
     const mediaThumbnail = feedItem["media:thumbnail"][0]['$'];
     this.thumbnailUrl = mediaThumbnail.url;
   }
-
-  guid : string;
-  url : string;
-  title : string;
-  description : string;
-  duration : number;
-  fileSize : number;
-  medium : string;
-  type : string;
-  thumbnailUrl : string;
-  pubDate : string;
 
   isImage() : boolean {
     if (this.type === 'image/jpeg' || this.type === 'image/png') {

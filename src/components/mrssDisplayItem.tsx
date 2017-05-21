@@ -3,6 +3,8 @@ import * as React from "react";
 
 const path = require('path');
 
+import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
+
 import ImageContainer from '../containers/imageContainer';
 
 export interface MrssDisplayItemProps {
@@ -11,10 +13,9 @@ export interface MrssDisplayItemProps {
   duration : number;
   onTimeout : Function;
   dataFeedId: string;
-  mrssDataFeedItem: any;
+  mrssDataFeedItem: MRSSDataFeedItem;
   mrssDataFeedItemPath: string;
 }
-
 
 export default class MrssDisplayItem extends React.Component<any, object> {
 

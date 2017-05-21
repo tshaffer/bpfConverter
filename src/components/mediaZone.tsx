@@ -21,6 +21,7 @@ import {
 
 import {
     BsDmId,
+    DmDataFeedContentItem,
     DmDerivedContentItem,
     DmMediaContentItem,
     DmZone,
@@ -110,7 +111,7 @@ export default class MediaZone extends React.Component<any, object> {
         }
     }
 
-    renderMrssItem(mrssContentItem : any) {
+    renderMrssItem(mrssContentItem : DmDataFeedContentItem) {
 
         let duration : number = 3;
 
@@ -160,16 +161,13 @@ export default class MediaZone extends React.Component<any, object> {
         const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
         const contentItem : DmDerivedContentItem = mediaState.contentItem;
 
-        // unsafe cast
-        const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
-
-        switch(mediaContentItem.type) {
+        switch(contentItem.type) {
             case'Video':
             case 'Image': {
-                return this.renderMediaItem(mediaContentItem, event);
+                return this.renderMediaItem(contentItem as DmMediaContentItem, event);
             }
             case 'MrssFeed': {
-                return this.renderMrssItem(mediaContentItem);
+                return this.renderMrssItem(contentItem as DmDataFeedContentItem);
             }
             default: {
                 break;

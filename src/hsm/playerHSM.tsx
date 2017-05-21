@@ -8,7 +8,8 @@ import {
 import { BSP } from '../app/bsp';
 import {
     ArEventType,
-    HSMStateData
+    HSMStateData,
+    ArDataFeedLUT,
 } from "../types/index";
 
 import {
@@ -146,7 +147,7 @@ class STPlaying extends HState {
             // const aDataFeeds = aState.dataFeeds;
             // const aDataFeedsById = aDataFeeds.dataFeedsById;
 
-            const dataFeedsById : any = stateMachine.getState().dataFeeds.dataFeedsById;
+            const dataFeedsById : ArDataFeedLUT = stateMachine.getState().dataFeeds.dataFeedsById;
             dataFeedIds.forEach( (dataFeedId : string) => {
                 const dataFeed = dataFeedsById[dataFeedId];
                 stateMachine.bsp.queueRetrieveLiveDataFeed(dataFeed);
