@@ -1,11 +1,15 @@
 import {
+  DmDerivedContentItem,
+  DmDataFeedContentItem,
   DmMediaStateState,
   DmState
 } from '@brightsign/bsdatamodel';
 
-import { HSM, HState } from './HSM';
+import { HState } from './HSM';
 
 import { ZoneHSM } from './zoneHSM';
+import { MrssDataFeed } from '../entities/mrssDataFeed';
+import { MRSSFeed } from '../entities/mrssFeed';
 
 import {
   setActiveMediaState
@@ -18,17 +22,16 @@ import {HSMStateData, ArEventType} from "../types/index";
 
 export default class MRSSDataFeedState extends HState {
 
-  bsdm : any;
-  bsdmState: any;
-  state: any;
-  currentFeed : any;
-  pendingFeed : any;
+  bsdm : DmState;
+  bsdmState: DmMediaStateState;
+  dataFeed : MrssDataFeed;
+  currentFeed : MRSSFeed;
+  pendingFeed : MRSSFeed;
   displayIndex : number;
-  dataFeed : any;
-  stateMachine : any;
+  stateMachine : ZoneHSM;
   nextState : HState;
 
-  constructor(zoneHSM: any, bsdmState: any) {
+  constructor(zoneHSM: ZoneHSM, bsdmState: DmMediaStateState) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;
@@ -38,7 +41,8 @@ export default class MRSSDataFeedState extends HState {
 
     this.HStateEventHandler = this.STDisplayingMRSSDataFeedEventHandler;
 
-    this.dataFeed = this.stateMachine.getState().dataFeeds.dataFeedsById[bsdmState.contentItem.dataFeedId];
+    const contentItem : DmDataFeedContentItem = bsdmState.contentItem as DmDataFeedContentItem;
+    this.dataFeed = this.stateMachine.getState().dataFeeds.dataFeedsById[contentItem.dataFeedId];
   }
 
   setNextState( nextState : HState ) {
@@ -53,8 +57,8 @@ export default class MRSSDataFeedState extends HState {
 
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
       console.log('entry signal');
-      this.currentFeed = {};
-      this.pendingFeed = {};
+      this.currentFeed = new MRSSFeed(null);
+      this.pendingFeed = new MRSSFeed(null);
 
       // get data feed associated with this state
       if (this.dataFeed.feedPoolAssetFiles &&

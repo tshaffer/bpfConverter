@@ -8,6 +8,8 @@ import {
   DataFeed
 } from './dataFeed';
 
+import { BSP } from '../app/bsp';
+
 export class TextDataFeed extends DataFeed {
 
   rssItems: Array<any>;
@@ -40,7 +42,7 @@ export class TextDataFeed extends DataFeed {
     });
   }
 
-  processFeedContents(bsp : Object, feedData : Object) {
+  processFeedContents(bsp : BSP, feedData : Object) {
     this.parse(feedData);
     this.postLiveDataFeedUpdateMessage(bsp);
   }

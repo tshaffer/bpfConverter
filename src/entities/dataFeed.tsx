@@ -1,19 +1,20 @@
-/* @flow */
-
 const xml2js = require('xml2js');
 
 import {
   DmDataFeed,
+  DmParameterizedString,
   dmGetParameterizedStringFromString,
   dmGetSimpleStringFromParameterizedString,
 } from '@brightsign/bsdatamodel';
+
+import { BSP } from '../app/bsp';
 
 export class DataFeed {
 
   id : string;
   type : string;
   usage : string;
-  url : any;
+  url : DmParameterizedString;
   updateInterval : number;
   name : string;
 
@@ -21,7 +22,7 @@ export class DataFeed {
     Object.assign(this, bsdmDataFeed);
   }
 
-  restartDownloadTimer(bsp : any) {
+  restartDownloadTimer(bsp : BSP) {
 
     const updateInterval = this.updateInterval * 1000;
 
@@ -41,7 +42,8 @@ export class DataFeed {
 
     // const url = dmGetSimpleStringFromParameterizedString(dmGetParameterizedStringFromString(this.url)).params[0].value;
     // any poop
-    const url = this.url.params[0].value;
+    // const url = this.url.params[0].value;
+    const url = dmGetSimpleStringFromParameterizedString(this.url);
 
     console.log('retrieveFeed: ' + url);
 
@@ -51,7 +53,7 @@ export class DataFeed {
         blobPromise.then( (content) => {
           let parser = new xml2js.Parser();
           try {
-            parser.parseString(content, (err : any, jsonResponse : any) => {
+            parser.parseString(content, (err : Error, jsonResponse : any) => {
               if (err) {
                 console.log(err);
                 debugger;
@@ -70,7 +72,7 @@ export class DataFeed {
       });
   }
 
-  postLiveDataFeedUpdateMessage(bsp : any) {
+  postLiveDataFeedUpdateMessage(bsp : BSP) {
     // send internal message indicating that the data feed has been updated
     let event = {
       'EventType' : 'LIVE_DATA_FEED_UPDATE',

@@ -8,6 +8,8 @@ import {
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
+import { BSP } from '../app/bsp';
+
 import {
   DataFeed
 } from './dataFeed';
@@ -24,7 +26,7 @@ export class MrssDataFeed extends DataFeed {
     super(bsdmDataFeed);
   }
 
-  processFeedContents(bsp : Object, feedData : Object) {
+  processFeedContents(bsp : BSP, feedData : Object) {
     this.downloadMRSSContent(bsp, feedData);
     this.postLiveDataFeedUpdateMessage(bsp);
   }
@@ -39,7 +41,7 @@ export class MrssDataFeed extends DataFeed {
     }
   }
 
-  downloadMRSSContent(bsp : any, feedData : Object) {
+  downloadMRSSContent(bsp : BSP, feedData : Object) {
 
     const rootPath: string = DesktopPlatformService.getRootDirectory();
     let filePath = path.join(rootPath, 'feed_cache', this.name);
