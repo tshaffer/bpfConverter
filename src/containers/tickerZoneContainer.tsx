@@ -7,6 +7,8 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  DmDataFeedContentItem,
+  DmMediaStateState,
   dmGetMediaStateIdsForZone,
   dmGetMediaStateById,
 } from '@brightsign/bsdatamodel';
@@ -34,14 +36,14 @@ export const getArticles = (state : ArState, zoneId : string) : Array<string> =>
 
   mediaStateIds.forEach( (mediaStateId) => {
 
-    const mediaState : any = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
+    const mediaState : DmMediaStateState = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
     console.log(mediaState);
     if (mediaState.contentItem.type === ContentItemType.DataFeed) {
 
-      const dataFeedId = mediaState.contentItem.dataFeedId;
+      const dataFeedId = (mediaState.contentItem as DmDataFeedContentItem).dataFeedId;
 
       if (state.dataFeeds.dataFeedsById.hasOwnProperty(dataFeedId)) {
-        const textDataFeed : TextDataFeed = state.dataFeeds.dataFeedsById[dataFeedId];
+        const textDataFeed : TextDataFeed = state.dataFeeds.dataFeedsById[dataFeedId] as TextDataFeed;
         textDataFeed.rssItems.forEach( (rssItem) => {
           articles.push(rssItem.title);
         });

@@ -30,7 +30,6 @@ export class ZoneHSM extends HSM {
     height : number;
     initialMediaStateId : string;
     mediaStateIds : BsDmId[];
-    mediaStates : MediaHState[];
 
     constructor(dispatch: Function, getState : Function, zoneId : string) {
         super();
@@ -44,8 +43,6 @@ export class ZoneHSM extends HSM {
         this.stTop.HStateEventHandler = STTopEventHandler;
         this.topState = this.stTop;
 
-
-        // build playlist
         this.bsdmZone = dmGetZoneById(this.bsdm, { id: zoneId });
 
         this.id = this.bsdmZone.id;
@@ -58,8 +55,6 @@ export class ZoneHSM extends HSM {
 
         this.initialMediaStateId = this.bsdmZone.initialMediaStateId;
         this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
-        this.mediaStates = [];
     }
-
 }
 

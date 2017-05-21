@@ -7,15 +7,22 @@ import {
 import { HState } from '../HSM/HSM';
 
 import { DataFeed } from '../entities/dataFeed';
+import {MRSSDataFeedItem} from "../entities/mrssDataFeedItem";
 
 export interface ActionWithPayload extends Action {
     payload : any
 };
 
 export type ArDataFeedLUT = { [ dataFeedId: string ] : DataFeed };
-export interface DataFeedState  {
+export interface DataFeedShape  {
     dataFeedsById : ArDataFeedLUT
 };
+
+export type ArMrssDataFeedItemLUT = { [ dataFeedId: string ] : MRSSDataFeedItem };
+export interface MrssDataFeedItemShape  {
+    mrssDataFeedItemsByFeedId : ArMrssDataFeedItemLUT
+};
+
 
 export interface ArEventType {
     EventType : string;
@@ -32,14 +39,14 @@ export type ActiveMediaStatesShape = {
     activeMediaStateByZone : ARMediaStateLUT
 };
 
-
 export type StateMachineShape = { playbackState : string };
 
 export interface ArState {
     bsdm : DmState;
     stateMachine : StateMachineShape;
     activeMediaStates : ActiveMediaStatesShape;
-    dataFeeds : any;
+    dataFeeds : DataFeedShape;
+    mrssDataFeedItems : MrssDataFeedItemShape;
 }
 
 export interface ArSyncSpecHash {

@@ -1,4 +1,6 @@
-import {ActionWithPayload } from '../types/index';
+import {ActionWithPayload, ArState} from '../types/index';
+
+import { MrssDataFeedItemShape } from '../types/index';
 
 // ------------------------------------
 // Constants
@@ -26,13 +28,13 @@ const initialState = {
   mrssDataFeedItemsByFeedId : {}
 };
 
-export default function(state : Object = initialState, action : ActionWithPayload) {
+export default function(state : MrssDataFeedItemShape = initialState, action : ActionWithPayload) {
 
   switch (action.type) {
 
     case SET_MRSS_DATA_FEED_ITEM: {
 
-      let newState : any = Object.assign({}, state);
+      let newState : MrssDataFeedItemShape = Object.assign({}, state);
 
       let { mrssDataFeedItemId, mrssDataFeedItem } = action.payload;
       newState.mrssDataFeedItemsByFeedId[mrssDataFeedItemId] = mrssDataFeedItem;
@@ -49,13 +51,13 @@ export default function(state : Object = initialState, action : ActionWithPayloa
 // ------------------------------------
 // Selectors
 // ------------------------------------
-export function getMrssDataFeedItem(state : any, mrssDataFeedItemId : string) {
+export function getMrssDataFeedItem(state : ArState, mrssDataFeedItemId : string) {
 
   const mrssDataFeedItemsByFeedId = state.mrssDataFeedItems.mrssDataFeedItemsByFeedId;
   return mrssDataFeedItemsByFeedId[mrssDataFeedItemId];
 }
 
-export function getMrssDataFeedItemPath(state : any, mrssDataFeedItemId : string) {
+export function getMrssDataFeedItemPath(state : ArState, mrssDataFeedItemId : string) {
 
   const mrssDataFeedItemsByFeedId = state.mrssDataFeedItems.mrssDataFeedItemsByFeedId;
   const mrssDataFeedItem = mrssDataFeedItemsByFeedId[mrssDataFeedItemId];

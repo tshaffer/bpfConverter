@@ -1,4 +1,4 @@
-import { DataFeedState } from '../types/index';
+import { DataFeedShape } from '../types/index';
 import {ActionWithPayload } from '../types/index';
 
 import { DataFeed } from '../entities/dataFeed';
@@ -36,17 +36,17 @@ export function updateDataFeed(dataFeed : DataFeed){
 // ------------------------------------
 // Reducer
 // ------------------------------------
-const initialState : DataFeedState = {
+const initialState : DataFeedShape = {
     dataFeedsById : {}
 };
 
-export default function(state : DataFeedState = initialState, action : ActionWithPayload) {
+export default function(state : DataFeedShape = initialState, action : ActionWithPayload) {
 
     switch (action.type) {
 
         case ADD_DATA_FEED: {
 
-            let newState : DataFeedState = {...state};
+            let newState : DataFeedShape = {...state};
 
             const dataFeed : DataFeed = action.payload.dataFeed;
 
@@ -59,7 +59,7 @@ export default function(state : DataFeedState = initialState, action : ActionWit
 
         case UPDATE_DATA_FEED: {
 
-            let newState : DataFeedState = {...state};
+            let newState : DataFeedShape = {...state};
 
             const dataFeed : DataFeed = action.payload.dataFeed;
 

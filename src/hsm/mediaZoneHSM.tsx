@@ -10,11 +10,17 @@ import {
     dmGetMediaStateById,
 } from '@brightsign/bsdatamodel';
 
+import {
+    MediaHState
+} from '../types';
+
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
 
 export class MediaZoneHSM extends ZoneHSM {
+
+    mediaStates : MediaHState[];
 
     constructor(dispatch: Function, getState: Function, zoneId: string) {
 
@@ -40,7 +46,7 @@ export class MediaZoneHSM extends ZoneHSM {
         this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
         this.mediaStates = [];
 
-        let newState : any = null;
+        let newState : MediaHState = null;
 
         this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
             const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
@@ -77,5 +83,4 @@ export class MediaZoneHSM extends ZoneHSM {
 
         return this.activeState;
     }
-
 }

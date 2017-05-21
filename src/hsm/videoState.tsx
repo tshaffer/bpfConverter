@@ -19,13 +19,12 @@ import {
 export default class VideoState extends HState {
 
   bsdm : DmState;
-  bsdmVideoState : any;
+  bsdmVideoState : DmMediaStateState;
   state : Object;
   nextState : HState;
   dispatch : Function;
-  stateMachine : ZoneHSM;
 
-  constructor(zoneHSM : any, bsdmVideoState : any) {
+  constructor(zoneHSM : ZoneHSM, bsdmVideoState : DmMediaStateState) {
 
     super(zoneHSM, bsdmVideoState.id);
     this.bsdmVideoState = bsdmVideoState;
@@ -33,6 +32,10 @@ export default class VideoState extends HState {
     this.superState = zoneHSM.stTop;
 
     this.HStateEventHandler = this.STDisplayingVideoEventHandler;
+  }
+
+  setNextState( nextState : HState ) {
+    this.nextState = nextState;
   }
 
   STDisplayingVideoEventHandler(event : ArEventType, stateData : HSMStateData) : string {

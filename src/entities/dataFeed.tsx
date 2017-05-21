@@ -3,7 +3,6 @@ const xml2js = require('xml2js');
 import {
   DmDataFeed,
   DmParameterizedString,
-  dmGetParameterizedStringFromString,
   dmGetSimpleStringFromParameterizedString,
 } from '@brightsign/bsdatamodel';
 
@@ -17,6 +16,7 @@ export class DataFeed {
   url : DmParameterizedString;
   updateInterval : number;
   name : string;
+  feedPoolAssetFiles : any;
 
   constructor(bsdmDataFeed: DmDataFeed) {
     Object.assign(this, bsdmDataFeed);

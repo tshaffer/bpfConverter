@@ -26,12 +26,19 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  ArDataFeedLUT,
   HSMStateData, ArEventType
 } from '../types';
 
 import {
   updateDataFeed
 } from '../store/dataFeeds';
+
+import {
+  MediaHState
+} from '../types';
+
+import { DataFeed } from '../entities/dataFeed';
 
 export class TickerZoneHSM extends ZoneHSM {
 
@@ -48,10 +55,12 @@ export class TickerZoneHSM extends ZoneHSM {
   foregroundTextColor : DmColor;
   safeTextRegion : DmRect;
   stretchBitmapFile : boolean;
-  rssDataFeedItems : any;
+  rssDataFeedItems : DataFeed[];
   includesRSSFeeds : boolean;
   stRSSDataFeedInitialLoad : HState;
   stRSSDataFeedPlaying : HState;
+
+  mediaStates : MediaHState[];
 
   constructor(dispatch: Function, getState: Function, zoneId: string) {
 
@@ -125,6 +134,7 @@ export class TickerZoneHSM extends ZoneHSM {
     // in autorun classic, this is done in newPlaylist as called from newZoneHSM
     let self = this;
     this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
+    this.mediaStates = [];
     this.rssDataFeedItems = [];
 
     this.mediaStateIds.forEach( (mediaStateId) => {
@@ -136,14 +146,14 @@ export class TickerZoneHSM extends ZoneHSM {
         // BACONTODO - I think this is sufficient to set 'includesRSSFeeds'
         self.includesRSSFeeds = true;
 
-        const dataFeedsById : any = getState().dataFeeds.dataFeedsById;
+        const dataFeedsById : ArDataFeedLUT = getState().dataFeeds.dataFeedsById;
         const dataFeedId = dataFeedContentItem.dataFeedId;
         const dataFeed = dataFeedsById[dataFeedId];
         self.rssDataFeedItems.push(dataFeed);
       }
     });
 
-    let newState : any = HState;
+    let newState : MediaHState = null;
 
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
       const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
@@ -161,7 +171,6 @@ export class TickerZoneHSM extends ZoneHSM {
       }
     });
     this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
-
   }
 
   tickerZoneConstructor() {
@@ -190,7 +199,7 @@ export class TickerZoneHSM extends ZoneHSM {
     }
   }
 
-  processLiveDataFeedUpdate(dataFeed : any) {
+  processLiveDataFeedUpdate(dataFeed : DataFeed) {
     this.dispatch(updateDataFeed(dataFeed));
   }
 }
