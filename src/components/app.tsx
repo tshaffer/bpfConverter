@@ -29,7 +29,7 @@ class App extends React.Component<any, object> {
     render() {
 
         if (this.props.bsdm.zones.allZones.length === 0 ||
-            Object.keys(this.props.activeMediaStates.activeMediaStateByZone).length === 0) {
+            Object.keys(this.props.activeMediaStates.activeMediaStateIdByZone).length === 0) {
             return (
                 <div>
                     Waiting for the presentation to be loaded...

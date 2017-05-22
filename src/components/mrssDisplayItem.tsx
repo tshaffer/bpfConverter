@@ -7,17 +7,14 @@ import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
 
 import ImageContainer from '../containers/imageContainer';
 
-export interface MrssDisplayItemProps {
-  width : number;
-  height: number;
-  duration : number;
-  onTimeout : Function;
-  dataFeedId: string;
+import { MRSSDisplayItemStateProps } from '../containers/mrssDisplayItemContainer';
+
+interface MrssDisplayItemProps extends MRSSDisplayItemStateProps {
   mrssDataFeedItem: MRSSDataFeedItem;
   mrssDataFeedItemPath: string;
-}
+};
 
-export default class MrssDisplayItem extends React.Component<any, object> {
+export default class MrssDisplayItem extends React.Component<MrssDisplayItemProps, object> {
 
   constructor(props : MrssDisplayItemProps) {
     super(props);

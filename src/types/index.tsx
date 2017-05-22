@@ -34,9 +34,9 @@ export interface HSMStateData {
     nextState : HState;
 }
 
-export type ARMediaStateLUT = { [ zoneId : string] : HState };
+export type ARMediaStateLUT = { [ zoneId : string] : string };
 export type ActiveMediaStatesShape = {
-    activeMediaStateByZone : ARMediaStateLUT
+    activeMediaStateIdByZone : ARMediaStateLUT
 };
 
 export type StateMachineShape = { playbackState : string };

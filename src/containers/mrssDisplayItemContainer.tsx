@@ -11,11 +11,15 @@ import {
   ArState
 } from '../types';
 
-import {
-  MrssDisplayItemProps
-} from '../components/mrssDisplayItem';
+export interface MRSSDisplayItemStateProps {
+  dataFeedId : string
+  duration : number;
+  height : number;
+  onTimeout : Function;
+  width : number
+}
 
-function mapStateToProps (state : ArState, ownProps : any) {
+function mapStateToProps (state : ArState, ownProps : MRSSDisplayItemStateProps) {
   return {
     ...ownProps,
     mrssDataFeedItem : getMrssDataFeedItem(state, ownProps.dataFeedId),

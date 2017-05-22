@@ -27,7 +27,7 @@ export function setActiveMediaState(zoneId : string, mediaStateId : string){
 // Reducer
 // ------------------------------------
 const initialState : ActiveMediaStatesShape = {
-    activeMediaStateByZone : {}
+    activeMediaStateIdByZone : {}
 };
 
 export default function(state : ActiveMediaStatesShape = initialState, action : ActionWithPayload) {
@@ -39,7 +39,7 @@ export default function(state : ActiveMediaStatesShape = initialState, action : 
             let newState : ActiveMediaStatesShape = Object.assign({}, state);
 
             let { zoneId, mediaStateId } = action.payload;
-            newState.activeMediaStateByZone[zoneId] = mediaStateId;
+            newState.activeMediaStateIdByZone[zoneId] = mediaStateId;
 
             console.log(newState);
 
@@ -56,9 +56,8 @@ export default function(state : ActiveMediaStatesShape = initialState, action : 
 // ------------------------------------
 export function getActiveMediaStateId(state : ArState, zoneId : string) {
 
-    const activeMediaStateByZone = state.activeMediaStates.activeMediaStateByZone;
-    const activeMediaState = activeMediaStateByZone[zoneId];
-    const activeMediaStateId = activeMediaState.id;
+    const activeMediaStateIdByZone = state.activeMediaStates.activeMediaStateIdByZone;
+    const activeMediaStateId = activeMediaStateIdByZone[zoneId];
     return activeMediaStateId;
 }
 
