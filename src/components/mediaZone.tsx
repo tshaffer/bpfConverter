@@ -24,7 +24,6 @@ import {
     DmDataFeedContentItem,
     DmDerivedContentItem,
     DmMediaContentItem,
-    DmZone,
     DmEvent,
     DmMediaStateState,
     DmState,
@@ -33,17 +32,9 @@ import {
     dmGetEventById,
 } from '@brightsign/bsdatamodel';
 
-export interface MediaZoneProps {
-    playbackState : string;
-    bsdm : DmState;
-    zone : DmZone;
-    width : number;
-    height : number;
-    activeMediaStateId : string;
-    // postBSPMessage : Function;
-}
+import { MediaZoneStateProps, MediaZoneDispatchProps } from '../containers/mediaZoneContainer';
 
-export default class MediaZone extends React.Component<any, object> {
+export default class MediaZone extends React.Component<MediaZoneStateProps & MediaZoneDispatchProps, object> {
 
     nextAsset()  {
         let event : ArEventType = {

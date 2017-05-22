@@ -57,7 +57,8 @@ export default function(state : ActiveMediaStatesShape = initialState, action : 
 export function getActiveMediaStateId(state : ArState, zoneId : string) {
 
     const activeMediaStateByZone = state.activeMediaStates.activeMediaStateByZone;
-    const activeMediaStateId = activeMediaStateByZone[zoneId];
+    const activeMediaState = activeMediaStateByZone[zoneId];
+    const activeMediaStateId = activeMediaState.id;
     return activeMediaStateId;
 }
 
