@@ -2,20 +2,13 @@ import * as React from "react";
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
-export interface TickerZoneProps {
-  left : number;
-  top : number;
-  width : number;
-  height: number;
-  articles : any;
-}
+import { tickerZoneProps } from '../containers/tickerZoneContainer';
 
-
-export default class TickerZone extends React.Component<any, object> {
+export default class TickerZone extends React.Component<tickerZoneProps, object> {
 
   bsTicker : any;
 
-  constructor(props : Object) {
+  constructor(props : tickerZoneProps) {
     super(props);
 
     this.bsTicker = null;
@@ -33,7 +26,7 @@ export default class TickerZone extends React.Component<any, object> {
     }
   }
 
-  shouldComponentUpdate(nextProps : TickerZoneProps) {
+  shouldComponentUpdate(nextProps : tickerZoneProps) {
 
     const currentArticles = this.props.articles;
     const nextArticles = nextProps.articles;
@@ -67,7 +60,7 @@ export default class TickerZone extends React.Component<any, object> {
       const rssStringCount = 100;
       bsTicker.PopStrings(rssStringCount);
 
-      this.props.articles.forEach( (article : any) => {
+      this.props.articles.forEach( (article : string) => {
         bsTicker.AddString(article);
       });
     }

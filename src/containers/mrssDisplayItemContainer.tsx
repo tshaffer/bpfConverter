@@ -6,6 +6,7 @@ import {
 from '../store/mrssDataFeedItems';
 
 import MrssDisplayItem from '../components/mrssDisplayItem';
+import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
 
 import {
   ArState
@@ -18,6 +19,11 @@ export interface MRSSDisplayItemStateProps {
   onTimeout : Function;
   width : number
 }
+
+export interface MrssDisplayItemProps extends MRSSDisplayItemStateProps {
+  mrssDataFeedItem: MRSSDataFeedItem;
+  mrssDataFeedItemPath: string;
+};
 
 function mapStateToProps (state : ArState, ownProps : MRSSDisplayItemStateProps) {
   return {

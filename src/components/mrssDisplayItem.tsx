@@ -7,12 +7,7 @@ import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
 
 import ImageContainer from '../containers/imageContainer';
 
-import { MRSSDisplayItemStateProps } from '../containers/mrssDisplayItemContainer';
-
-interface MrssDisplayItemProps extends MRSSDisplayItemStateProps {
-  mrssDataFeedItem: MRSSDataFeedItem;
-  mrssDataFeedItemPath: string;
-};
+import { MrssDisplayItemProps } from '../containers/mrssDisplayItemContainer';
 
 export default class MrssDisplayItem extends React.Component<MrssDisplayItemProps, object> {
 

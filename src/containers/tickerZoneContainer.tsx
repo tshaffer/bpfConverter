@@ -9,19 +9,37 @@ import {
 import {
   DmDataFeedContentItem,
   DmMediaStateState,
+  DmState,
+  DmZone,
   dmGetMediaStateIdsForZone,
   dmGetMediaStateById,
 } from '@brightsign/bsdatamodel';
 
 import {
-  ArState
+  ArState,
+  DataFeedShape,
 } from '../types';
 
 import {
   TextDataFeed
 } from '../entities/textDataFeed';
 
-function mapStateToProps (state : ArState, ownProps : any) {
+export interface tickerZoneOwnProps {
+  bsdm : DmState;
+  width : Number;
+  height : Number;
+  top : Number;
+  left : Number;
+  zone : DmZone;
+  playbackState : string;
+}
+
+export interface tickerZoneProps extends tickerZoneOwnProps {
+  dataFeeds : DataFeedShape;
+  articles : string[];
+}
+
+function mapStateToProps (state : ArState, ownProps : tickerZoneOwnProps) : tickerZoneProps {
   return {
     ...ownProps,
     dataFeeds: state.dataFeeds,
