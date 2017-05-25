@@ -1,13 +1,12 @@
 import {
   DmMediaStateState,
-  DmState
+  DmState,
 } from '@brightsign/bsdatamodel';
 
-import { HSM, HState } from './HSM';
+import { HState } from './HSM';
 
-import { ZoneHSM } from './zoneHSM';
-import {HSMStateData, ArEventType} from "../types/index";
-import {TickerZoneHSM} from "./tickerZoneHSM";
+import {HSMStateData, ArEventType} from '../types/index';
+import {TickerZoneHSM} from './tickerZoneHSM';
 
 export default class RSSDataFeedState extends HState {
 
@@ -37,8 +36,7 @@ export default class RSSDataFeedState extends HState {
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
       console.log('entry signal');
       return 'HANDLED';
-    }
-    else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
+    } else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
       console.log('exit signal');
     }
     stateData.nextState = this.superState;

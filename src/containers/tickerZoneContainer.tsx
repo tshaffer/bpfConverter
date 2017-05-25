@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import TickerZone from '../components/tickerZone';
 
 import {
-  ContentItemType
+  ContentItemType,
 } from '@brightsign/bscore';
 
 import {
@@ -21,15 +21,15 @@ import {
 } from '../types';
 
 import {
-  TextDataFeed
+  TextDataFeed,
 } from '../entities/textDataFeed';
 
 export interface tickerZoneOwnProps {
   bsdm : DmState;
-  width : Number;
-  height : Number;
-  top : Number;
-  left : Number;
+  width : number;
+  height : number;
+  top : number;
+  left : number;
   zone : DmZone;
   playbackState : string;
 }
@@ -39,16 +39,16 @@ export interface tickerZoneProps extends tickerZoneOwnProps {
   articles : string[];
 }
 
-function mapStateToProps (state : ArState, ownProps : tickerZoneOwnProps) : tickerZoneProps {
+function mapStateToProps(state : ArState, ownProps : tickerZoneOwnProps) : tickerZoneProps {
   return {
     ...ownProps,
     dataFeeds: state.dataFeeds,
-    articles : getArticles(state, ownProps.zone.id)
+    articles : getArticles(state, ownProps.zone.id),
   };
 }
-export const getArticles = (state : ArState, zoneId : string) : Array<string> => {
+export const getArticles = (state : ArState, zoneId : string) : string[] => {
 
-  let articles : Array<string> = [];
+  const articles : string[] = [];
 
   const mediaStateIds = dmGetMediaStateIdsForZone(state.bsdm, { id: zoneId});
 
@@ -72,7 +72,6 @@ export const getArticles = (state : ArState, zoneId : string) : Array<string> =>
   return articles;
 
 };
-
 
 const TickerZoneContainer = connect(
   mapStateToProps,

@@ -12,14 +12,14 @@ export const SET_ACTIVE_MEDIA_STATE = 'SET_ACTIVE_MEDIA_STATE';
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function setActiveMediaState(zoneId : string, mediaStateId : string){
+export function setActiveMediaState(zoneId : string, mediaStateId : string) {
 
     return {
         type: SET_ACTIVE_MEDIA_STATE,
         payload: {
             zoneId,
-            mediaStateId
-        }
+            mediaStateId,
+        },
     };
 }
 
@@ -27,7 +27,7 @@ export function setActiveMediaState(zoneId : string, mediaStateId : string){
 // Reducer
 // ------------------------------------
 const initialState : ActiveMediaStatesShape = {
-    activeMediaStateIdByZone : {}
+    activeMediaStateIdByZone : {},
 };
 
 export default function(state : ActiveMediaStatesShape = initialState, action : ActionWithPayload) {
@@ -36,9 +36,9 @@ export default function(state : ActiveMediaStatesShape = initialState, action : 
 
         case SET_ACTIVE_MEDIA_STATE: {
 
-            let newState : ActiveMediaStatesShape = Object.assign({}, state);
+            const newState : ActiveMediaStatesShape = Object.assign({}, state);
 
-            let { zoneId, mediaStateId } = action.payload;
+            const { zoneId, mediaStateId } = action.payload;
             newState.activeMediaStateIdByZone[zoneId] = mediaStateId;
 
             console.log(newState);
@@ -50,14 +50,11 @@ export default function(state : ActiveMediaStatesShape = initialState, action : 
     return state;
 }
 
-
 // ------------------------------------
 // Selectors
 // ------------------------------------
 export function getActiveMediaStateId(state : ArState, zoneId : string) {
 
     const activeMediaStateIdByZone = state.activeMediaStates.activeMediaStateIdByZone;
-    const activeMediaStateId = activeMediaStateIdByZone[zoneId];
-    return activeMediaStateId;
+    return activeMediaStateIdByZone[zoneId];
 }
-

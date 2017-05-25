@@ -11,7 +11,7 @@ export class MRSSDataFeedItem {
   thumbnailUrl : string;
   pubDate : string;
 
-  constructor (feedItem : any) {
+  constructor(feedItem : any) {
 
     this.guid = feedItem.guid ? feedItem.guid[0] : '';
     this.url = feedItem.url ? feedItem.url[0] : '';
@@ -25,7 +25,7 @@ export class MRSSDataFeedItem {
     this.pubDate = feedItem.pubDate ? feedItem.pubDate[0] : '';
 
     // TODO - check for existence before creating
-    const mediaContent = feedItem["media:content"][0]['$'];
+    const mediaContent = feedItem['media:content'][0]['$'];
     this.url = mediaContent.url;
     this.fileSize = Number(mediaContent.fileSize);
     this.type = mediaContent.type;
@@ -33,7 +33,7 @@ export class MRSSDataFeedItem {
     this.duration = Number(mediaContent.duration);
 
     // TODO - check for existence before creating
-    const mediaThumbnail = feedItem["media:thumbnail"][0]['$'];
+    const mediaThumbnail = feedItem['media:thumbnail'][0]['$'];
     this.thumbnailUrl = mediaThumbnail.url;
   }
 
@@ -44,11 +44,11 @@ export class MRSSDataFeedItem {
 
     return false;
   }
-  
+
   isVideo() : boolean {
 
-    if (this.type === 'video/mpeg' || this.type === 'video/mp4' || this.type === 'video/quicktime' || 
-      this.type === 'video/x-matroska' || this.medium === 'video') {
+    if (this.type === 'video/mpeg' || this.type === 'video/mp4' || this.type === 'video/quicktime' ||
+        this.type === 'video/x-matroska' || this.medium === 'video') {
       return true;
     }
 

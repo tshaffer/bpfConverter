@@ -12,32 +12,31 @@ export const UPDATE_DATA_FEED = 'UPDATE_DATA_FEED';
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function addDataFeed(dataFeed : DataFeed){
+export function addDataFeed(dataFeed : DataFeed) {
 
     return {
         type: ADD_DATA_FEED,
         payload: {
             dataFeed,
-        }
+        },
     };
 }
 
-export function updateDataFeed(dataFeed : DataFeed){
+export function updateDataFeed(dataFeed : DataFeed) {
 
     return {
         type: UPDATE_DATA_FEED,
         payload: {
             dataFeed,
-        }
+        },
     };
 }
-
 
 // ------------------------------------
 // Reducer
 // ------------------------------------
 const initialState : DataFeedShape = {
-    dataFeedsById : {}
+    dataFeedsById : {},
 };
 
 export default function(state : DataFeedShape = initialState, action : ActionWithPayload) {
@@ -46,7 +45,7 @@ export default function(state : DataFeedShape = initialState, action : ActionWit
 
         case ADD_DATA_FEED: {
 
-            let newState : DataFeedShape = {...state};
+            const newState : DataFeedShape = {...state};
 
             const dataFeed : DataFeed = action.payload.dataFeed;
 
@@ -59,7 +58,7 @@ export default function(state : DataFeedShape = initialState, action : ActionWit
 
         case UPDATE_DATA_FEED: {
 
-            let newState : DataFeedShape = {...state};
+            const newState : DataFeedShape = {...state};
 
             const dataFeed : DataFeed = action.payload.dataFeed;
 
@@ -74,5 +73,3 @@ export default function(state : DataFeedShape = initialState, action : ActionWit
 
     return state;
 }
-
-

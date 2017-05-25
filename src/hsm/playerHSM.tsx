@@ -10,11 +10,7 @@ import {
     ArEventType,
     HSMStateData,
     ArDataFeedLUT,
-} from "../types/index";
-
-import {
-    DataFeed
-} from '../entities/dataFeed';
+} from '../types/index';
 
 export class PlayerHSM extends HSM {
 
@@ -39,7 +35,7 @@ export class PlayerHSM extends HSM {
         this.getState = getState;
         this.bsdm = bsdm;
 
-        this.stTop = new HState(this, "Top");
+        this.stTop = new HState(this, 'Top');
         this.stTop.HStateEventHandler = STTopEventHandler;
 
         this.initialPseudoStateHandler = this.initializePlayerStateMachine;
@@ -53,8 +49,7 @@ export class PlayerHSM extends HSM {
 
     initializePlayerStateMachine() {
 
-        console.log("initializePlayerStateMachine invoked");
-
+        console.log('initializePlayerStateMachine invoked');
 
         // ISSUE
         // would like restartBSP to return a promise, then transition to the stPlaying state once that is done.
@@ -62,8 +57,8 @@ export class PlayerHSM extends HSM {
         // the problem is that entering stPlaying state invokes startBSPPlayback before the zones are even created
         this.bsp.restartPlayback('').then( () => {
             // send event to cause transition to stPlaying
-            let event = {
-                'EventType' : 'TRANSITION_TO_PLAYING'
+            const event = {
+                EventType : 'TRANSITION_TO_PLAYING'
             };
             this.dispatch(this.bsp.postMessage(event));
         });
@@ -83,7 +78,7 @@ export class PlayerHSM extends HSM {
 }
 
 class STPlayer extends HState {
-    
+
     constructor(stateMachine : PlayerHSM, id : string, superState : HState) {
         super(stateMachine, id);
 
@@ -92,16 +87,16 @@ class STPlayer extends HState {
     }
 
     STPlayerEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-        
+
         stateData.nextState = null;
 
         if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-            console.log(this.id + ": entry signal");
+            console.log(this.id + ': entry signal');
             return 'HANDLED';
         }
 
         stateData.nextState = this.superState;
-        return "SUPER";
+        return 'SUPER';
     }
 }
 
@@ -115,12 +110,12 @@ class STPlaying extends HState {
     }
 
     STPlayingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-        
+
         stateData.nextState = null;
 
         if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
 
-            console.log(this.id + ": entry signal");
+            console.log(this.id + ': entry signal');
 
             // TODO
             // set a timer for when the current presentation should end
@@ -129,11 +124,11 @@ class STPlaying extends HState {
             // assume presentation is active
 
             // TODO
-            //check for live data feeds that include content (either MRSS or content for Media Lists / PlayFiles).
+            // check for live data feeds that include content (either MRSS or content for Media Lists / PlayFiles).
             // for each of them, check to see if the feed and/or content already exists.
 
-            let stateMachine = this.stateMachine as PlayerHSM;
-            
+            const stateMachine = this.stateMachine as PlayerHSM;
+
             // update bsdm
             stateMachine.bsdm = stateMachine.getState().bsdm;
 
@@ -162,7 +157,7 @@ class STPlaying extends HState {
         }
 
         stateData.nextState = this.superState;
-        return "SUPER";
+        return 'SUPER';
     }
 }
 
@@ -170,27 +165,26 @@ class STWaiting extends HState {
 
     constructor(stateMachine : PlayerHSM, id : string, superState : HState) {
         super(stateMachine, id);
-        
+
         this.HStateEventHandler = this.STWaitingEventHandler;
         this.superState = superState;
     }
-    
+
     STWaitingEventHandler(event:  ArEventType, stateData: HSMStateData) : string {
-        
+
         stateData.nextState = null;
 
         if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-            console.log(this.id + ": entry signal");
-            return "HANDLED";
-        }
-        else if (event.EventType && event.EventType === 'TRANSITION_TO_PLAYING') {
-            console.log(this.id + ": TRANSITION_TO_PLAYING event received");
+            console.log(this.id + ': entry signal');
+            return 'HANDLED';
+        } else if (event.EventType && event.EventType === 'TRANSITION_TO_PLAYING') {
+            console.log(this.id + ': TRANSITION_TO_PLAYING event received');
             stateData.nextState = (this.stateMachine as PlayerHSM).stPlaying;
-            return "TRANSITION";
+            return 'TRANSITION';
         }
 
         stateData.nextState = this.superState;
-        return "SUPER";
+        return 'SUPER';
     }
 }
 

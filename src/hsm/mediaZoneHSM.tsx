@@ -1,5 +1,5 @@
 import {
-    ZoneHSM
+    ZoneHSM,
 } from './zoneHSM';
 
 import {
@@ -11,7 +11,7 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-    MediaHState
+    MediaHState,
 } from '../types';
 
 import ImageState from './imageState';
@@ -52,11 +52,9 @@ export class MediaZoneHSM extends ZoneHSM {
             const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
             if (bsdmMediaState.contentItem.type === 'Image') {
                 newState = new ImageState(this, bsdmMediaState);
-            }
-            else if (bsdmMediaState.contentItem.type === 'Video') {
+            } else if (bsdmMediaState.contentItem.type === 'Video') {
                 newState = new VideoState(this, bsdmMediaState);
-            }
-            else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
+            } else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
                 newState = new MRSSDataFeedState(this, bsdmMediaState);
             }
 
@@ -71,7 +69,7 @@ export class MediaZoneHSM extends ZoneHSM {
     }
 
     videoOrImagesZoneConstructor() {
-        console.log("VideoOrImagesZoneConstructor invoked");
+        console.log('VideoOrImagesZoneConstructor invoked');
 
         // const mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: this.zoneId });
         // should really look at initialMediaStateId, but the following should work for non interactive playlists
@@ -79,7 +77,7 @@ export class MediaZoneHSM extends ZoneHSM {
     }
 
     videoOrImagesZoneGetInitialState() {
-        console.log("videoOrImagesZoneGetInitialState invoked");
+        console.log('videoOrImagesZoneGetInitialState invoked');
 
         return this.activeState;
     }

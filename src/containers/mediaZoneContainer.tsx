@@ -8,7 +8,7 @@ import {
 
 import {
     ArEventType,
-    ArState
+    ArState,
 } from '../types';
 
 import MediaZone from '../components/mediaZone';
@@ -35,7 +35,7 @@ export function postBSPMessage(event : ArEventType) {
     return bsp.postMessage(event);
 }
 
-function mapStateToProps (state : ArState, ownProps : MediaZoneStateProps) : MediaZoneStateProps {
+function mapStateToProps(state : ArState, ownProps : MediaZoneStateProps) : MediaZoneStateProps {
     return {
         ...ownProps,
         activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
@@ -50,8 +50,7 @@ const mapDispatchToProps = (dispatch : Dispatch<ArState>) : MediaZoneDispatchPro
 
 const MediaZoneContainer = connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
 )(MediaZone);
 
 export default MediaZoneContainer;
-

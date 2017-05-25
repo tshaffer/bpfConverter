@@ -1,8 +1,7 @@
 import {
-  DmDerivedContentItem,
   DmDataFeedContentItem,
   DmMediaStateState,
-  DmState
+  DmState,
 } from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
@@ -12,13 +11,13 @@ import { MrssDataFeed } from '../entities/mrssDataFeed';
 import { MRSSFeed } from '../entities/mrssFeed';
 
 import {
-  setActiveMediaState
+  setActiveMediaState,
 } from '../store/activeMediaStates';
 
 import {
-  setMrssDataFeedItem
+  setMrssDataFeedItem,
 } from '../store/mrssDataFeedItems';
-import {HSMStateData, ArEventType} from "../types/index";
+import {HSMStateData, ArEventType} from '../types/index';
 
 export default class MRSSDataFeedState extends HState {
 
@@ -68,23 +67,20 @@ export default class MRSSDataFeedState extends HState {
         this.currentFeed = this.dataFeed.feed;
         this.displayIndex = 0;
         this.advanceToNextMRSSItem(true);
-      }
-      else {
+      } else {
         debugger;
       }
 
       return 'HANDLED';
-    }
-    else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
+    } else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
       console.log('exit signal');
-    }
-    else if (event.EventType && event.EventType === 'timeoutEvent') {
+    } else if (event.EventType && event.EventType === 'timeoutEvent') {
       console.log('timeout event');
 
       // check to see if it's at the end of the feed
       if (this.atEndOfFeed()) {
         stateData.nextState = this.nextState;
-        return "TRANSITION";
+        return 'TRANSITION';
       }
 
       this.advanceToNextMRSSItem(false);

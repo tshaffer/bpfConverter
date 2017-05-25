@@ -1,15 +1,11 @@
 import {
   DmMediaStateState,
-  DmState
+  DmState,
 } from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
 
 import { ZoneHSM } from './zoneHSM';
-
-import {
-  setActiveMediaState
-} from '../store/activeMediaStates';
 
 import {
   ArEventType,
@@ -20,7 +16,7 @@ export default class VideoState extends HState {
 
   bsdm : DmState;
   bsdmVideoState : DmMediaStateState;
-  state : Object;
+  state : object;
   nextState : HState;
   dispatch : Function;
 
@@ -47,8 +43,7 @@ export default class VideoState extends HState {
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
       console.log('entry signal');
       return 'HANDLED';
-    }
-    else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
+    } else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {
       console.log('exit signal');
     }
 

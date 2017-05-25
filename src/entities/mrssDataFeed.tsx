@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = require("path");
+const path = require('path');
 const crypto = require('crypto');
 
 import {
@@ -11,7 +11,7 @@ import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 import { BSP } from '../app/bsp';
 
 import {
-  DataFeed
+  DataFeed,
 } from './dataFeed';
 
 import { MRSSFeed } from './mrssFeed';
@@ -19,14 +19,14 @@ import { MRSSFeed } from './mrssFeed';
 export class MrssDataFeed extends DataFeed {
 
   feed : MRSSFeed;
-  assetsToDownload : Array<Object>;
+  assetsToDownload : object[];
   feedPoolAssetFiles : any = {};
 
   constructor(bsdmDataFeed: DmDataFeed) {
     super(bsdmDataFeed);
   }
 
-  processFeedContents(bsp : BSP, feedData : Object) {
+  processFeedContents(bsp : BSP, feedData : object) {
     this.downloadMRSSContent(bsp, feedData);
     this.postLiveDataFeedUpdateMessage(bsp);
   }
@@ -41,7 +41,7 @@ export class MrssDataFeed extends DataFeed {
     }
   }
 
-  downloadMRSSContent(bsp : BSP, feedData : Object) {
+  downloadMRSSContent(bsp : BSP, feedData : object) {
 
     const rootPath: string = DesktopPlatformService.getRootDirectory();
     let filePath = path.join(rootPath, 'feed_cache', this.name);
@@ -56,22 +56,22 @@ export class MrssDataFeed extends DataFeed {
     this.assetsToDownload = [];
     this.feed.items.forEach( (item : any) => {
 
-      let change_hint = '';
+      let changeHint = '';
       if (item.guid && item.guid[0]) {
-        change_hint = item.guid[0];
+        changeHint = item.guid[0];
       }
 
       this.assetsToDownload.push( {
         name: item.url,
         url: item.url,
-        change_hint
+        changeHint,
       });
     });
 
     // see bacon::src/platform/desktop//services/mediaThumbs.js::buildImageThumbs
     // http://stackoverflow.com/questions/24586110/resolve-promises-one-after-another-i-e-in-sequence
 
-    let self = this;
+    const self = this;
 
     let fileCount = this.assetsToDownload.length;
     let sequence = Promise.resolve();
@@ -84,9 +84,9 @@ export class MrssDataFeed extends DataFeed {
         if (fileCount === 0) {
 
           // tell the states to switch over to the new spec immediately
-          let event = {
-            'EventType' : 'MRSS_SPEC_UPDATED',
-            'EventData' : this
+          const event = {
+            EventType : 'MRSS_SPEC_UPDATED',
+            EventData : this,
           };
           bsp.dispatch(bsp.postMessage(event));
 
@@ -163,8 +163,7 @@ export class MrssDataFeed extends DataFeed {
         const data = input.read();
         if (data) {
           hash.update(data);
-        }
-        else {
+        } else {
           const sha1 : string = hash.digest('hex');
           resolve(sha1);
         }
@@ -181,7 +180,7 @@ export class MrssDataFeed extends DataFeed {
 
       if (sha1.length >= 2) {
 
-        let folders : string[] = [];
+        const folders : string[] = [];
         folders.push(sha1.substring(sha1.length - 2, sha1.length - 2 + 1));
         folders.push(sha1.substring(sha1.length - 1, sha1.length - 1 + 1));
 
@@ -190,7 +189,7 @@ export class MrssDataFeed extends DataFeed {
           mkdir(currentDir).then(() => {
             currentDir = path.join(currentDir, folders[1]);
             mkdir(currentDir).then(() => {
-              folders.forEach(folderName => {
+              folders.forEach( (folderName) => {
                 relativeFilePath = relativeFilePath + folderName + '/';
               });
               resolve(relativeFilePath);
@@ -199,22 +198,20 @@ export class MrssDataFeed extends DataFeed {
             debugger;
             reject(err);
           });
-        }
-        else {
-          folders.forEach(folderName => {
+        } else {
+          folders.forEach( (folderName) => {
             relativeFilePath = relativeFilePath + folderName + '/';
           });
           resolve(relativeFilePath);
         }
-      }
-      else {
+      } else {
         // not sure if this case can occur
         debugger;
       }
     });
   }
 
-  setFeedPoolAssetFiles(poolAssetFilesIn : Object) {
+  setFeedPoolAssetFiles(poolAssetFilesIn : object) {
     this.feedPoolAssetFiles = poolAssetFilesIn;
   }
 
@@ -232,8 +229,8 @@ export class MrssDataFeed extends DataFeed {
 
 // From ArrayBuffer to Buffer
 function toBuffer(ab : ArrayBuffer) : Buffer {
-  let buf = new Buffer(ab.byteLength);
-  let view = new Uint8Array(ab);
+  const buf = new Buffer(ab.byteLength);
+  const view = new Uint8Array(ab);
   for (let i = 0; i < buf.length; ++i) {
     buf[i] = view[i];
   }
@@ -245,8 +242,7 @@ function mkdir(dirPath: string, ignoreAlreadyExists: boolean = true) {
     fs.mkdir(dirPath, 0o777, (err : any) => {
       if (!err || (err.code === 'EEXIST' && ignoreAlreadyExists)) {
         resolve();
-      }
-      else {
+      } else {
         reject(err);
       }
     });

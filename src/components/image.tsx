@@ -1,18 +1,18 @@
-import * as React from "react";
+import * as React from 'react';
 
 export interface ImageProps {
     height: number;
-    width : number;
-    duration : number;
-    onTimeout : Function;
+    width: number;
+    duration: number;
+    onTimeout: () => void;
     resourceIdentifier : string;
 }
 
 export default class Image extends React.Component<ImageProps, object> {
 
-    timeout : any;
+    private timeout: any;
 
-    constructor(props : ImageProps) {
+    constructor(props: ImageProps) {
         super(props);
         this.timeout = null;
     }
@@ -22,12 +22,13 @@ export default class Image extends React.Component<ImageProps, object> {
         if (this.timeout) {
             return false;
         }
+
         return true;
     }
 
-    render () {
+    render() {
 
-        let self = this;
+        const self: Image = this;
 
         if (this.timeout) {
             debugger;
@@ -37,7 +38,7 @@ export default class Image extends React.Component<ImageProps, object> {
             this.timeout = null;
             self.props.onTimeout();
         }
-            ,this.props.duration);
+            , this.props.duration);
 
         console.log('image.js::render, image src: ' + this.props.resourceIdentifier);
 

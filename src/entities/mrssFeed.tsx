@@ -6,25 +6,22 @@ const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
 import {
-  DataFeed
-}
-from './dataFeed';
+  DataFeed,
+} from './dataFeed';
 
 import { MRSSDataFeedItem } from './mrssDataFeedItem';
 
 export class MRSSFeed {
 
+  dataFeed : DataFeed;
+  ttlSeconds : number;
+  title : string;
+  items : object[];
+
   constructor(dataFeed : DataFeed) {
     this.dataFeed = dataFeed;
     this.ttlSeconds = -1;
   }
-
-  dataFeed : DataFeed;
-  ttlSeconds : number;
-
-  title : string;
-
-  items : Array<Object>;
 
   populateFeedItems(filePath : string) {
 

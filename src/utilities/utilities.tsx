@@ -1,5 +1,5 @@
 import {
-    ArFileLUT
+    ArFileLUT,
 } from '../types';
 
 let poolAssetFiles : ArFileLUT = {};

@@ -1,12 +1,11 @@
-import * as React from "react";
+import * as React from 'react';
 
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
 import {
-    ArState
+    ArState,
 } from '../types';
-
 
 import { setPlaybackState } from '../store/stateMachine';
 // import { postMessage } from '../store/stateMachine';
@@ -18,13 +17,13 @@ export let myApp = {};
 
 class App extends React.Component<any, object> {
 
-    constructor(props: Object) {
+    state: object;
+
+    constructor(props: object) {
         super(props);
 
         myApp = this;
     }
-
-    state: Object;
 
     render() {
 
@@ -47,17 +46,16 @@ class App extends React.Component<any, object> {
     }
 }
 
-function mapStateToProps (state : ArState) {
+function mapStateToProps(state : ArState) {
 
     return {
         bsdm: state.bsdm,
         playbackState: state.stateMachine.playbackState,
-        activeMediaStates : state.activeMediaStates
+        activeMediaStates : state.activeMediaStates,
     };
 }
 
-
-const mapDispatchToProps = (dispatch : Dispatch<ArState>) => {
+const mapDispatchToProps = (dispatch: Dispatch<ArState>) => {
     return bindActionCreators({
         setPlaybackState,
     }, dispatch);

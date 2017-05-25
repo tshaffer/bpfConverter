@@ -11,8 +11,6 @@ class DesktopPlatformService {
     static isTickerSupported() : boolean {
         return false;
     }
-
-
 }
 
 export default DesktopPlatformService;

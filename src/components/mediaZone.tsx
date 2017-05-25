@@ -1,9 +1,10 @@
-import * as React from "react";
+import * as React from 'react';
 
-const path = require("path");
+// const path = require('path');
+import path = require('path');
 
 import {
-    ArEventType
+    ArEventType,
 } from '../types';
 
 // import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
@@ -37,8 +38,8 @@ import { MediaZoneStateProps, MediaZoneDispatchProps } from '../containers/media
 export default class MediaZone extends React.Component<MediaZoneStateProps & MediaZoneDispatchProps, object> {
 
     nextAsset()  {
-        let event : ArEventType = {
-            'EventType' : 'timeoutEvent'
+        const event : ArEventType = {
+            EventType : 'timeoutEvent',
         };
         this.props.postBSPMessage(event);
     }
@@ -47,7 +48,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
         let duration : number = 10;
 
-        let self = this;
+        const self = this;
 
         // unsafe cast
         const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
@@ -59,7 +60,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         const resourceIdentifier : string = path.basename(assetId);
 
         const eventName : EventType = event.type;
-        switch(eventName) {
+        switch (eventName) {
             case 'Timer': {
                 duration = event.data.interval;
                 break;
@@ -104,9 +105,9 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     renderMrssItem(mrssContentItem : DmDataFeedContentItem) {
 
-        let duration : number = 3;
+        const duration : number = 3;
 
-        let self = this;
+        const self = this;
 
         const dataFeedId : string = mrssContentItem.dataFeedId;
 
@@ -123,19 +124,18 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
-        let eventIds : Array<BsDmId> = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
+        const eventIds : BsDmId[] = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
         if (eventIds.length !== 1) {
             debugger;
         }
 
-        let event : DmEvent = dmGetEventById(bsdm, { id : eventIds[0] });
+        const event : DmEvent = dmGetEventById(bsdm, { id : eventIds[0] });
         if (!event) {
             debugger;
         }
 
         return event;
     }
-
 
     render() {
 
@@ -152,7 +152,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
         const contentItem : DmDerivedContentItem = mediaState.contentItem;
 
-        switch(contentItem.type) {
+        switch (contentItem.type) {
             case'Video':
             case 'Image': {
                 return this.renderMediaItem(contentItem as DmMediaContentItem, event);

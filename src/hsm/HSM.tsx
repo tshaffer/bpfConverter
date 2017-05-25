@@ -17,22 +17,22 @@ export class HSM {
         this.initialPseudoStateHandler = null;
     }
 
-    constructorFunction () {
+    constructorFunction() {
         this.constructorHandler();
     }
 
-    initialize () {
+    initialize() {
 
-        let stateData : HSMStateData = { nextState : null };
+        const stateData : HSMStateData = { nextState : null };
 
         // empty event used to get super states
-        let emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
+        const emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
 
         // entry event
-        let entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
+        const entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
 
         // init event
-        let initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
+        const initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
 
         // execute initial transition
         // this.activeState = this.initialPseudoStateHandler(...arguments);
@@ -44,13 +44,15 @@ export class HSM {
 
         let activeState = this.activeState;
 
-        //start at the top state
-        if (this.topState == null) debugger;
+        // start at the top state
+        if (this.topState == null) {
+            debugger;
+        }
         let sourceState = this.topState;
 
         while (true) {
 
-            let entryStates = [];
+            const entryStates = [];
             let entryStateIndex = 0;
 
             entryStates[0] = activeState;                                                   // target of the initial transition
@@ -71,7 +73,7 @@ export class HSM {
             //        activeState = entryStates[0];                                                 // restore the target of the initial transition
 
             while (entryStateIndex >= 0) {                                                  // retrace the entry path in reverse (desired) order
-                let entryState = entryStates[entryStateIndex];
+                const entryState = entryStates[entryStateIndex];
                 status = entryState.HStateEventHandler(entryEvent, stateData);
                 entryStateIndex = entryStateIndex - 1;
             }
@@ -79,7 +81,7 @@ export class HSM {
             sourceState = entryStates[0];                                                    // new source state is the current state
 
             status = sourceState.HStateEventHandler(initEvent, stateData);
-            if (status !== "TRANSITION") {
+            if (status !== 'TRANSITION') {
                 this.activeState = sourceState;
                 return;
             }
@@ -89,36 +91,38 @@ export class HSM {
         }
     }
 
-    Dispatch (event : ArEventType) {
+    Dispatch(event : ArEventType) {
 
         // if there is no activeState, the playlist is empty
-        if (this.activeState == null) return;
+        if (this.activeState == null) {
+            return;
+        }
 
-        let stateData : HSMStateData = { nextState : null };
+        const stateData : HSMStateData = { nextState : null };
 
         // empty event used to get super states
-        let emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
+        const emptyEvent : ArEventType =  { EventType : 'EMPTY_SIGNAL' };
 
         // entry event
-        let entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
+        const entryEvent : ArEventType = { EventType : 'ENTRY_SIGNAL' };
 
         // init event
-        let initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
+        const initEvent : ArEventType = { EventType : 'INIT_SIGNAL' };
 
         // exit event
-        let exitEvent : ArEventType = { EventType : 'EXIT_SIGNAL' };
+        const exitEvent : ArEventType = { EventType : 'EXIT_SIGNAL' };
 
         let t = this.activeState;                                                      // save the current state
 
-        let status = "SUPER";
+        let status = 'SUPER';
         let s = null;
-        while (status === "SUPER") {                                                 // process the event hierarchically
+        while (status === 'SUPER') {                                                 // process the event hierarchically
             s = this.activeState;
             status = s.HStateEventHandler(event, stateData);
             this.activeState = stateData.nextState;
         }
 
-        if (status === "TRANSITION") {
+        if (status === 'TRANSITION') {
             let path = [];
 
             path[0] = this.activeState;                                                // save the target of the transition
@@ -139,14 +143,12 @@ export class HSM {
             if (s.id === t.id) {                                                     // check source == target (transition to self)
                 status = s.HStateEventHandler(exitEvent, stateData);                // exit the source
                 ip = 0;
-            }
-            else {
+            } else {
                 status = t.HStateEventHandler(emptyEvent, stateData);               // superstate of target
                 t = stateData.nextState;
                 if (s.id === t.id) {                                                 // check source == target->super
                     ip = 0;                                                         // enter the target
-                }
-                else {
+                } else {
                     status = s.HStateEventHandler(emptyEvent, stateData);           // superstate of source
                     if (stateData.nextState.id === t.id) {                           // check source->super == target->super
                         status = s.HStateEventHandler(exitEvent, stateData);        // exit the source

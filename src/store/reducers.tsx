@@ -1,10 +1,9 @@
 import {
-    ArState
+    ArState,
 } from '../types';
 
 import {combineReducers} from 'redux';
 import { bsDmReducer } from '@brightsign/bsdatamodel';
-import { DataFeedShape } from '../types/index';
 import stateMachineReducer from './stateMachine';
 import activeMediaStatesReducer from './activeMediaStates';
 import mrssDataFeedItemReducer from './mrssDataFeedItems';
@@ -16,7 +15,7 @@ const rootReducer = combineReducers<ArState>({
     stateMachine: stateMachineReducer,
     activeMediaStates : activeMediaStatesReducer,
     dataFeeds: dataFeedsReducer,
-    mrssDataFeedItems : mrssDataFeedItemReducer
+    mrssDataFeedItems : mrssDataFeedItemReducer,
 });
 
 export default rootReducer;

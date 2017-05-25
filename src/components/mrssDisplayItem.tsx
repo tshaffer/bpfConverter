@@ -1,9 +1,7 @@
 
-import * as React from "react";
+import * as React from 'react';
 
 const path = require('path');
-
-import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
 
 import ImageContainer from '../containers/imageContainer';
 
@@ -11,14 +9,14 @@ import { MrssDisplayItemProps } from '../containers/mrssDisplayItemContainer';
 
 export default class MrssDisplayItem extends React.Component<MrssDisplayItemProps, object> {
 
+  timeout : any;
+
   constructor(props : MrssDisplayItemProps) {
     super(props);
     this.timeout = null;
   }
 
-  timeout : any;
-
-  render () {
+  render() {
 
     const src : string = path.join('file://', this.props.mrssDataFeedItemPath);
     console.log('mrssDisplayItem.js::render, image src: ' + src);
@@ -33,8 +31,7 @@ export default class MrssDisplayItem extends React.Component<MrssDisplayItemProp
           onTimeout={this.props.onTimeout.bind(this)}
         />
       );
-    }
-    else {
+    } else {
       debugger;
     }
   }

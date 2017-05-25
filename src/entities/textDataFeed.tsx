@@ -5,14 +5,14 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-  DataFeed
+  DataFeed,
 } from './dataFeed';
 
 import { BSP } from '../app/bsp';
 
 export class TextDataFeed extends DataFeed {
 
-  rssItems: Array<any>;
+  rssItems: any[];
 
   constructor(bsdmDataFeed: DmDataFeed) {
     super(bsdmDataFeed);
@@ -42,10 +42,8 @@ export class TextDataFeed extends DataFeed {
     });
   }
 
-  processFeedContents(bsp : BSP, feedData : Object) {
+  processFeedContents(bsp : BSP, feedData : object) {
     this.parse(feedData);
     this.postLiveDataFeedUpdateMessage(bsp);
   }
-
-
 }

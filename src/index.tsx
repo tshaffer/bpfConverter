@@ -1,7 +1,7 @@
 import thunkMiddleware from 'redux-thunk';
 
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import { Provider } from 'react-redux';
 
@@ -16,8 +16,8 @@ import App from './components/app';
 const store = createStore(
     reducers,
     applyMiddleware(
-        thunkMiddleware
-    )
+        thunkMiddleware,
+    ),
 );
 
 bsp.initialize(store);
@@ -26,5 +26,5 @@ ReactDOM.render(
     <Provider store={store}>
         <App />
     </Provider>,
-    document.getElementById('content') as HTMLElement
+    document.getElementById('content') as HTMLElement,
 );

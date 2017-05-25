@@ -1,6 +1,6 @@
 import {
     DmMediaStateState,
-    DmState
+    DmState,
 } from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
@@ -8,14 +8,13 @@ import { HState } from './HSM';
 import { ZoneHSM } from './zoneHSM';
 
 import {
-    setActiveMediaState
+    setActiveMediaState,
 } from '../store/activeMediaStates';
 
 import {
     ArEventType,
     HSMStateData,
 } from '../types';
-
 
 export default class ImageState extends HState {
 
@@ -45,20 +44,17 @@ export default class ImageState extends HState {
         stateData.nextState = null;
 
         if (event.EventType === 'ENTRY_SIGNAL') {
-            console.log(this.id + ": entry signal");
+            console.log(this.id + ': entry signal');
             this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
             return 'HANDLED';
-        }
-        else if (event.EventType === 'EXIT_SIGNAL') {
-            console.log(this.id + ": exit signal");
-        }
-
-        else if (event.EventType === 'timeoutEvent') {
-            console.log(this.id + ": timeoutEvent");
+        } else if (event.EventType === 'EXIT_SIGNAL') {
+            console.log(this.id + ': exit signal');
+        } else if (event.EventType === 'timeoutEvent') {
+            console.log(this.id + ': timeoutEvent');
 
             if (event.EventType === 'timeoutEvent') {
                 stateData.nextState = this.nextState;
-                return "TRANSITION";
+                return 'TRANSITION';
             }
         }
 

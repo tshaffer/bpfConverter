@@ -1,17 +1,17 @@
-import * as React from "react";
+import * as React from 'react';
 
 export interface VideoProps {
   width : number;
   height: number;
-  onVideoEnd : Function;
+  onVideoEnd : () => void;
   resourceIdentifier : string;
 }
 
 export default class Video extends React.Component<VideoProps, object> {
 
-  render () {
+  render() {
 
-    let self = this;
+    const self = this;
 
     console.log('video.js::render, video src: ' + this.props.resourceIdentifier);
 

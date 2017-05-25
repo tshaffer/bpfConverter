@@ -30,15 +30,15 @@ export class DataFeed {
       console.log('restartDownloadTimer: timeout occurred');
       bsp.queueRetrieveLiveDataFeed(this);
     }
-      ,updateInterval
+      , updateInterval,
     );
   }
 
-  processFeedContents(_ : Object, __ : Object) {
+  processFeedContents(_ : object, __ : object) {
     debugger;
   }
 
-  retrieveFeed(bsp : Object) {
+  retrieveFeed(bsp : object) {
 
     const url = dmGetSimpleStringFromParameterizedString(this.url);
 
@@ -46,9 +46,9 @@ export class DataFeed {
 
     fetch(url)
       .then( (response) => {
-        let blobPromise = response.text();
+        const blobPromise = response.text();
         blobPromise.then( (content) => {
-          let parser = new xml2js.Parser();
+          const parser = new xml2js.Parser();
           try {
             parser.parseString(content, (err : Error, jsonResponse : any) => {
               if (err) {
@@ -58,8 +58,7 @@ export class DataFeed {
               console.log(jsonResponse);
               this.processFeedContents(bsp, jsonResponse);
             });
-          }
-          catch (err) {
+          } catch (err) {
             debugger;
           }
         });
@@ -71,9 +70,9 @@ export class DataFeed {
 
   postLiveDataFeedUpdateMessage(bsp : BSP) {
     // send internal message indicating that the data feed has been updated
-    let event = {
-      'EventType' : 'LIVE_DATA_FEED_UPDATE',
-      'EventData' : this
+    const event = {
+      EventType : 'LIVE_DATA_FEED_UPDATE',
+      EventData : this,
     };
     bsp.dispatch(bsp.postMessage(event));
 
@@ -81,6 +80,3 @@ export class DataFeed {
     this.restartDownloadTimer(bsp);
   }
 }
-
-
-

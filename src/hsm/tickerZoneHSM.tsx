@@ -1,7 +1,7 @@
 import { HState } from './HSM';
 
 import {
-  ZoneHSM
+  ZoneHSM,
 } from './zoneHSM';
 
 import RSSDataFeedState from './rssDataFeedState';
@@ -27,15 +27,15 @@ import {
 
 import {
   ArDataFeedLUT,
-  HSMStateData, ArEventType
+  HSMStateData, ArEventType,
 } from '../types';
 
 import {
-  updateDataFeed
+  updateDataFeed,
 } from '../store/dataFeeds';
 
 import {
-  MediaHState
+  MediaHState,
 } from '../types';
 
 import { DataFeed } from '../entities/dataFeed';
@@ -78,19 +78,19 @@ export class TickerZoneHSM extends ZoneHSM {
 
     const rotation = zoneProperties.textWidget.rotation;
     switch (rotation) {
-      case"0": {
+      case'0': {
         this.rotation = 0;
         break;
       }
-      case "90": {
+      case '90': {
         this.rotation = 3;
         break;
       }
-      case "180": {
+      case '180': {
         this.rotation = 2;
         break;
       }
-      case "270": {
+      case '270': {
         this.rotation = 1;
         break;
       }
@@ -98,11 +98,11 @@ export class TickerZoneHSM extends ZoneHSM {
 
     const alignment = zoneProperties.textWidget.alignment;
     switch (alignment) {
-      case "center": {
+      case 'center': {
         this.alignment = 1;
         break;
       }
-      case "right": {
+      case 'right': {
         this.alignment = 2;
         break;
       }
@@ -128,11 +128,11 @@ export class TickerZoneHSM extends ZoneHSM {
     this.safeTextRegion = zoneProperties.widget.safeTextRegion;
     this.stretchBitmapFile = zoneProperties.widget.stretchBitmapFile;
 
-    this.stRSSDataFeedInitialLoad = new STRSSDataFeedInitialLoad(this, "RSSDataFeedInitialLoad", this.stTop);
-    this.stRSSDataFeedPlaying = new STRSSDataFeedPlaying(this, "RSSDataFeedPlaying", this.stTop);
+    this.stRSSDataFeedInitialLoad = new STRSSDataFeedInitialLoad(this, 'RSSDataFeedInitialLoad', this.stTop);
+    this.stRSSDataFeedPlaying = new STRSSDataFeedPlaying(this, 'RSSDataFeedPlaying', this.stTop);
 
     // in autorun classic, this is done in newPlaylist as called from newZoneHSM
-    let self = this;
+    const self = this;
     this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
     this.mediaStates = [];
     this.rssDataFeedItems = [];
@@ -159,8 +159,7 @@ export class TickerZoneHSM extends ZoneHSM {
       const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'DataFeed') {
         newState = new RSSDataFeedState(this, bsdmMediaState);
-      }
-      else {
+      } else {
         debugger;
       }
 
@@ -193,8 +192,7 @@ export class TickerZoneHSM extends ZoneHSM {
   tickerZoneGetInitialState() {
     if (this.includesRSSFeeds) {
       return this.stRSSDataFeedInitialLoad;
-    }
-    else {
+    } else {
       return this.stRSSDataFeedPlaying;
     }
   }
@@ -217,13 +215,13 @@ export class STRSSDataFeedPlaying extends HState {
     stateData.nextState = null;
 
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-      console.log(this.id + ": entry signal");
+      console.log(this.id + ': entry signal');
       // this.populateRSSDataFeedWidget();
-      return "HANDLED";
+      return 'HANDLED';
     }
 
     stateData.nextState = this.superState;
-    return "SUPER";
+    return 'SUPER';
   }
 }
 
@@ -239,16 +237,15 @@ class STRSSDataFeedInitialLoad extends HState {
     stateData.nextState = null;
 
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-      console.log(this.id + ": entry signal");
-      return "HANDLED";
-    }
-    else if (event.EventType && event.EventType === 'LIVE_DATA_FEED_UPDATE') {
+      console.log(this.id + ': entry signal');
+      return 'HANDLED';
+    } else if (event.EventType && event.EventType === 'LIVE_DATA_FEED_UPDATE') {
       (this.stateMachine as TickerZoneHSM).processLiveDataFeedUpdate(event.EventData);
       stateData.nextState = (this.stateMachine as TickerZoneHSM).stRSSDataFeedPlaying;
-      return "TRANSITION";
+      return 'TRANSITION';
     }
 
     stateData.nextState = this.superState;
-    return "SUPER";
+    return 'SUPER';
   }
 }

@@ -1,6 +1,6 @@
 import {
     ActionWithPayload,
-    StateMachineShape
+    StateMachineShape,
 } from '../types/index';
 
 // ------------------------------------
@@ -11,11 +11,11 @@ export const SET_PLAYBACK_STATE = 'SET_PLAYBACK_STATE';
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function setPlaybackState(playbackState : string){
+export function setPlaybackState(playbackState : string) {
 
     return {
         type: SET_PLAYBACK_STATE,
-        payload: playbackState
+        payload: playbackState,
     };
 }
 
@@ -32,9 +32,9 @@ export default function(state : StateMachineShape = initialState, action : Actio
 
         case SET_PLAYBACK_STATE: {
 
-            let newState = {
+            const newState = {
                 ...state,
-                playbackState: action.payload
+                playbackState: action.payload,
             };
 
             console.log(newState);
@@ -44,5 +44,3 @@ export default function(state : StateMachineShape = initialState, action : Actio
 
     return state;
 }
-
-

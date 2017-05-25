@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 import {
     DmState,
@@ -17,7 +17,7 @@ export interface SignProps {
 
 export default class Sign extends React.Component<SignProps, object> {
 
-    getMediaZoneJSX(zone : DmZone) : Object {
+    getMediaZoneJSX(zone : DmZone) : object {
 
         return (
             <div
@@ -27,7 +27,7 @@ export default class Sign extends React.Component<SignProps, object> {
                   left: zone.absolutePosition.x,
                   top: zone.absolutePosition.y,
                   width: zone.absolutePosition.width,
-                  height: zone.absolutePosition.height
+                  height: zone.absolutePosition.height,
                 }}
             >
                 <MediaZoneContainer
@@ -53,7 +53,7 @@ export default class Sign extends React.Component<SignProps, object> {
           left: zone.absolutePosition.x,
           top: zone.absolutePosition.y,
           width: zone.absolutePosition.width,
-          height: zone.absolutePosition.height
+          height: zone.absolutePosition.height,
         }}
             >
                 <TickerZoneContainer
@@ -70,18 +70,16 @@ export default class Sign extends React.Component<SignProps, object> {
         );
     }
 
-    getZoneJSX(zoneId : string) : Object {
+    getZoneJSX(zoneId : string) : object {
 
         const zone : DmZone = dmGetZoneById(this.props.bsdm, { id: zoneId });
 
         switch (zone.type) {
             case 'VideoOrImages': {
-                const mediaZoneJSX = this.getMediaZoneJSX(zone);
-                return mediaZoneJSX;
+                return this.getMediaZoneJSX(zone);
             }
             case 'Ticker': {
-                const tickerZoneJSX  = this.getTickerZoneJSX(zone);
-                return tickerZoneJSX;
+                return this.getTickerZoneJSX(zone);
             }
             default: {
                 debugger;
@@ -91,13 +89,13 @@ export default class Sign extends React.Component<SignProps, object> {
 
     render() {
 
-        const zoneIds : Array<string> = dmGetZonesForSign(this.props.bsdm);
+        const zoneIds : string[] = dmGetZonesForSign(this.props.bsdm);
 
         return (
             <div>
                 {
                     zoneIds.map( (zoneId) =>
-                        this.getZoneJSX(zoneId)
+                        this.getZoneJSX(zoneId),
                     )
                 }
             </div>

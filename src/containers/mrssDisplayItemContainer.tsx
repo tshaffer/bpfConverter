@@ -2,30 +2,30 @@ import { connect } from 'react-redux';
 
 import {
   getMrssDataFeedItem,
-  getMrssDataFeedItemPath }
-from '../store/mrssDataFeedItems';
+  getMrssDataFeedItemPath,
+} from '../store/mrssDataFeedItems';
 
 import MrssDisplayItem from '../components/mrssDisplayItem';
 import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
 
 import {
-  ArState
+  ArState,
 } from '../types';
 
 export interface MRSSDisplayItemStateProps {
-  dataFeedId : string
+  dataFeedId : string;
   duration : number;
   height : number;
-  onTimeout : Function;
-  width : number
+  onTimeout : () => void;
+  width : number;
 }
 
 export interface MrssDisplayItemProps extends MRSSDisplayItemStateProps {
   mrssDataFeedItem: MRSSDataFeedItem;
   mrssDataFeedItemPath: string;
-};
+}
 
-function mapStateToProps (state : ArState, ownProps : MRSSDisplayItemStateProps) {
+function mapStateToProps(state : ArState, ownProps : MRSSDisplayItemStateProps) {
   return {
     ...ownProps,
     mrssDataFeedItem : getMrssDataFeedItem(state, ownProps.dataFeedId),

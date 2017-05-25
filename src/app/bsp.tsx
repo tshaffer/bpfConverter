@@ -1,10 +1,10 @@
-const fs = require("fs"),
-    path = require("path");
+const fs = require("fs");
+const path = require("path");
 
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
-import { Store } from 'redux'
+import { Store } from 'redux';
 
 import {
     DataFeedUsageType,
@@ -27,49 +27,49 @@ import {
     ArSyncSpec,
     ArSyncSpecDownload,
     ArState,
-    ArFileLUT
+    ArFileLUT,
 } from '../types';
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import {
-    setPoolAssetFiles
+    setPoolAssetFiles,
 } from '../utilities/utilities';
 
 import {
-    HSM
+    HSM,
 } from '../hsm/HSM';
 
 import {
-    PlayerHSM
+    PlayerHSM,
 } from '../hsm/playerHSM';
 
 import {
-    ZoneHSM
+    ZoneHSM,
 } from '../hsm/zoneHSM';
 
 import {
-    MediaZoneHSM
+    MediaZoneHSM,
 } from '../hsm/mediaZoneHSM';
 
 import {
-    TickerZoneHSM
+    TickerZoneHSM,
 } from '../hsm/tickerZoneHSM';
 
 import {
-    DataFeed
+    DataFeed,
 } from '../entities/dataFeed';
 
 import {
-    MrssDataFeed
+    MrssDataFeed,
 } from '../entities/mrssDataFeed';
 
 import {
-    TextDataFeed
+    TextDataFeed,
 } from '../entities/textDataFeed';
 
 import {
-    addDataFeed
+    addDataFeed,
 } from '../store/dataFeeds';
 
 let _singleton : BSP = null;
@@ -80,9 +80,9 @@ export class BSP {
     dispatch : Function;
     getState : Function;
     syncSpec : ArSyncSpec;
-    hsmList : Array<HSM>;
+    hsmList : HSM[];
     playerHSM: PlayerHSM;
-    liveDataFeedsToDownload : Array<DataFeed>;
+    liveDataFeedsToDownload : DataFeed[];
 
     constructor() {
         if (!_singleton) {
@@ -135,9 +135,9 @@ export class BSP {
 
         const bsdm : DmState = this.getState().bsdm;
 
-        let zoneHSMs : Array<ZoneHSM> = [];
+        const zoneHSMs : ZoneHSM[] = [];
 
-        const zoneIds : Array<BsDmId> = dmGetZonesForSign(bsdm);
+        const zoneIds : BsDmId[] = dmGetZonesForSign(bsdm);
         zoneIds.forEach( (zoneId : BsDmId) => {
 
             const bsdmZone : DmZone = dmGetZoneById(bsdm, { id: zoneId });
@@ -180,26 +180,24 @@ export class BSP {
                 const presentationName = presentationToSchedule.name;
                 const bmlFileName = presentationName + '.bml';
 
-                this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then( (autoPlay : Object) => {
+                this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then( (autoPlay : object) => {
                     console.log(autoPlay);
                     const signState = autoPlay as DmSignState;
                     this.dispatch(dmOpenSign(signState));
 
                     // get data feeds for the sign
-                    let bsdm : DmState = this.getState().bsdm;
+                    const bsdm : DmState = this.getState().bsdm;
                     const dataFeedIds : BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
                     dataFeedIds.forEach( (dataFeedId : BsDmId) => {
                         const dmDataFeed = dmGetDataFeedById(bsdm, { id: dataFeedId });
 
                         if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
-                            let dataFeed : MrssDataFeed = new MrssDataFeed(dmDataFeed);
+                            const dataFeed : MrssDataFeed = new MrssDataFeed(dmDataFeed);
                             this.dispatch(addDataFeed(dataFeed));
-                        }
-                        else if (dmDataFeed.usage === DataFeedUsageType.Text) {
-                            let dataFeed : TextDataFeed = new TextDataFeed(dmDataFeed);
+                        } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+                            const dataFeed : TextDataFeed = new TextDataFeed(dmDataFeed);
                             this.dispatch(addDataFeed(dataFeed));
-                        }
-                        else {
+                        } else {
                             debugger;
                         }
                     });
@@ -227,11 +225,9 @@ export class BSP {
         });
     }
 
-
     getAutoschedule(syncSpec : ArSyncSpec, rootPath : string) {
         return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
     }
-
 
     openSyncSpec(filePath : string = '') : Promise<ArSyncSpec> {
 
@@ -250,11 +246,11 @@ export class BSP {
         });
     }
 
-    getSyncSpecFile(fileName : string, syncSpec : ArSyncSpec, rootPath : string) : Promise<Object> {
+    getSyncSpecFile(fileName : string, syncSpec : ArSyncSpec, rootPath : string) : Promise<object> {
 
-        return new Promise<Object>( (resolve : Function, reject : Function) => {
+        return new Promise<object>( (resolve : Function, reject : Function) => {
 
-            let syncSpecFile : ArSyncSpecDownload = this.getFile(syncSpec, fileName);
+            const syncSpecFile : ArSyncSpecDownload = this.getFile(syncSpec, fileName);
             if (syncSpecFile == null) {
                 debugger;
                 // syncSpecFile = { };    // required to eliminate flow warnings
@@ -268,7 +264,7 @@ export class BSP {
                     reject(err);
                 } else {
                     const fileStr : string = decoder.write(dataBuffer);
-                    const file : Object = JSON.parse(fileStr);
+                    const file : object = JSON.parse(fileStr);
 
                     // I have commented out the following code to allow hacking of files -
                     // that is, overwriting files in the pool without updating the sync spec with updated sha1
@@ -295,10 +291,9 @@ export class BSP {
         return file;
     }
 
-
     buildPoolAssetFiles(syncSpec : ArSyncSpec, pathToPool : string) : ArFileLUT {
 
-        let poolAssetFiles : ArFileLUT = { };
+        const poolAssetFiles : ArFileLUT = { };
 
         syncSpec.files.download.forEach( (syncSpecFile : ArSyncSpecDownload) => {
             poolAssetFiles[syncSpecFile.name] = path.join(pathToPool, syncSpecFile.link);
@@ -313,8 +308,7 @@ export class BSP {
 
         if (liveDataFeed.usage === DataFeedUsageType.Text) {
             dataFeed.retrieveFeed(this);
-        }
-        else {
+        } else {
             // is the following correct? check with autorun classic
             this.liveDataFeedsToDownload.push(liveDataFeed);
 

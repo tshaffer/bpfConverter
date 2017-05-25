@@ -8,11 +8,6 @@ import {
     dmGetZoneSimplePlaylist,
 } from '@brightsign/bsdatamodel';
 
-
-import {
-    MediaHState
-} from '../types';
-
 export class ZoneHSM extends HSM {
 
     type : string;
@@ -39,7 +34,7 @@ export class ZoneHSM extends HSM {
         this.bsdm = getState().bsdm;
         this.zoneId = zoneId;
 
-        this.stTop = new HState(this, "Top");
+        this.stTop = new HState(this, 'Top');
         this.stTop.HStateEventHandler = STTopEventHandler;
         this.topState = this.stTop;
 
@@ -57,4 +52,3 @@ export class ZoneHSM extends HSM {
         this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
     }
 }
-

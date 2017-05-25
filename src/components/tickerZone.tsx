@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
@@ -18,7 +18,7 @@ export default class TickerZone extends React.Component<tickerZoneProps, object>
 
     if (DesktopPlatformService.isTickerSupported()) {
 
-      let { left, top, width, height } = this.props;
+      const { left, top, width, height } = this.props;
 
       // $FlowBrightSignExternalObject
       // this.bsTicker = new BSTicker(left, top, width, height, 0);
@@ -67,6 +67,6 @@ export default class TickerZone extends React.Component<tickerZoneProps, object>
 
     return (
         <div>tickerHere</div>
-    )
+    );
   }
 }

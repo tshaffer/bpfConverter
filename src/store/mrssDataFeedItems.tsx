@@ -10,14 +10,14 @@ export const SET_MRSS_DATA_FEED_ITEM = 'SET_FEED_DISPLAY_ITEM';
 // ------------------------------------
 // Actions
 // ------------------------------------
-export function setMrssDataFeedItem(mrssDataFeedItemId : string, mrssDataFeedItem : Object){
+export function setMrssDataFeedItem(mrssDataFeedItemId : string, mrssDataFeedItem : object) {
 
   return {
     type: SET_MRSS_DATA_FEED_ITEM,
     payload: {
       mrssDataFeedItemId,
-      mrssDataFeedItem
-    }
+      mrssDataFeedItem,
+    },
   };
 }
 
@@ -25,7 +25,7 @@ export function setMrssDataFeedItem(mrssDataFeedItemId : string, mrssDataFeedIte
 // Reducer
 // ------------------------------------
 const initialState = {
-  mrssDataFeedItemsByFeedId : {}
+  mrssDataFeedItemsByFeedId : {},
 };
 
 export default function(state : MrssDataFeedItemShape = initialState, action : ActionWithPayload) {
@@ -34,9 +34,9 @@ export default function(state : MrssDataFeedItemShape = initialState, action : A
 
     case SET_MRSS_DATA_FEED_ITEM: {
 
-      let newState : MrssDataFeedItemShape = Object.assign({}, state);
+      const newState : MrssDataFeedItemShape = Object.assign({}, state);
 
-      let { mrssDataFeedItemId, mrssDataFeedItem } = action.payload;
+      const { mrssDataFeedItemId, mrssDataFeedItem } = action.payload;
       newState.mrssDataFeedItemsByFeedId[mrssDataFeedItemId] = mrssDataFeedItem;
 
       console.log(newState);
@@ -66,5 +66,3 @@ export function getMrssDataFeedItemPath(state : ArState, mrssDataFeedItemId : st
   const url = mrssDataFeedItem.url;
   return dataFeed.feedPoolAssetFiles[url];
 }
-
-
