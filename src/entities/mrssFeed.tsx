@@ -1,6 +1,6 @@
 /* @flow */
 
-const fs = require('fs');
+import fs = require('fs');
 
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');

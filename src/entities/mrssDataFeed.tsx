@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+import fs = require('fs');
+import path = require('path');
+import crypto = require('crypto');
 
 import {
   DmDataFeed,

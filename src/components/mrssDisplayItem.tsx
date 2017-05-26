@@ -1,7 +1,7 @@
 
 import * as React from 'react';
 
-const path = require('path');
+import path = require('path');
 
 import ImageContainer from '../containers/imageContainer';
 
