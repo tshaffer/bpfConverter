@@ -27,13 +27,14 @@ export class DataFeed {
     const updateInterval = this.updateInterval * 1000;
 
     setTimeout(() => {
-      console.log('restartDownloadTimer: timeout occurred');
-      bsp.queueRetrieveLiveDataFeed(this);
-    }
+        console.log('restartDownloadTimer: timeout occurred');
+        bsp.queueRetrieveLiveDataFeed(this);
+      }
       , updateInterval,
     );
   }
 
+  // base class method - should never be called
   processFeedContents(_ : object, __ : object) {
     debugger;
   }
@@ -63,9 +64,9 @@ export class DataFeed {
           }
         });
       }).catch( (err) => {
-        console.log(err);
-        debugger;
-      });
+      console.log(err);
+      debugger;
+    });
   }
 
   postLiveDataFeedUpdateMessage(bsp : BSP) {
