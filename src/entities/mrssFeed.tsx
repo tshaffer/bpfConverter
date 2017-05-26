@@ -16,7 +16,7 @@ export class MRSSFeed {
   dataFeed : DataFeed;
   ttlSeconds : number;
   title : string;
-  items : object[];
+  items : MRSSDataFeedItem[];
 
   constructor(dataFeed : DataFeed) {
     this.dataFeed = dataFeed;

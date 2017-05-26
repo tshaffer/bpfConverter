@@ -15,6 +15,7 @@ import {
 } from './dataFeed';
 
 import { MRSSFeed } from './mrssFeed';
+import { MRSSDataFeedItem } from './mrssDataFeedItem';
 
 import {
   ArFileLUT,
@@ -58,7 +59,7 @@ export class MrssDataFeed extends DataFeed {
 
     // get files to download
     this.assetsToDownload = [];
-    this.feed.items.forEach( (item : any) => {
+    this.feed.items.forEach( (item : MRSSDataFeedItem) => {
 
       let changeHint = '';
       if (item.guid && item.guid[0]) {
