@@ -28,7 +28,7 @@ export class TextDataFeed extends DataFeed {
     if (rssItemSpecs.length !== this.rssItems.length) {
       console.log('parseSimpleRSSFeed - length changed');
     }
-    rssItemSpecs.forEach( (rssItemSpec : any, index : any ) => {
+    rssItemSpecs.forEach( (rssItemSpec : any, index : number ) => {
       if (this.rssItems.length > index && rssItemSpec.title[0] !== this.rssItems[index].title) {
         console.log('parseSimpleRSSFeed - content changed');
       }
