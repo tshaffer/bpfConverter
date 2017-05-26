@@ -8,6 +8,10 @@ import {
 
 import { BSP } from '../app/bsp';
 
+import {
+  ArFileLUT,
+} from '../types';
+
 export class DataFeed {
 
   id : string;
@@ -16,7 +20,7 @@ export class DataFeed {
   url : DmParameterizedString;
   updateInterval : number;
   name : string;
-  feedPoolAssetFiles : any;
+  feedPoolAssetFiles : ArFileLUT;
 
   constructor(bsdmDataFeed: DmDataFeed) {
     Object.assign(this, bsdmDataFeed);

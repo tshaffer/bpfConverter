@@ -16,11 +16,15 @@ import {
 
 import { MRSSFeed } from './mrssFeed';
 
+import {
+  ArFileLUT,
+} from '../types';
+
 export class MrssDataFeed extends DataFeed {
 
   feed : MRSSFeed;
   assetsToDownload : object[];
-  feedPoolAssetFiles : any = {};
+  feedPoolAssetFiles : ArFileLUT = {};
 
   constructor(bsdmDataFeed: DmDataFeed) {
     super(bsdmDataFeed);
@@ -211,7 +215,7 @@ export class MrssDataFeed extends DataFeed {
     });
   }
 
-  setFeedPoolAssetFiles(poolAssetFilesIn : object) {
+  setFeedPoolAssetFiles(poolAssetFilesIn : ArFileLUT) {
     this.feedPoolAssetFiles = poolAssetFilesIn;
   }
 
