@@ -20,9 +20,9 @@ import {
   DataFeedShape,
 } from '../types';
 
-import {
-  TextDataFeed,
-} from '../entities/textDataFeed';
+import 
+  TextDataFeed
+ from '../entities/textDataFeed';
 
 export interface tickerZoneOwnProps {
   bsdm : DmState;

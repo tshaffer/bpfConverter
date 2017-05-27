@@ -6,7 +6,7 @@ import {
 } from '../store/mrssDataFeedItems';
 
 import MrssDisplayItem from '../components/mrssDisplayItem';
-import { MRSSDataFeedItem } from '../entities/mrssDataFeedItem';
+import  MRSSDataFeedItem  from '../entities/mrssDataFeedItem';
 
 import {
   ArState,

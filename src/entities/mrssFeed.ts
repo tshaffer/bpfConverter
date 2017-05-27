@@ -5,13 +5,10 @@ import fs = require('fs');
 const StringDecoder = require('string_decoder').StringDecoder;
 const decoder = new StringDecoder('utf8');
 
-import {
-  DataFeed,
-} from './dataFeed';
+import DataFeed from './dataFeed';
+import MRSSDataFeedItem from './mrssDataFeedItem';
 
-import { MRSSDataFeedItem } from './mrssDataFeedItem';
-
-export class MRSSFeed {
+export default class MRSSFeed {
 
   dataFeed : DataFeed;
   ttlSeconds : number;

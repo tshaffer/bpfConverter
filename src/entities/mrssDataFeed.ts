@@ -10,18 +10,15 @@ import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import { BSP } from '../app/bsp';
 
-import {
-  DataFeed,
-} from './dataFeed';
-
-import { MRSSFeed } from './mrssFeed';
-import { MRSSDataFeedItem } from './mrssDataFeedItem';
+import DataFeed from './dataFeed';
+import MRSSFeed from './mrssFeed';
+import MRSSDataFeedItem from './mrssDataFeedItem';
 
 import {
   ArFileLUT,
 } from '../types';
 
-export class MrssDataFeed extends DataFeed {
+export default class MrssDataFeed extends DataFeed {
 
   feed : MRSSFeed;
   assetsToDownload : object[];

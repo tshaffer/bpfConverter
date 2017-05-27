@@ -4,13 +4,11 @@ import {
   DmDataFeed,
 } from '@brightsign/bsdatamodel';
 
-import {
-  DataFeed,
-} from './dataFeed';
+import DataFeed from './dataFeed';
 
 import { BSP } from '../app/bsp';
 
-export class TextDataFeed extends DataFeed {
+export default class TextDataFeed extends DataFeed {
 
   rssItems: any[];
 

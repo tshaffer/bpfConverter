@@ -56,20 +56,20 @@ import {
     TickerZoneHSM,
 } from '../hsm/tickerZoneHSM';
 
-import {
-    DataFeed,
-} from '../entities/dataFeed';
+import 
+    DataFeed
+ from '../entities/dataFeed';
+
+import 
+    MrssDataFeed
+ from '../entities/mrssDataFeed';
+
+import 
+    TextDataFeed
+ from '../entities/textDataFeed';
 
 import {
-    MrssDataFeed,
-} from '../entities/mrssDataFeed';
-
-import {
-    TextDataFeed,
-} from '../entities/textDataFeed';
-
-import {
-    addDataFeed,
+    addDataFeed
 } from '../store/dataFeeds';
 
 let _singleton : BSP = null;

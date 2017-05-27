@@ -6,8 +6,8 @@ import {
 
 import { HState } from '../HSM/HSM';
 
-import { DataFeed } from '../entities/dataFeed';
-import {MRSSDataFeedItem} from '../entities/mrssDataFeedItem';
+import DataFeed from '../entities/dataFeed';
+import MRSSDataFeedItem from '../entities/mrssDataFeedItem';
 
 export interface ActionWithPayload extends Action {
   payload : any;

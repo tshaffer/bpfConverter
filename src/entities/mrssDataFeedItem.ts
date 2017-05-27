@@ -1,4 +1,4 @@
-export class MRSSDataFeedItem {
+export default class MRSSDataFeedItem {
 
   guid : string;
   url : string;

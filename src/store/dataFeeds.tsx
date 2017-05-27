@@ -1,7 +1,7 @@
 import { DataFeedShape } from '../types/index';
 import {ActionWithPayload } from '../types/index';
 
-import { DataFeed } from '../entities/dataFeed';
+import  DataFeed  from '../entities/dataFeed';
 
 // ------------------------------------
 // Constants

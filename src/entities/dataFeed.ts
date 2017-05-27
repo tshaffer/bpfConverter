@@ -12,7 +12,7 @@ import {
   ArFileLUT,
 } from '../types';
 
-export class DataFeed {
+export default class DataFeed {
 
   id : string;
   type : string;
