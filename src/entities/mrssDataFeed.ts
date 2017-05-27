@@ -1,6 +1,8 @@
 import fs = require('fs');
 import path = require('path');
 import crypto = require('crypto');
+import { arrayBufferToBuffer } from '../utilities/utilities';
+import { mkdir } from '../utilities/utilities';
 
 import {
   DmDataFeed,
@@ -126,7 +128,7 @@ export default class MrssDataFeed extends DataFeed {
       }).then((contents) => {
 
         // write file to temporary location
-        const buf = toBuffer(contents);
+        const buf = arrayBufferToBuffer(contents);
         return this.writeFileGetSha1(buf, 'flibbet');
 
       }).then( (sha1 : string) => {
@@ -229,24 +231,3 @@ export default class MrssDataFeed extends DataFeed {
   }
 }
 
-// From ArrayBuffer to Buffer
-function toBuffer(ab : ArrayBuffer) : Buffer {
-  const buf = new Buffer(ab.byteLength);
-  const view = new Uint8Array(ab);
-  for (let i = 0; i < buf.length; ++i) {
-    buf[i] = view[i];
-  }
-  return buf;
-}
-
-function mkdir(dirPath: string, ignoreAlreadyExists: boolean = true) {
-  return new Promise( (resolve, reject) => {
-    fs.mkdir(dirPath, 0o777, (err : any) => {
-      if (!err || (err.code === 'EEXIST' && ignoreAlreadyExists)) {
-        resolve();
-      } else {
-        reject(err);
-      }
-    });
-  });
-}
