@@ -20,7 +20,6 @@ export default class DataFeed {
   url : DmParameterizedString;
   updateInterval : number;
   name : string;
-  feedPoolAssetFiles : ArFileLUT;
 
   constructor(bsdmDataFeed: DmDataFeed) {
     Object.assign(this, bsdmDataFeed);

@@ -2,6 +2,8 @@ import {ActionWithPayload, ArState} from '../types/index';
 
 import { MrssDataFeedItemShape } from '../types/index';
 
+import MrssDataFeed from '../entities/mrssDataFeed';
+
 // ------------------------------------
 // Constants
 // ------------------------------------
@@ -64,5 +66,10 @@ export function getMrssDataFeedItemPath(state : ArState, mrssDataFeedItemId : st
 
   const dataFeed = state.dataFeeds.dataFeedsById[mrssDataFeedItemId];
   const url = mrssDataFeedItem.url;
-  return dataFeed.feedPoolAssetFiles[url];
+
+  if (dataFeed instanceof MrssDataFeed) {
+    return (dataFeed as MrssDataFeed).feedPoolAssetFiles[url];
+  }
+
+  return '';
 }
