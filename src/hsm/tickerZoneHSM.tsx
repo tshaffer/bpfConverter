@@ -60,8 +60,6 @@ export class TickerZoneHSM extends ZoneHSM {
   stRSSDataFeedInitialLoad : HState;
   stRSSDataFeedPlaying : HState;
 
-  mediaStates : MediaHState[];
-
   constructor(dispatch: Function, getState: Function, zoneId: string) {
 
     super(dispatch, getState, zoneId);
