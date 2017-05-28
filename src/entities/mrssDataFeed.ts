@@ -129,7 +129,8 @@ export default class MrssDataFeed extends DataFeed {
 
         // write file to temporary location
         const buf = arrayBufferToBuffer(contents);
-        return this.writeFileGetSha1(buf, 'flibbet');
+        const tmpFilePath = path.join(DesktopPlatformService.getTmpDirectory(), 'flibbet');
+        return this.writeFileGetSha1(buf, tmpFilePath);
 
       }).then( (sha1 : string) => {
 
@@ -142,17 +143,19 @@ export default class MrssDataFeed extends DataFeed {
       }).then((relativeFilePath : string) => {
 
         // move file to the pool
+        const tmpFilePath = path.join(DesktopPlatformService.getTmpDirectory(), 'flibbet');
         absolutePoolPath = path.join(targetPath, relativeFilePath, 'sha1-' + fileSha1);
-        fs.rename('flibbet', absolutePoolPath, (err : Error) => {
+        fs.rename(tmpFilePath, absolutePoolPath, (err : Error) => {
           if (err) {
             debugger;
             reject(err);
           }
         });
 
-        // add file to pool asset files
-        console.log('moved flibbet to: ', absolutePoolPath);
-        this.addFeedPoolAssetFile(url, absolutePoolPath);
+        // convert absoluteFilePath to the correct format (from node -> BrightSign)
+        let nodeAbsolutePath = absolutePoolPath.slice(DesktopPlatformService.getRootDirectory().length);
+        let bsAbsolutePath = path.join(DesktopPlatformService.getPathToPool(), nodeAbsolutePath);
+        this.addFeedPoolAssetFile(url, bsAbsolutePath);
         resolve();
       });
     });

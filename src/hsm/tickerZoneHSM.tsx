@@ -28,6 +28,8 @@ import {
 import {
   ArDataFeedLUT,
   HSMStateData, ArEventType,
+  TextWidgetRotation,
+  TextWidgetAlignment,
 } from '../types';
 
 import {
@@ -77,19 +79,19 @@ export class TickerZoneHSM extends ZoneHSM {
     const rotation = zoneProperties.textWidget.rotation;
     switch (rotation) {
       case'0': {
-        this.rotation = 0;
+        this.rotation = TextWidgetRotation.Rotate_0;
         break;
       }
       case '90': {
-        this.rotation = 3;
+        this.rotation = TextWidgetRotation.Rotate_90;
         break;
       }
       case '180': {
-        this.rotation = 2;
+        this.rotation = TextWidgetRotation.Rotate_180;
         break;
       }
       case '270': {
-        this.rotation = 1;
+        this.rotation = TextWidgetRotation.Rotate_270;
         break;
       }
     }
@@ -97,15 +99,15 @@ export class TickerZoneHSM extends ZoneHSM {
     const alignment = zoneProperties.textWidget.alignment;
     switch (alignment) {
       case 'center': {
-        this.alignment = 1;
+        this.alignment = TextWidgetAlignment.AlignCenter;
         break;
       }
       case 'right': {
-        this.alignment = 2;
+        this.alignment = TextWidgetAlignment.AlignRight;
         break;
       }
       default: {
-        this.alignment = 0;
+        this.alignment = TextWidgetAlignment.AlignLeft;
         break;
       }
     }

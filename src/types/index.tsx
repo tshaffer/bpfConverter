@@ -106,3 +106,16 @@ export interface FeedItem {
   mediaProps : MediaProps;
 }
 
+export enum TextWidgetRotation {
+  Rotate_0 = 0,
+  Rotate_90 = 3,
+  Rotate_180 = 2,
+  Rotate_270 = 1
+};
+
+export enum TextWidgetAlignment {
+  AlignCenter = 1,
+  AlignRight = 2,
+  AlignLeft = 0
+};
+
