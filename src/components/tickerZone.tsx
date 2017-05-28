@@ -4,6 +4,9 @@ import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
 
 import { tickerZoneProps } from '../containers/tickerZoneContainer';
 
+// didn't work
+// import { BSTicker } from '../utilities/index.d';
+
 export default class TickerZone extends React.Component<tickerZoneProps, object> {
 
   bsTicker : any;
