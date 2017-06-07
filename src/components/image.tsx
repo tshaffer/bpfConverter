@@ -54,7 +54,9 @@ export default class Image extends React.Component<ImageProps & ImagePropsAssetI
 
     const fileName : string = this.props.bsAssetItem.name;
     const poolFilePath : string = getPoolFilePath(fileName);
+
     const src : string = path.join('file://', poolFilePath);
+    console.log('image src: ' + src);
 
     return (
       <img
