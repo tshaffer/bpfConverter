@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import path = require('path');
 
+import { getPoolFilePath } from '../utilities/utilities';
+
 import {
   BsAssetItem
 } from '@brightsign/bscore';
@@ -50,10 +52,9 @@ export default class Image extends React.Component<ImageProps & ImagePropsAssetI
       }
       , this.props.duration);
 
-    // console.log('image.js::render, image src: ' + this.props.resourceIdentifier);
-
-    const filePath : string = this.props.bsAssetItem.path;
-    const src : string = path.join('file://', filePath);
+    const fileName : string = this.props.bsAssetItem.name;
+    const poolFilePath : string = getPoolFilePath(fileName);
+    const src : string = path.join('file://', poolFilePath);
 
     return (
       <img
