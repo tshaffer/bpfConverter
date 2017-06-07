@@ -1,53 +1,66 @@
 import * as React from 'react';
 
+import path = require('path');
+
+import {
+  BsAssetItem
+} from '@brightsign/bscore';
+
 export interface ImageProps {
-    height: number;
-    width: number;
-    duration: number;
-    onTimeout: () => void;
-    resourceIdentifier : string;
+  height: number;
+  width: number;
+  duration: number;
+  onTimeout: () => void;
+  assetId : string;
 }
 
-export default class Image extends React.Component<ImageProps, object> {
+export interface ImagePropsAssetItem {
+  bsAssetItem : BsAssetItem;
+}
 
-    private timeout: any;
+export default class Image extends React.Component<ImageProps & ImagePropsAssetItem, object> {
 
-    constructor(props: ImageProps) {
-        super(props);
+  private timeout: any;
+
+  constructor(props: ImageProps & ImagePropsAssetItem) {
+    super(props);
+    this.timeout = null;
+  }
+
+  shouldComponentUpdate() {
+
+    if (this.timeout) {
+      return false;
+    }
+
+    return true;
+  }
+
+  render() {
+
+    const self: Image = this;
+
+    if (this.timeout) {
+      debugger;
+    }
+
+    this.timeout = setTimeout( () => {
         this.timeout = null;
-    }
+        self.props.onTimeout();
+      }
+      , this.props.duration);
 
-    shouldComponentUpdate() {
+    // console.log('image.js::render, image src: ' + this.props.resourceIdentifier);
 
-        if (this.timeout) {
-            return false;
-        }
+    const filePath : string = this.props.bsAssetItem.path;
+    const src : string = path.join('file://', filePath);
 
-        return true;
-    }
-
-    render() {
-
-        const self: Image = this;
-
-        if (this.timeout) {
-            debugger;
-        }
-
-        this.timeout = setTimeout( () => {
-            this.timeout = null;
-            self.props.onTimeout();
-        }
-            , this.props.duration);
-
-        console.log('image.js::render, image src: ' + this.props.resourceIdentifier);
-
-        return (
-            <img
-                src={this.props.resourceIdentifier}
-                width={this.props.width.toString()}
-                height={this.props.height.toString()}
-            />
-        );
-    }
+    return (
+      <img
+        src={src}
+        width={this.props.width.toString()}
+        height={this.props.height.toString()}
+      />
+    );
+  }
 }

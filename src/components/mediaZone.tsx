@@ -56,8 +56,6 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     // TODO - HACK - need FileName!!
     const mediaType : ContentItemType = mediaContentItem.type;
 
-    const resourceIdentifier : string = path.basename(assetId);
-
     const eventName : EventType = event.type;
     switch (eventName) {
       case 'Timer': {
@@ -72,13 +70,11 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       }
     }
 
-    const src : string = path.join('file://', getPoolFilePath(resourceIdentifier));
-
     switch (mediaType) {
       case 'Image': {
         return (
           <ImageContainer
-            resourceIdentifier={src}
+            assetId={assetId}
             width={this.props.width}
             height={this.props.height}
             duration={duration * 1000}
@@ -89,7 +85,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       case 'Video': {
         return (
           <VideoContainer
-            resourceIdentifier={src}
+            assetId={assetId}
             width={this.props.width}
             height={this.props.height}
             onVideoEnd={self.nextAsset.bind(this)}
