@@ -13,7 +13,8 @@ export interface ImageProps {
   width: number;
   duration: number;
   onTimeout: () => void;
-  assetId : string;
+  assetId? : string;
+  resourceIdentifier?: string;
 }
 
 export interface ImagePropsAssetItem {
