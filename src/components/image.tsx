@@ -2,12 +2,6 @@ import * as React from 'react';
 
 import path = require('path');
 
-import { getPoolFilePath } from '../utilities/utilities';
-
-import {
-  BsAssetItem
-} from '@brightsign/bscore';
-
 export interface ImageProps {
   height: number;
   width: number;
@@ -16,11 +10,6 @@ export interface ImageProps {
   src: string;
 }
 
-// export interface ImagePropsAssetItem {
-//   bsAssetItem : BsAssetItem;
-// }
-
-// export default class Image extends React.Component<ImageProps & ImagePropsAssetItem, object> {
 export default class Image extends React.Component<ImageProps, object> {
 
   private timeout: any;
@@ -52,11 +41,6 @@ export default class Image extends React.Component<ImageProps, object> {
         self.props.onTimeout();
       }
       , this.props.duration);
-
-    // const poolFilePath : string = getPoolFilePath(this.props.fileId);
-    //
-    // const src : string = path.join('file://', poolFilePath);
-    // console.log('image src: ' + src);
 
     return (
       <img

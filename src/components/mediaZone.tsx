@@ -97,7 +97,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
             width={this.props.width}
             height={this.props.height}
             onVideoEnd={self.nextAsset.bind(this)}
-            fileId={fileId}
+            src={src}
           />
         );
       }

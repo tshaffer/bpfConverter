@@ -17,11 +17,6 @@ import { bsp } from '../app/bsp';
 
 import { getActiveMediaStateId } from '../store/activeMediaStates';
 
-import {
-    dmGetAssetItemById,
-} from '@brightsign/bsdatamodel';
-import {BsAssetItem} from "@brightsign/bscore";
-
 export interface MediaZoneStateProps {
     key : string;
     playbackState : string;
@@ -41,18 +36,9 @@ export function postBSPMessage(event : ArEventType) {
     return bsp.postMessage(event);
 }
 
-// dmGetAssetItemById(state.bsdm, { id : ownProps.assetId })
-
-// function getAssetItemId(state : ArState, assetId : string) {
-//   const assetItem : BsAssetItem = dmGetAssetItemById(state.bsdm, { id : assetId });
-//   return assetItem.name;
-// }
-
 function mapStateToProps(state : ArState, ownProps : MediaZoneStateProps) : MediaZoneStateProps {
   return {
       ...ownProps,
-      // fileId : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId }),
-    // fileId : getAssetItemId(state, ownProps.activeMediaStateId),
     activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
   };
 }
