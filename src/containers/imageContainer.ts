@@ -9,13 +9,14 @@ import {
 } from '../types';
 
 import Image from '../components/image';
-import { ImageProps, ImagePropsAssetItem } from '../components/image';
+import { ImageProps } from '../components/image';
 
-function mapStateToProps(state : ArState, ownProps : ImageProps) : ImageProps & ImagePropsAssetItem {
+function mapStateToProps(state : ArState, ownProps : ImageProps) : ImageProps {
+
+  // bsAssetItem : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId })
 
   return {
     ...ownProps,
-    bsAssetItem : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId })
   };
 }
 

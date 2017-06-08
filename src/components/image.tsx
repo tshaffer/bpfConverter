@@ -13,19 +13,20 @@ export interface ImageProps {
   width: number;
   duration: number;
   onTimeout: () => void;
-  assetId? : string;
-  resourceIdentifier?: string;
+  // assetId? : string;
+  fileId: string;
 }
 
-export interface ImagePropsAssetItem {
-  bsAssetItem : BsAssetItem;
-}
+// export interface ImagePropsAssetItem {
+//   bsAssetItem : BsAssetItem;
+// }
 
-export default class Image extends React.Component<ImageProps & ImagePropsAssetItem, object> {
+// export default class Image extends React.Component<ImageProps & ImagePropsAssetItem, object> {
+export default class Image extends React.Component<ImageProps, object> {
 
   private timeout: any;
 
-  constructor(props: ImageProps & ImagePropsAssetItem) {
+  constructor(props: ImageProps) {
     super(props);
     this.timeout = null;
   }
@@ -53,8 +54,9 @@ export default class Image extends React.Component<ImageProps & ImagePropsAssetI
       }
       , this.props.duration);
 
-    const fileName : string = this.props.bsAssetItem.name;
-    const poolFilePath : string = getPoolFilePath(fileName);
+    // const fileId : string = this.props.bsAssetItem.name;
+    // const poolFilePath : string = getPoolFilePath(fileId);
+    const poolFilePath : string = getPoolFilePath(this.props.fileId);
 
     const src : string = path.join('file://', poolFilePath);
     console.log('image src: ' + src);

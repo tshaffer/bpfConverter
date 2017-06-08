@@ -14,10 +14,10 @@ export function addPoolAssetFile(fileName : string, filePath : string) {
     poolAssetFiles[fileName] = filePath;
 }
 
-export function getPoolFilePath(resourceIdentifier : string) {
+export function getPoolFilePath(fileName : string) {
 
-    const filePath : string =  poolAssetFiles[resourceIdentifier];
-    console.log('resourceIdentifier: ' + resourceIdentifier + ', filePath: ' +  filePath);
+    const filePath : string =  poolAssetFiles[fileName];
+    console.log('fileName: ' + fileName + ', filePath: ' +  filePath);
     return filePath;
 }
 

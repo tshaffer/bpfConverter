@@ -226,10 +226,10 @@ export default class MrssDataFeed extends DataFeed {
     this.feedPoolAssetFiles[fileName] = filePath;
   }
 
-  getFeedPoolFilePath(resourceIdentifier : string) {
+  getFeedPoolFilePath(feedUniqueId : string) {
 
-    const filePath =  this.feedPoolAssetFiles[resourceIdentifier];
-    console.log('resourceIdentifier: ' + resourceIdentifier + ', filePath: ' +  filePath);
+    const filePath =  this.feedPoolAssetFiles[feedUniqueId];
+    console.log('feedUniqueId: ' + feedUniqueId + ', filePath: ' +  filePath);
     return filePath;
   }
 }

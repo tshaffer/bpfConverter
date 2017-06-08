@@ -13,8 +13,6 @@ export default class Video extends React.Component<VideoProps, object> {
 
     const self = this;
 
-    // console.log('video.js::render, video src: ' + this.props.resourceIdentifier);
-
     return (
       <video
         src={this.props.assetId}

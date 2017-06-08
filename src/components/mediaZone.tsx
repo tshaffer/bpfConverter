@@ -52,7 +52,8 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     // unsafe cast
     const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
 
-    const assetId : string = mediaContentItem.assetId;
+    // const assetId : string = mediaContentItem.assetId;
+    const fileId : string = mediaContentItem.name;
     // TODO - HACK - need FileName!!
     const mediaType : ContentItemType = mediaContentItem.type;
 
@@ -70,22 +71,24 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       }
     }
 
+    // assetId={assetId}
+
     switch (mediaType) {
       case 'Image': {
         return (
           <ImageContainer
-            assetId={assetId}
             width={this.props.width}
             height={this.props.height}
             duration={duration * 1000}
             onTimeout={self.nextAsset.bind(this)}
+            fileId={fileId}
           />
         );
       }
       case 'Video': {
         return (
           <VideoContainer
-            assetId={assetId}
+            assetId={fileId}
             width={this.props.width}
             height={this.props.height}
             onVideoEnd={self.nextAsset.bind(this)}

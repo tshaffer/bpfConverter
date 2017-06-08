@@ -17,6 +17,10 @@ import { bsp } from '../app/bsp';
 
 import { getActiveMediaStateId } from '../store/activeMediaStates';
 
+import {
+    dmGetAssetItemById,
+} from '@brightsign/bsdatamodel';
+
 export interface MediaZoneStateProps {
     key : string;
     playbackState : string;
@@ -35,9 +39,12 @@ export function postBSPMessage(event : ArEventType) {
     return bsp.postMessage(event);
 }
 
+// dmGetAssetItemById(state.bsdm, { id : ownProps.assetId })
+
 function mapStateToProps(state : ArState, ownProps : MediaZoneStateProps) : MediaZoneStateProps {
     return {
         ...ownProps,
+        // fileId : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId }),
         activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
     };
 }

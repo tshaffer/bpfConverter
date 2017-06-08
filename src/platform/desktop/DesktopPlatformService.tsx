@@ -1,27 +1,27 @@
 class DesktopPlatformService {
 
     static getRootDirectory() : string {
-        // return '/Users/tedshaffer/Desktop/baconTestCard';
+        return '/Users/tedshaffer/Desktop/baconTestCard';
       // return '/Users/tedshaffer/Desktop/autorunTSFilesFromBacon';
 
-      return '/storage/sd';
+      // return '/storage/sd';
     }
 
     static getTmpDirectory() : string {
-      // return '/Users/tedshaffer/Desktop/baconTestCard';
+      return '/Users/tedshaffer/Desktop/baconTestCard';
       // return '/Users/tedshaffer/Desktop/autorunTSFilesFromBacon';
-      return '/storage/sd';
+      // return '/storage/sd';
     }
 
     static getPathToPool() : string {
-      // return '/Users/tedshaffer/Desktop/baconTestCard';
+      return '/Users/tedshaffer/Desktop/baconTestCard';
       //   return '/Users/tedshaffer/Desktop/autorunTSFilesFromBacon';
-        return '/sd:/';
+      //   return '/sd:/';
     }
 
     static isTickerSupported() : boolean {
-        // return false;
-        return true;
+        return false;
+        // return true;
     }
 }
 
