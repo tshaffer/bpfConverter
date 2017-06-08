@@ -60,7 +60,8 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     const assetId : string = mediaContentItem.assetId;
     const assetItem : BsAssetItem = dmGetAssetItemById(this.props.bsdm, { id : assetId });
     const fileId : string = assetItem.name;
-    // const fileId : string = mediaContentItem.name;
+    const poolFilePath : string = getPoolFilePath(fileId);
+    const src : string = path.join('file://', poolFilePath);
 
     const mediaType : ContentItemType = mediaContentItem.type;
 
@@ -86,7 +87,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
             height={this.props.height}
             duration={duration * 1000}
             onTimeout={self.nextAsset.bind(this)}
-            fileId={fileId}
+            src={src}
           />
         );
       }

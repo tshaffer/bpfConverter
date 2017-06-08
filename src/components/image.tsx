@@ -13,7 +13,7 @@ export interface ImageProps {
   width: number;
   duration: number;
   onTimeout: () => void;
-  fileId: string;
+  src: string;
 }
 
 // export interface ImagePropsAssetItem {
@@ -53,14 +53,14 @@ export default class Image extends React.Component<ImageProps, object> {
       }
       , this.props.duration);
 
-    const poolFilePath : string = getPoolFilePath(this.props.fileId);
-
-    const src : string = path.join('file://', poolFilePath);
-    console.log('image src: ' + src);
+    // const poolFilePath : string = getPoolFilePath(this.props.fileId);
+    //
+    // const src : string = path.join('file://', poolFilePath);
+    // console.log('image src: ' + src);
 
     return (
       <img
-        src={src}
+        src={this.props.src}
         width={this.props.width.toString()}
         height={this.props.height.toString()}
       />

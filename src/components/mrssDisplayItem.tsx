@@ -24,11 +24,11 @@ export default class MrssDisplayItem extends React.Component<MrssDisplayItemProp
     if (this.props.mrssDataFeedItem.isImage()) {
       return (
         <ImageContainer
-          resourceIdentifier={src}
           width={this.props.width}
           height={this.props.height}
           duration={this.props.duration}
           onTimeout={this.props.onTimeout.bind(this)}
+          src={src}
         />
       );
     } else {
