@@ -15,6 +15,11 @@ import MrssDisplayItemContainer from '../containers/mrssDisplayItemContainer';
 import { getPoolFilePath } from '../utilities/utilities';
 
 import {
+  dmGetAssetItemById,
+} from '@brightsign/bsdatamodel';
+import {BsAssetItem} from "@brightsign/bscore";
+
+import {
   ContentItemType,
   EventType,
 } from '@brightsign/bscore';
@@ -43,7 +48,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     this.props.postBSPMessage(event);
   }
 
-  renderMediaItem(contentItem: DmDerivedContentItem, event : DmEvent) {
+  renderMediaItem(mediaState : DmMediaStateState, contentItem: DmDerivedContentItem, event : DmEvent) {
 
     let duration : number = 10;
 
@@ -52,9 +57,11 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     // unsafe cast
     const mediaContentItem : DmMediaContentItem = contentItem as DmMediaContentItem;
 
-    // const assetId : string = mediaContentItem.assetId;
-    const fileId : string = mediaContentItem.name;
-    // TODO - HACK - need FileName!!
+    const assetId : string = mediaContentItem.assetId;
+    const assetItem : BsAssetItem = dmGetAssetItemById(this.props.bsdm, { id : assetId });
+    const fileId : string = assetItem.name;
+    // const fileId : string = mediaContentItem.name;
+
     const mediaType : ContentItemType = mediaContentItem.type;
 
     const eventName : EventType = event.type;
@@ -71,8 +78,6 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       }
     }
 
-    // assetId={assetId}
-
     switch (mediaType) {
       case 'Image': {
         return (
@@ -88,10 +93,10 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       case 'Video': {
         return (
           <VideoContainer
-            assetId={fileId}
             width={this.props.width}
             height={this.props.height}
             onVideoEnd={self.nextAsset.bind(this)}
+            fileId={fileId}
           />
         );
       }
@@ -147,13 +152,14 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     const mediaStateId : string = this.props.activeMediaStateId;
     const mediaState : DmMediaStateState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
+
     const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
     const contentItem : DmDerivedContentItem = mediaState.contentItem;
 
     switch (contentItem.type) {
       case'Video':
       case 'Image': {
-        return this.renderMediaItem(contentItem as DmMediaContentItem, event);
+        return this.renderMediaItem(mediaState, contentItem as DmMediaContentItem, event);
       }
       case 'MrssFeed': {
         return this.renderMrssItem(contentItem as DmDataFeedContentItem);

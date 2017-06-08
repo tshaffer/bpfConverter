@@ -20,6 +20,7 @@ import { getActiveMediaStateId } from '../store/activeMediaStates';
 import {
     dmGetAssetItemById,
 } from '@brightsign/bsdatamodel';
+import {BsAssetItem} from "@brightsign/bscore";
 
 export interface MediaZoneStateProps {
     key : string;
@@ -29,6 +30,7 @@ export interface MediaZoneStateProps {
     width : number;
     height : number;
     activeMediaStateId : string;
+    // fileId : string;
 }
 
 export interface MediaZoneDispatchProps {
@@ -41,12 +43,18 @@ export function postBSPMessage(event : ArEventType) {
 
 // dmGetAssetItemById(state.bsdm, { id : ownProps.assetId })
 
+// function getAssetItemId(state : ArState, assetId : string) {
+//   const assetItem : BsAssetItem = dmGetAssetItemById(state.bsdm, { id : assetId });
+//   return assetItem.name;
+// }
+
 function mapStateToProps(state : ArState, ownProps : MediaZoneStateProps) : MediaZoneStateProps {
-    return {
-        ...ownProps,
-        // fileId : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId }),
-        activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
-    };
+  return {
+      ...ownProps,
+      // fileId : dmGetAssetItemById(state.bsdm, { id : ownProps.assetId }),
+    // fileId : getAssetItemId(state, ownProps.activeMediaStateId),
+    activeMediaStateId: getActiveMediaStateId(state, ownProps.zone.id),
+  };
 }
 
 const mapDispatchToProps = (dispatch : Dispatch<ArState>) : MediaZoneDispatchProps => {
