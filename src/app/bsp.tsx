@@ -30,10 +30,10 @@ import {
     ArFileLUT,
 } from '../types';
 
-import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
+import PlatformService from '../platform';
 
 import {
-    setPoolAssetFiles,
+  setPoolAssetFiles,
 } from '../utilities/utilities';
 
 import {
@@ -100,8 +100,9 @@ export class BSP {
         this.getState = this.store.getState;
         this.hsmList = [] ;
 
-        const rootPath = DesktopPlatformService.getRootDirectory();
-        const pathToPool = DesktopPlatformService.getPathToPool();
+        console.log(PlatformService);
+        const rootPath = PlatformService.getRootDirectory();
+        const pathToPool = PlatformService.getPathToPool();
 
         let state : ArState;
 
@@ -168,7 +169,7 @@ export class BSP {
 
         console.log('restart: ', presentationName);
 
-        const rootPath = DesktopPlatformService.getRootDirectory();
+        const rootPath = PlatformService.getRootDirectory();
 
         return new Promise<void>( (resolve : Function) => {
             this.getAutoschedule(this.syncSpec, rootPath).then( (autoSchedule : any) => {

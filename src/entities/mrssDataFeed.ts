@@ -8,7 +8,7 @@ import {
   DmDataFeed,
 } from '@brightsign/bsdatamodel';
 
-import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
+import PlatformService from '../platform';
 
 import { BSP } from '../app/bsp';
 
@@ -47,7 +47,7 @@ export default class MrssDataFeed extends DataFeed {
 
   downloadMRSSContent(bsp : BSP, feedData : object) {
 
-    const rootPath: string = DesktopPlatformService.getRootDirectory();
+    const rootPath: string = PlatformService.getRootDirectory();
     let filePath = path.join(rootPath, 'feed_cache', this.name);
     filePath = filePath + '.json';
 
@@ -129,7 +129,7 @@ export default class MrssDataFeed extends DataFeed {
 
         // write file to temporary location
         const buf = arrayBufferToBuffer(contents);
-        const tmpFilePath = path.join(DesktopPlatformService.getTmpDirectory(), 'flibbet');
+        const tmpFilePath = path.join(PlatformService.getTmpDirectory(), 'flibbet');
         return this.writeFileGetSha1(buf, tmpFilePath);
 
       }).then( (sha1 : string) => {
@@ -137,13 +137,13 @@ export default class MrssDataFeed extends DataFeed {
         fileSha1 = sha1;
 
         // use the sha1 to get the target file path
-        targetPath = path.join(DesktopPlatformService.getRootDirectory(), 'pool');
+        targetPath = path.join(PlatformService.getRootDirectory(), 'pool');
         return this.getPoolFilePath(targetPath, sha1, true);
 
       }).then((relativeFilePath : string) => {
 
         // move file to the pool
-        const tmpFilePath = path.join(DesktopPlatformService.getTmpDirectory(), 'flibbet');
+        const tmpFilePath = path.join(PlatformService.getTmpDirectory(), 'flibbet');
         absolutePoolPath = path.join(targetPath, relativeFilePath, 'sha1-' + fileSha1);
         fs.rename(tmpFilePath, absolutePoolPath, (err : Error) => {
           if (err) {
@@ -153,8 +153,8 @@ export default class MrssDataFeed extends DataFeed {
         });
 
         // convert absoluteFilePath to the correct format (from node -> BrightSign)
-        let nodeAbsolutePath = absolutePoolPath.slice(DesktopPlatformService.getRootDirectory().length);
-        let bsAbsolutePath = path.join(DesktopPlatformService.getPathToPool(), nodeAbsolutePath);
+        let nodeAbsolutePath = absolutePoolPath.slice(PlatformService.getRootDirectory().length);
+        let bsAbsolutePath = path.join(PlatformService.getPathToPool(), nodeAbsolutePath);
         this.addFeedPoolAssetFile(url, bsAbsolutePath);
         resolve();
       });

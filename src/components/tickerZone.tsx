@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import DesktopPlatformService from '../platform/desktop/DesktopPlatformService';
+import PlatformService from '../platform';
 
 import { tickerZoneProps } from '../containers/tickerZoneContainer';
 
@@ -18,7 +18,7 @@ export default class TickerZone extends React.Component<tickerZoneProps, object>
 
   componentDidMount() {
 
-    if (DesktopPlatformService.isTickerSupported()) {
+    if (PlatformService.isTickerSupported()) {
 
       const { left, top, width, height } = this.props;
 
