@@ -102,7 +102,7 @@ export class BSP {
 
         console.log(PlatformService);
         const rootPath = PlatformService.default.getRootDirectory();
-        const pathToPool = PlatformService.getPathToPool();
+        const pathToPool = PlatformService.default.getPathToPool();
 
         let state : ArState;
 
@@ -169,7 +169,7 @@ export class BSP {
 
         console.log('restart: ', presentationName);
 
-        const rootPath = PlatformService.getRootDirectory();
+        const rootPath = PlatformService.default.getRootDirectory();
 
         return new Promise<void>( (resolve : Function) => {
             this.getAutoschedule(this.syncSpec, rootPath).then( (autoSchedule : any) => {

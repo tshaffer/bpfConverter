@@ -47,7 +47,7 @@ export default class MrssDataFeed extends DataFeed {
 
   downloadMRSSContent(bsp : BSP, feedData : object) {
 
-    const rootPath: string = PlatformService.getRootDirectory();
+    const rootPath: string = PlatformService.default.getRootDirectory();
     let filePath = path.join(rootPath, 'feed_cache', this.name);
     filePath = filePath + '.json';
 
@@ -129,7 +129,7 @@ export default class MrssDataFeed extends DataFeed {
 
         // write file to temporary location
         const buf = arrayBufferToBuffer(contents);
-        const tmpFilePath = path.join(PlatformService.getTmpDirectory(), 'flibbet');
+        const tmpFilePath = path.join(PlatformService.default.getTmpDirectory(), 'flibbet');
         return this.writeFileGetSha1(buf, tmpFilePath);
 
       }).then( (sha1 : string) => {
@@ -137,13 +137,13 @@ export default class MrssDataFeed extends DataFeed {
         fileSha1 = sha1;
 
         // use the sha1 to get the target file path
-        targetPath = path.join(PlatformService.getRootDirectory(), 'pool');
+        targetPath = path.join(PlatformService.default.getRootDirectory(), 'pool');
         return this.getPoolFilePath(targetPath, sha1, true);
 
       }).then((relativeFilePath : string) => {
 
         // move file to the pool
-        const tmpFilePath = path.join(PlatformService.getTmpDirectory(), 'flibbet');
+        const tmpFilePath = path.join(PlatformService.default.getTmpDirectory(), 'flibbet');
         absolutePoolPath = path.join(targetPath, relativeFilePath, 'sha1-' + fileSha1);
         fs.rename(tmpFilePath, absolutePoolPath, (err : Error) => {
           if (err) {
@@ -153,8 +153,8 @@ export default class MrssDataFeed extends DataFeed {
         });
 
         // convert absoluteFilePath to the correct format (from node -> BrightSign)
-        let nodeAbsolutePath = absolutePoolPath.slice(PlatformService.getRootDirectory().length);
-        let bsAbsolutePath = path.join(PlatformService.getPathToPool(), nodeAbsolutePath);
+        let nodeAbsolutePath = absolutePoolPath.slice(PlatformService.default.getRootDirectory().length);
+        let bsAbsolutePath = path.join(PlatformService.default.getPathToPool(), nodeAbsolutePath);
         this.addFeedPoolAssetFile(url, bsAbsolutePath);
         resolve();
       });

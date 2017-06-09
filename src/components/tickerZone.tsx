@@ -18,7 +18,7 @@ export default class TickerZone extends React.Component<tickerZoneProps, object>
 
   componentDidMount() {
 
-    if (PlatformService.isTickerSupported()) {
+    if (PlatformService.default.isTickerSupported()) {
 
       const { left, top, width, height } = this.props;
 
