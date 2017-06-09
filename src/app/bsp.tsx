@@ -101,7 +101,7 @@ export class BSP {
         this.hsmList = [] ;
 
         console.log(PlatformService);
-        const rootPath = PlatformService.getRootDirectory();
+        const rootPath = PlatformService.default.getRootDirectory();
         const pathToPool = PlatformService.getPathToPool();
 
         let state : ArState;

@@ -1,1 +1,1 @@
-export default './BrightSignPlatformService';
+export * from './BrightSignPlatformService';

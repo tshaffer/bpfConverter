@@ -1,1 +1,1 @@
-export default './DesktopPlatformService';
+export * from './DesktopPlatformService';
