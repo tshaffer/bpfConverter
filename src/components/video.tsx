@@ -23,6 +23,7 @@ export default class Video extends React.Component<VideoProps, object> {
         height={this.props.height.toString()}
         type="video/mp4"
         onEnded = {() => {
+          console.log('**** - videoEnd');
           self.props.onVideoEnd();
         }
         }/>

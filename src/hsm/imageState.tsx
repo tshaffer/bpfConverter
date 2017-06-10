@@ -51,11 +51,8 @@ export default class ImageState extends HState {
             console.log(this.id + ': exit signal');
         } else if (event.EventType === 'timeoutEvent') {
             console.log(this.id + ': timeoutEvent');
-
-            if (event.EventType === 'timeoutEvent') {
-                stateData.nextState = this.nextState;
-                return 'TRANSITION';
-            }
+            stateData.nextState = this.nextState;
+            return 'TRANSITION';
         }
 
         stateData.nextState = this.superState;

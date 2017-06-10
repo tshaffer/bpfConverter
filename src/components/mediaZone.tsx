@@ -41,9 +41,16 @@ import { MediaZoneStateProps, MediaZoneDispatchProps } from '../containers/media
 
 export default class MediaZone extends React.Component<MediaZoneStateProps & MediaZoneDispatchProps, object> {
 
-  nextAsset()  {
+  postTimeoutEvent()  {
     const event : ArEventType = {
       EventType : 'timeoutEvent',
+    };
+    this.props.postBSPMessage(event);
+  }
+
+  postMediaEndEvent()  {
+    const event : ArEventType = {
+      EventType : 'mediaEndEvent',
     };
     this.props.postBSPMessage(event);
   }
@@ -86,7 +93,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
             width={this.props.width}
             height={this.props.height}
             duration={duration * 1000}
-            onTimeout={self.nextAsset.bind(this)}
+            onTimeout={self.postTimeoutEvent.bind(this)}
             src={src}
           />
         );
@@ -96,7 +103,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
           <VideoContainer
             width={this.props.width}
             height={this.props.height}
-            onVideoEnd={self.nextAsset.bind(this)}
+            onVideoEnd={self.postMediaEndEvent.bind(this)}
             src={src}
           />
         );
@@ -121,7 +128,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         width={this.props.width}
         height={this.props.height}
         duration={duration * 1000}
-        onTimeout={self.nextAsset.bind(this)}
+        onTimeout={self.postTimeoutEvent.bind(this)}
       />
     );
   }
