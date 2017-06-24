@@ -20,6 +20,7 @@ import {
   UdpAddressType,
   VideoConnectorType,
   BsColor,
+
 } from '@brightsign/bscore';
 
 import {
@@ -27,6 +28,10 @@ import {
   dmNewSign, DmSignMetadata, DmSignProperties,
   dmUpdateSignProperties,
   SignAction,
+  DmSerialPortConfiguration,
+  DmSerialPortList,
+  SerialPortListParams,
+  dmUpdateSignSerialPorts,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -297,15 +302,44 @@ export class BSP {
     return (Number(s));
   }
 
-  convertAutoplay(autoplayBac : any) : DmSignState {
+  updateAutoplaySerialPorts(autoplayBac : any) {
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    let serialPortConfiguration : DmSerialPortConfiguration;
+    let serialPortList : DmSerialPortList = [];
+
+    meta.SerialPortConfiguration.forEach( (serialPortConfigurationBac : any) => {
+      serialPortConfiguration = {
+        port : this.stringToNumber(serialPortConfigurationBac.port),
+        baudRate : this.stringToNumber(serialPortConfigurationBac.baudRate),
+        dataBits: this.stringToNumber(serialPortConfigurationBac.dataBits),
+        stopBits: this.stringToNumber(serialPortConfigurationBac.stopBits),
+        parity: serialPortConfigurationBac.parity,
+        protocol: serialPortConfigurationBac.protocol,
+        sendEol : serialPortConfigurationBac.sendEol,
+        receiveEol : serialPortConfigurationBac.receiveEol,
+        invertSignals : this.stringToBool(serialPortConfigurationBac.invertSignals),
+        connectedDevice : serialPortConfigurationBac.connectedDevice,
+      };
+      serialPortList.push(serialPortConfiguration);
+    });
+
+    let serialPortListParams : SerialPortListParams = {
+      params : serialPortList
+    };
+
+    this.dispatch(dmUpdateSignSerialPorts(serialPortListParams));
+  }
+
+  updateAutoplaySignProperties(autoplayBac : any) {
+
     let signAction : SignAction;
     let signState : DmSignState;
     let signMetadata : DmSignMetadata;
     let signProperties : DmSignProperties;
-    
-    const meta = autoplayBac.BrightAuthor.meta;
 
-    signAction = this.dispatch(dmNewSign(meta.name, meta.videoMode, meta.model));
+    const meta = autoplayBac.BrightAuthor.meta;
 
     let state = this.getState();
 
@@ -373,11 +407,22 @@ export class BSP {
       })
     );
 
-    state = this.getState();
+  }
+
+  convertAutoplay(autoplayBac : any) : DmSignState {
+
+    let state : any;
+    let signAction : SignAction;
+
+    const meta = autoplayBac.BrightAuthor.meta;
+    signAction = this.dispatch(dmNewSign(meta.name, meta.videoMode, meta.model));
+
+    this.updateAutoplaySignProperties(autoplayBac);
+    this.updateAutoplaySerialPorts(autoplayBac);
 
     debugger;
 
-    return signState;
+    return dmGetSignState(this.getState().bsdm);
   }
 
   convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
