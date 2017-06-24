@@ -11,6 +11,17 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  DeviceWebPageDisplay,
+} from '@brightsign/bscore';
+
+import {
+  dmGetSignState,
+  dmNewSign, DmSignMetadata, DmSignProperties,
+  dmUpdateSignProperties,
+  SignAction,
+} from '@brightsign/bsdatamodel';
+
+import {
   BsDmId,
   DmSignState,
   DmState,
@@ -173,16 +184,22 @@ export class BSP {
 
     return new Promise<void>((resolve: Function) => {
       this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
-        
+
         // TODO - only a single scheduled item is currently supported
 
         const scheduledPresentation = autoSchedule.scheduledPresentations[0];
         const presentationToSchedule = scheduledPresentation.presentationToSchedule;
         const presentationName = presentationToSchedule.name;
-        const bmlFileName = presentationName + '.bml';
 
-        this.getSyncSpecFile(bmlFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
+        // for bacon
+        // const autoplayFileName = presentationName + '.bml';
+        // for bac
+        const autoplayFileName = 'autoplay-' + presentationName + '.json';
+        this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
           console.log(autoPlay);
+
+          autoPlay = this.convertAutoplay(autoPlay);
+
           const signState = autoPlay as DmSignState;
           this.dispatch(dmOpenSign(signState));
 
@@ -262,6 +279,58 @@ export class BSP {
     let autoSchedule : any = {};
     autoSchedule.scheduledPresentations = [scheduledPresentation];
     return autoSchedule;
+  }
+
+  convertAutoplay(autoplayBac : any) : DmSignState {
+    let signAction : SignAction;
+    let signState : DmSignState;
+    let signMetadata : DmSignMetadata;
+    let signProperties : DmSignProperties;
+
+    debugger;
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    signAction = this.dispatch(dmNewSign(meta.name, meta.videoMode, meta.model));
+
+    const state = this.getState();
+
+    signState = dmGetSignState(state.bsdm);
+    signMetadata = signState.sign;
+    signProperties = signMetadata.properties;
+
+    const alphabetizeVariableNames : Boolean = (meta.alphabetizeVariableNames.toLowerCase() === 'true');
+    const autoCreateMediaCounterVariables : Boolean = (meta.autoCreateMediaCounterVariables.toLowerCase() === 'true');
+    // background screen color
+    const delayScheduleChangeUntilMediaEndEvent : Boolean = (meta.delayScheduleChangeUntilMediaEndEvent.toLowerCase() === 'true');
+    let deviceWebPageDisplay : DeviceWebPageDisplay = meta.deviceWebPageDisplay;
+/*
+flipCoordinates - b
+forceResolution - b
+graphicsZOrder - ?
+htmlEnableJavascriptConsole - b
+inactivityTime - n
+inactivityTimeout - b
+isMosaic - b
+language
+languageKey
+monitorOrientation - s
+monitorOverscan - s
+networkedVariablesUpdateInterval - n
+ resetVariablesOnPresentationStart - b
+ tenBitColorEnabled - b
+ touchCursorDisplayMode - ? 'Auto'
+ udpDestinationAddress - s?
+ udpDestinationAddressType - s?
+ udpDestinationPort - n
+ udpReceiverPort - n
+ version - s
+ videoConnector - s
+ */
+    signAction = dmUpdateSignProperties(signProperties);
+
+
+    return signState;
   }
 
   convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
