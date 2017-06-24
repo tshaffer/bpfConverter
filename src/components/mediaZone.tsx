@@ -30,7 +30,7 @@ import {
   DmDerivedContentItem,
   DmMediaContentItem,
   DmEvent,
-  DmMediaStateState,
+  DmMediaState,
   DmState,
   dmGetMediaStateById,
   dmGetEventIdsForMediaState,
@@ -55,7 +55,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     this.props.postBSPMessage(event);
   }
 
-  renderMediaItem(mediaState : DmMediaStateState, contentItem: DmDerivedContentItem, event : DmEvent) {
+  renderMediaItem(mediaState : DmMediaState, contentItem: DmDerivedContentItem, event : DmEvent) {
 
     let duration : number = 10;
 
@@ -159,7 +159,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     }
 
     const mediaStateId : string = this.props.activeMediaStateId;
-    const mediaState : DmMediaStateState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
+    const mediaState : DmMediaState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
 
     const event : DmEvent = this.getEvent(this.props.bsdm, mediaState.id);
     const contentItem : DmDerivedContentItem = mediaState.contentItem;

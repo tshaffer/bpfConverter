@@ -24,10 +24,10 @@ export default class Sign extends React.Component<SignProps, object> {
                 key={zone.id}
                 style={{
                   position: 'absolute',
-                  left: zone.absolutePosition.x,
-                  top: zone.absolutePosition.y,
-                  width: zone.absolutePosition.width,
-                  height: zone.absolutePosition.height,
+                  left: zone.position.x,
+                  top: zone.position.y,
+                  width: zone.position.width,
+                  height: zone.position.height,
                 }}
             >
                 <MediaZoneContainer
@@ -35,8 +35,8 @@ export default class Sign extends React.Component<SignProps, object> {
                     playbackState={this.props.playbackState}
                     bsdm={this.props.bsdm}
                     zone={zone}
-                    width={Number(zone.absolutePosition.width)}
-                    height={Number(zone.absolutePosition.height)}
+                    width={Number(zone.position.width)}
+                    height={Number(zone.position.height)}
                     activeMediaStateId={''}
                 />
             </div>
@@ -50,10 +50,10 @@ export default class Sign extends React.Component<SignProps, object> {
                 key={zone.id}
                 style={{
           position: 'absolute',
-          left: zone.absolutePosition.x,
-          top: zone.absolutePosition.y,
-          width: zone.absolutePosition.width,
-          height: zone.absolutePosition.height,
+          left: zone.position.x,
+          top: zone.position.y,
+          width: zone.position.width,
+          height: zone.position.height,
         }}
             >
                 <TickerZoneContainer
@@ -61,10 +61,10 @@ export default class Sign extends React.Component<SignProps, object> {
                     playbackState={this.props.playbackState}
                     bsdm={this.props.bsdm}
                     zone={zone}
-                    left={Number(zone.absolutePosition.x)}
-                    top={Number(zone.absolutePosition.y)}
-                    width={Number(zone.absolutePosition.width)}
-                    height={Number(zone.absolutePosition.height)}
+                    left={Number(zone.position.x)}
+                    top={Number(zone.position.y)}
+                    width={Number(zone.position.width)}
+                    height={Number(zone.position.height)}
                 />
             </div>
         );

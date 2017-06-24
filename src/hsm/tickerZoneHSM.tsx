@@ -16,7 +16,7 @@ import {
 
 import {
   BsDmId,
-  DmMediaStateState,
+  DmMediaState,
   DmDataFeedContentItem,
   DmTickerZoneProperties,
   dmGetZoneById,
@@ -138,7 +138,7 @@ export class TickerZoneHSM extends ZoneHSM {
     this.rssDataFeedItems = [];
 
     this.mediaStateIds.forEach( (mediaStateId) => {
-      const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
+      const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'DataFeed') {
 
         const dataFeedContentItem : DmDataFeedContentItem = bsdmMediaState.contentItem as DmDataFeedContentItem;
@@ -156,7 +156,7 @@ export class TickerZoneHSM extends ZoneHSM {
     let newState : MediaHState = null;
 
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
-      const bsdmMediaState : DmMediaStateState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
+      const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'DataFeed') {
         newState = new RSSDataFeedState(this, bsdmMediaState);
       } else {
@@ -183,10 +183,10 @@ export class TickerZoneHSM extends ZoneHSM {
     this.name = this.bsdmZone.name;
 
     // ticker rectangle parameters
-    this.x = this.bsdmZone.absolutePosition.x;
-    this.y = this.bsdmZone.absolutePosition.y;
-    this.width = this.bsdmZone.absolutePosition.width;
-    this.height = this.bsdmZone.absolutePosition.height;
+    this.x = this.bsdmZone.position.x;
+    this.y = this.bsdmZone.position.y;
+    this.width = this.bsdmZone.position.width;
+    this.height = this.bsdmZone.position.height;
   }
 
   tickerZoneGetInitialState() {

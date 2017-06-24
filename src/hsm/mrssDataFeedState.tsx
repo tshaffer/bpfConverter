@@ -1,6 +1,6 @@
 import {
   DmDataFeedContentItem,
-  DmMediaStateState,
+  DmMediaState,
   DmState,
 } from '@brightsign/bsdatamodel';
 
@@ -22,7 +22,7 @@ import {HSMStateData, ArEventType} from '../types/index';
 export default class MRSSDataFeedState extends HState {
 
   bsdm : DmState;
-  bsdmState: DmMediaStateState;
+  bsdmState: DmMediaState;
   dataFeed : MrssDataFeed;
   currentFeed : MRSSFeed;
   pendingFeed : MRSSFeed;
@@ -30,7 +30,7 @@ export default class MRSSDataFeedState extends HState {
   stateMachine : ZoneHSM;
   nextState : HState;
 
-  constructor(zoneHSM: ZoneHSM, bsdmState: DmMediaStateState) {
+  constructor(zoneHSM: ZoneHSM, bsdmState: DmMediaState) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;

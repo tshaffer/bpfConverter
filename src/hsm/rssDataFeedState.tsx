@@ -1,5 +1,5 @@
 import {
-  DmMediaStateState,
+  DmMediaState,
   DmState,
 } from '@brightsign/bsdatamodel';
 
@@ -10,11 +10,11 @@ import {TickerZoneHSM} from './tickerZoneHSM';
 
 export default class RSSDataFeedState extends HState {
 
-  bsdmState: DmMediaStateState;
+  bsdmState: DmMediaState;
   bsdm : DmState;
   nextState : HState;
 
-  constructor(zoneHSM: TickerZoneHSM, bsdmState: DmMediaStateState) {
+  constructor(zoneHSM: TickerZoneHSM, bsdmState: DmMediaState) {
 
     super(zoneHSM, bsdmState.id);
     this.bsdm = zoneHSM.bsdm;

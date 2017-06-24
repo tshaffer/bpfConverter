@@ -1,5 +1,5 @@
 import {
-  DmMediaStateState,
+  DmMediaState,
   DmState,
 } from '@brightsign/bsdatamodel';
 
@@ -19,13 +19,13 @@ import {
 export default class VideoState extends HState {
 
   bsdm : DmState;
-  bsdmVideoState : DmMediaStateState;
+  bsdmVideoState : DmMediaState;
   // state : object;
   nextState : HState;
   dispatch : Function;
   stateMachine : ZoneHSM;
 
-  constructor(zoneHSM : ZoneHSM, bsdmVideoState : DmMediaStateState) {
+  constructor(zoneHSM : ZoneHSM, bsdmVideoState : DmMediaState) {
 
     super(zoneHSM, bsdmVideoState.id);
     this.bsdmVideoState = bsdmVideoState;
@@ -44,7 +44,7 @@ export default class VideoState extends HState {
     stateData.nextState = null;
 
     if (event.EventType && event.EventType === 'ENTRY_SIGNAL') {
-      console.log('entry s  ignal');
+      console.log('entry signal');
       this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
       return 'HANDLED';
     } else if (event.EventType && event.EventType === 'EXIT_SIGNAL') {

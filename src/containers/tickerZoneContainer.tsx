@@ -8,7 +8,7 @@ import {
 
 import {
   DmDataFeedContentItem,
-  DmMediaStateState,
+  DmMediaState,
   DmState,
   DmZone,
   dmGetMediaStateIdsForZone,
@@ -54,7 +54,7 @@ export const getArticles = (state : ArState, zoneId : string) : string[] => {
 
   mediaStateIds.forEach( (mediaStateId) => {
 
-    const mediaState : DmMediaStateState = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
+    const mediaState : DmMediaState = dmGetMediaStateById(state.bsdm, { id : mediaStateId} );
     console.log(mediaState);
     if (mediaState.contentItem.type === ContentItemType.DataFeed) {
 
