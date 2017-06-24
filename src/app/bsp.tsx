@@ -234,6 +234,18 @@ export class BSP {
 
     let syncSpec : ArSyncSpec;
 
+    syncSpec.meta = {};
+
+    syncSpec.files = {};
+    syncSpec.files.download = [];
+
+    syncSpec.files.delete = syncSpecRaw.sync.files.delete;
+
+    syncSpec.files.ignore = syncSpecRaw.sync.files.ignore;
+
+
+    debugger;
+
     return syncSpec;
   }
 
