@@ -232,19 +232,53 @@ export class BSP {
 
   convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
 
-    let syncSpec : ArSyncSpec;
-
+    let syncSpec : ArSyncSpec = {
+      meta : {},
+      files : {}
+    };
+    
     syncSpec.meta = {};
+    syncSpec.meta.server = {};
+
+    let client : any = {};
+    let clientKeys : Array<string> = [
+      'diagnosticLoggingEnabled',
+      'enableSerialDebugging',
+      'enableSystemLogDebugging',
+      'eventLoggingEnabled',
+      'limitStorageSpace',
+      'playbackLoggingEnabled',
+      'stateLoggingEnabled',
+      'uploadLogFilesAtBoot',
+      'uploadLogFilesAtSpecificTime',
+      'uploadLogFilesTime',
+      'variableLoggingEnabled'
+    ]
+    for (let clientKey of clientKeys) {
+      client[clientKey] = syncSpecRaw.sync.meta.client[clientKey];
+    }
+    // TODO - some of these types are WRONG
+    syncSpec.meta.client = client;
 
     syncSpec.files = {};
-    syncSpec.files.download = [];
 
     syncSpec.files.delete = syncSpecRaw.sync.files.delete;
 
     syncSpec.files.ignore = syncSpecRaw.sync.files.ignore;
 
+    syncSpec.files.download = [];
 
-    debugger;
+    syncSpecRaw.sync.files.download.forEach( (downloadRaw : any) => {
+      let download : any = {};
+      download.link = downloadRaw.link;
+      download.name = downloadRaw.name;
+      download.size = Number(downloadRaw.size);
+      download.hash = {};
+      download.hash.hex = downloadRaw.hash['#text'];
+      download.hash.method = downloadRaw.hash['@method'];
+
+      syncSpec.files.download.push(download);
+    });
 
     return syncSpec;
   }
