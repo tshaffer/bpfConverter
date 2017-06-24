@@ -7,11 +7,19 @@ const decoder = new StringDecoder('utf8');
 import {Store} from 'redux';
 
 import {
-  DataFeedUsageType,
+  DataFeedUsageType, GraphicsZOrderType,
 } from '@brightsign/bscore';
 
 import {
   DeviceWebPageDisplay,
+  LanguageKeyType,
+  LanguageType,
+  MonitorOrientationType,
+  MonitorOverscanType,
+  TouchCursorDisplayModeType,
+  UdpAddressType,
+  VideoConnectorType,
+  BsColor,
 } from '@brightsign/bscore';
 
 import {
@@ -281,54 +289,93 @@ export class BSP {
     return autoSchedule;
   }
 
+  stringToBool(s : string) : boolean {
+    return (s.toLowerCase() === 'true');
+  }
+
+  stringToNumber(s : string) : number {
+    return (Number(s));
+  }
+
   convertAutoplay(autoplayBac : any) : DmSignState {
     let signAction : SignAction;
     let signState : DmSignState;
     let signMetadata : DmSignMetadata;
     let signProperties : DmSignProperties;
-
-    debugger;
-
+    
     const meta = autoplayBac.BrightAuthor.meta;
 
     signAction = this.dispatch(dmNewSign(meta.name, meta.videoMode, meta.model));
 
-    const state = this.getState();
+    let state = this.getState();
 
     signState = dmGetSignState(state.bsdm);
     signMetadata = signState.sign;
     signProperties = signMetadata.properties;
 
-    const alphabetizeVariableNames : Boolean = (meta.alphabetizeVariableNames.toLowerCase() === 'true');
-    const autoCreateMediaCounterVariables : Boolean = (meta.autoCreateMediaCounterVariables.toLowerCase() === 'true');
-    // background screen color
-    const delayScheduleChangeUntilMediaEndEvent : Boolean = (meta.delayScheduleChangeUntilMediaEndEvent.toLowerCase() === 'true');
-    let deviceWebPageDisplay : DeviceWebPageDisplay = meta.deviceWebPageDisplay;
-/*
-flipCoordinates - b
-forceResolution - b
-graphicsZOrder - ?
-htmlEnableJavascriptConsole - b
-inactivityTime - n
-inactivityTimeout - b
-isMosaic - b
-language
-languageKey
-monitorOrientation - s
-monitorOverscan - s
-networkedVariablesUpdateInterval - n
- resetVariablesOnPresentationStart - b
- tenBitColorEnabled - b
- touchCursorDisplayMode - ? 'Auto'
- udpDestinationAddress - s?
- udpDestinationAddressType - s?
- udpDestinationPort - n
- udpReceiverPort - n
- version - s
- videoConnector - s
- */
-    signAction = dmUpdateSignProperties(signProperties);
+    const alphabetizeVariableNames : boolean = this.stringToBool(meta.alphabetizeVariableNames);
+    const autoCreateMediaCounterVariables : boolean = this.stringToBool(meta.autoCreateMediaCounterVariables);
+    const backgroundScreenColor : BsColor = {
+      a: this.stringToNumber(meta.backgroundScreenColor['@a']),
+      r: this.stringToNumber(meta.backgroundScreenColor['@a']),
+      g: this.stringToNumber(meta.backgroundScreenColor['@a']),
+      b: this.stringToNumber(meta.backgroundScreenColor['@a']),
+    };
+    const delayScheduleChangeUntilMediaEndEvent : boolean = this.stringToBool(meta.delayScheduleChangeUntilMediaEndEvent.toLowerCase());
+    const deviceWebPageDisplay : DeviceWebPageDisplay = meta.deviceWebPageDisplay;
+    const flipCoordinates : boolean =  this.stringToBool(meta.flipCoordinates);
+    const forceResolution : boolean = this.stringToBool(meta.forceResolution);
+    const graphicsZOrder : GraphicsZOrderType = meta.graphicsZOrder;
+    const htmlEnableJavascriptConsole : boolean = this.stringToBool(meta.htmlEnableJavascriptConsole);
+    const inactivityTime : number = this.stringToNumber(meta.inactivityTime);
+    const inactivityTimeout : boolean = this.stringToBool(meta.inactivityTimeout);
+    const isMosaic : boolean = this.stringToBool(meta.isMosaic);
+    const language : LanguageType = meta.language;
+    const languageKey : LanguageKeyType = meta.languageKey;
+    const monitorOrientation : MonitorOrientationType = meta.monitorOrientation;
+    const monitorOverscan : MonitorOverscanType = meta.monitorOverscan;
+    const resetVariablesOnPresentationStart : boolean = this.stringToBool(meta.resetVariablesOnPresentationStart);
+    const tenBitColorEnabled : boolean = this.stringToBool(meta.tenBitColorEnabled);
+    const touchCursorDisplayMode : TouchCursorDisplayModeType = meta.touchCursorDisplayMode;
+    const udpDestinationAddress : string = meta.udpDestinationAddress;
+    const udpDestinationAddressType : UdpAddressType = meta.udpDestinationAddressType;
+    const udpDestinationPort : number = this.stringToNumber(meta.udpDestinationPort);
+    const udpReceiverPort : number = this.stringToNumber(meta.udpReceiverPort);
+    const videoConnector : VideoConnectorType = meta.videoConnector;
 
+    signAction = this.dispatch(dmUpdateSignProperties(
+      {
+        id : signProperties.id,
+        alphabetizeVariableNames,
+        autoCreateMediaCounterVariables,
+        backgroundScreenColor,
+        delayScheduleChangeUntilMediaEndEvent,
+        deviceWebPageDisplay,
+        flipCoordinates,
+        forceResolution,
+        graphicsZOrder,
+        htmlEnableJavascriptConsole,
+        inactivityTime,
+        inactivityTimeout,
+        isMosaic,
+        language,
+        languageKey,
+        monitorOrientation,
+        monitorOverscan,
+        resetVariablesOnPresentationStart,
+        tenBitColorEnabled,
+        touchCursorDisplayMode,
+        udpDestinationAddress,
+        udpDestinationAddressType,
+        udpDestinationPort,
+        udpReceiverPort,
+        videoConnector,
+      })
+    );
+
+    state = this.getState();
+
+    debugger;
 
     return signState;
   }
