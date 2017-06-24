@@ -36,6 +36,10 @@ import {
   GpioListParams,
   DmGpioList,
   dmUpdateSignGpio,
+  DmButtonPanelMap,
+  ButtonPanelMapParams,
+  dmUpdateSignButtonPanelMap,
+  DmBpConfiguration,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -430,6 +434,40 @@ export class BSP {
     this.dispatch(dmUpdateSignGpio(gpioListParams));
   }
 
+  updateAutoplayButtonPanels(autoplayBac : any) {
+
+    let bpConfiguration : DmBpConfiguration;
+    let buttonPanelMap : DmButtonPanelMap = {};
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    let buttonPanelNames : Array<string> = [
+      'BP200A',
+      'BP200B',
+      'BP200C',
+      'BP200D',
+      'BP900A',
+      'BP900B',
+      'BP900C',
+      'BP900D',
+    ]
+    for (let buttonPanelName of buttonPanelNames) {
+      let configureAutomatically : boolean = this.stringToBool(meta[buttonPanelName +  'ConfigureAutomatically']);
+      let configuration : number = this.stringToNumber(meta[buttonPanelName + 'Configuration']);
+      bpConfiguration = {
+        configureAutomatically,
+        configuration
+      };
+      buttonPanelMap[buttonPanelName] = bpConfiguration;
+    }
+
+    const buttonPanelMapParams : ButtonPanelMapParams = {
+      params : buttonPanelMap
+    };
+
+    this.dispatch(dmUpdateSignButtonPanelMap(buttonPanelMapParams));
+  }
+
   convertAutoplay(autoplayBac : any) : DmSignState {
 
     let state : any;
@@ -441,12 +479,7 @@ export class BSP {
     this.updateAutoplaySignProperties(autoplayBac);
     this.updateAutoplaySerialPorts(autoplayBac);
     this.updateAutoplayGpio(autoplayBac);
-
-    // BP's - buttonPanels
-    // audio - audioSignPropertyMap
-    // gpio's - gpio
-
-    debugger;
+    this.updateAutoplayButtonPanels(autoplayBac);
 
     return dmGetSignState(this.getState().bsdm);
   }
