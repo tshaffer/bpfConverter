@@ -173,7 +173,7 @@ export class BSP {
 
     return new Promise<void>((resolve: Function) => {
       this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
-
+        
         // TODO - only a single scheduled item is currently supported
 
         const scheduledPresentation = autoSchedule.scheduledPresentations[0];
@@ -227,7 +227,41 @@ export class BSP {
   }
 
   getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) {
-    return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
+    // return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
+
+    return new Promise( (resolve) => {
+      this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath).then( (autoScheduleBac) => {
+        const autoSchedule = this.convertAutoschedule(autoScheduleBac);
+        resolve(autoSchedule);
+      });
+    });
+  }
+
+  convertAutoschedule(autoScheduleBac : any) : any {
+
+    // only works now for a single scheduledPresentation
+    let scheduledPresentation : any = {};
+    let rawScheduledPresentation : any = autoScheduleBac.autoschedule.scheduledPresentation;
+    scheduledPresentation.allDayEveryDay = (rawScheduledPresentation.allDayEveryDay.toLowerCase() === 'true');
+    scheduledPresentation.dateTime = rawScheduledPresentation.dateTime;
+    scheduledPresentation.duration = Number(rawScheduledPresentation.duration);
+    scheduledPresentation.interruption = (rawScheduledPresentation.interruption.toLowerCase() === 'true');
+    scheduledPresentation.presentationToSchedule = {
+      fileName: rawScheduledPresentation.presentationToSchedule.fileName,
+      filePath: rawScheduledPresentation.presentationToSchedule.filePath,
+      name: rawScheduledPresentation.presentationToSchedule.name,
+    };
+    scheduledPresentation.recurrence = (rawScheduledPresentation.recurrence.toLowerCase() === 'true');
+    scheduledPresentation.recurrenceEndDate = rawScheduledPresentation.recurrenceEndDate;
+    scheduledPresentation.recurrenceGoesForever = (rawScheduledPresentation.recurrenceGoesForever.toLowerCase() === 'true');
+    scheduledPresentation.recurrencePattern = rawScheduledPresentation.recurrencePattern;
+    scheduledPresentation.recurrencePatternDaily = rawScheduledPresentation.recurrencePatternDaily;
+    scheduledPresentation.recurrencePatternDaysOfWeek = Number(rawScheduledPresentation.recurrencePatternDaysOfWeek);
+    scheduledPresentation.recurrenceStartDate = rawScheduledPresentation.recurrenceStartDate;
+
+    let autoSchedule : any = {};
+    autoSchedule.scheduledPresentations = [scheduledPresentation];
+    return autoSchedule;
   }
 
   convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
@@ -236,7 +270,7 @@ export class BSP {
       meta : {},
       files : {}
     };
-    
+
     syncSpec.meta = {};
     syncSpec.meta.server = {};
 
@@ -304,6 +338,7 @@ export class BSP {
     });
   }
 
+  // Gets a file referenced by a syncSpec, not an actual sync spec
   getSyncSpecFile(fileName: string, syncSpec: ArSyncSpec, rootPath: string): Promise<object> {
 
     return new Promise<object>((resolve: Function, reject: Function) => {
