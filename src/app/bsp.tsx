@@ -20,6 +20,7 @@ import {
   UdpAddressType,
   VideoConnectorType,
   BsColor,
+  GpioType,
 
 } from '@brightsign/bscore';
 
@@ -32,6 +33,9 @@ import {
   DmSerialPortList,
   SerialPortListParams,
   dmUpdateSignSerialPorts,
+  GpioListParams,
+  DmGpioList,
+  dmUpdateSignGpio,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -302,36 +306,6 @@ export class BSP {
     return (Number(s));
   }
 
-  updateAutoplaySerialPorts(autoplayBac : any) {
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
-    let serialPortConfiguration : DmSerialPortConfiguration;
-    let serialPortList : DmSerialPortList = [];
-
-    meta.SerialPortConfiguration.forEach( (serialPortConfigurationBac : any) => {
-      serialPortConfiguration = {
-        port : this.stringToNumber(serialPortConfigurationBac.port),
-        baudRate : this.stringToNumber(serialPortConfigurationBac.baudRate),
-        dataBits: this.stringToNumber(serialPortConfigurationBac.dataBits),
-        stopBits: this.stringToNumber(serialPortConfigurationBac.stopBits),
-        parity: serialPortConfigurationBac.parity,
-        protocol: serialPortConfigurationBac.protocol,
-        sendEol : serialPortConfigurationBac.sendEol,
-        receiveEol : serialPortConfigurationBac.receiveEol,
-        invertSignals : this.stringToBool(serialPortConfigurationBac.invertSignals),
-        connectedDevice : serialPortConfigurationBac.connectedDevice,
-      };
-      serialPortList.push(serialPortConfiguration);
-    });
-
-    let serialPortListParams : SerialPortListParams = {
-      params : serialPortList
-    };
-
-    this.dispatch(dmUpdateSignSerialPorts(serialPortListParams));
-  }
-
   updateAutoplaySignProperties(autoplayBac : any) {
 
     let signAction : SignAction;
@@ -409,6 +383,53 @@ export class BSP {
 
   }
 
+  updateAutoplaySerialPorts(autoplayBac : any) {
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    let serialPortConfiguration : DmSerialPortConfiguration;
+    let serialPortList : DmSerialPortList = [];
+
+    meta.SerialPortConfiguration.forEach( (serialPortConfigurationBac : any) => {
+      serialPortConfiguration = {
+        port : this.stringToNumber(serialPortConfigurationBac.port),
+        baudRate : this.stringToNumber(serialPortConfigurationBac.baudRate),
+        dataBits: this.stringToNumber(serialPortConfigurationBac.dataBits),
+        stopBits: this.stringToNumber(serialPortConfigurationBac.stopBits),
+        parity: serialPortConfigurationBac.parity,
+        protocol: serialPortConfigurationBac.protocol,
+        sendEol : serialPortConfigurationBac.sendEol,
+        receiveEol : serialPortConfigurationBac.receiveEol,
+        invertSignals : this.stringToBool(serialPortConfigurationBac.invertSignals),
+        connectedDevice : serialPortConfigurationBac.connectedDevice,
+      };
+      serialPortList.push(serialPortConfiguration);
+    });
+
+    let serialPortListParams : SerialPortListParams = {
+      params : serialPortList
+    };
+
+    this.dispatch(dmUpdateSignSerialPorts(serialPortListParams));
+  }
+
+  updateAutoplayGpio(autoplayBac : any) {
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    let gpioList : DmGpioList = [];
+
+    for (let i = 0; i < 8; i++) {
+      const gpio : GpioType = meta['gpio' + i.toString()];
+      gpioList.push(gpio);
+    }
+    let gpioListParams : GpioListParams = {
+      params : gpioList
+    };
+
+    this.dispatch(dmUpdateSignGpio(gpioListParams));
+  }
+
   convertAutoplay(autoplayBac : any) : DmSignState {
 
     let state : any;
@@ -419,6 +440,11 @@ export class BSP {
 
     this.updateAutoplaySignProperties(autoplayBac);
     this.updateAutoplaySerialPorts(autoplayBac);
+    this.updateAutoplayGpio(autoplayBac);
+
+    // BP's - buttonPanels
+    // audio - audioSignPropertyMap
+    // gpio's - gpio
 
     debugger;
 
