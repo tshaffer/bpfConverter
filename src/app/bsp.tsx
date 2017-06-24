@@ -21,6 +21,8 @@ import {
   VideoConnectorType,
   BsColor,
   GpioType,
+  AudioOutputType,
+
 
 } from '@brightsign/bscore';
 
@@ -40,6 +42,10 @@ import {
   ButtonPanelMapParams,
   dmUpdateSignButtonPanelMap,
   DmBpConfiguration,
+  DmAudioSignProperties,
+  DmAudioSignPropertyMap,
+  dmUpdateSignAudioPropertyMap,
+  AudioSignPropertyMapParams,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -450,7 +456,7 @@ export class BSP {
       'BP900B',
       'BP900C',
       'BP900D',
-    ]
+    ];
     for (let buttonPanelName of buttonPanelNames) {
       let configureAutomatically : boolean = this.stringToBool(meta[buttonPanelName +  'ConfigureAutomatically']);
       let configuration : number = this.stringToNumber(meta[buttonPanelName + 'Configuration']);
@@ -458,7 +464,7 @@ export class BSP {
         configureAutomatically,
         configuration
       };
-      buttonPanelMap[buttonPanelName] = bpConfiguration;
+      buttonPanelMap[buttonPanelName.toLowerCase()] = bpConfiguration;
     }
 
     const buttonPanelMapParams : ButtonPanelMapParams = {
@@ -466,6 +472,57 @@ export class BSP {
     };
 
     this.dispatch(dmUpdateSignButtonPanelMap(buttonPanelMapParams));
+  }
+
+  updateAutoplayAudio(autoplayBac : any) {
+
+    let audioSignPropertyMap : DmAudioSignPropertyMap = {};
+    let audioSignProperties : DmAudioSignProperties;
+
+    const meta = autoplayBac.BrightAuthor.meta;
+
+    // note - unused 'analog1', 'analog2', and 'analog3' don't appear in bac
+    let badAudioNames : Array<string> = [
+      'audio1',
+      'audio2',
+      'audio3',
+      'spdif',
+      'usbA',
+      'usbB',
+      'usbC',
+      'usbD',
+      'hdmi',
+    ];
+
+    for (let bacAudioName of badAudioNames) {
+      audioSignProperties = {
+        min : this.stringToNumber(meta[bacAudioName + 'MinVolume']),
+        max : this.stringToNumber(meta[bacAudioName + 'MaxVolume'])
+      };
+
+      let audioName : string = bacAudioName;
+      switch (bacAudioName) {
+        case 'audio1': {
+          audioName = 'analog1';
+          break;
+        }
+        case 'audio2': {
+          audioName = 'analog2';
+          break;
+        }
+        case 'audio3': {
+          audioName = 'analog3';
+          break;
+        }
+      }
+      audioSignPropertyMap[audioName] = audioSignProperties;
+    }
+
+    const audioSignPropertyMapParams : AudioSignPropertyMapParams = {
+      params : audioSignPropertyMap
+    };
+
+    this.dispatch(dmUpdateSignAudioPropertyMap(audioSignPropertyMapParams));
   }
 
   convertAutoplay(autoplayBac : any) : DmSignState {
@@ -480,6 +537,7 @@ export class BSP {
     this.updateAutoplaySerialPorts(autoplayBac);
     this.updateAutoplayGpio(autoplayBac);
     this.updateAutoplayButtonPanels(autoplayBac);
+    this.updateAutoplayAudio(autoplayBac);
 
     return dmGetSignState(this.getState().bsdm);
   }
