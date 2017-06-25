@@ -22,11 +22,21 @@ import {
   BsColor,
   GpioType,
   AudioOutputType,
-
-
+  ZoneType,
+  BsRect,
+  LiveVideoInputType,
+  ViewModeType,
+  MosaicMaxContentResolutionType,
+  AudioOutputSelectionType,
+  AudioModeType,
+  AudioMappingType,
+  AudioMixModeType,
+  ImageModeType,
 } from '@brightsign/bscore';
 
 import {
+  DmAudioOutputAssignmentMap,
+
   dmGetSignState,
   dmNewSign, DmSignMetadata, DmSignProperties,
   dmUpdateSignProperties,
@@ -46,6 +56,19 @@ import {
   DmAudioSignPropertyMap,
   dmUpdateSignAudioPropertyMap,
   AudioSignPropertyMapParams,
+  dmAddZone,
+  dmUpdateZoneProperties,
+  ZonePropertyUpdateParams,
+  BsDmThunkAction,
+  VideoOrImagesZonePropertyParams,
+  DmVideoOrImagesZoneProperties,
+  DmVideoZoneProperties,
+  DmImageZoneProperties,
+  DmAudioZoneProperties,
+  DmVideoZonePropertyData,
+  DmImageZonePropertyData,
+  DmAudioZonePropertyData,
+
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -316,50 +339,48 @@ export class BSP {
     return (Number(s));
   }
 
-  updateAutoplaySignProperties(autoplayBac : any) {
+  updateAutoplaySignProperties(bacMeta : any) {
 
     let signAction : SignAction;
     let signState : DmSignState;
     let signMetadata : DmSignMetadata;
     let signProperties : DmSignProperties;
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
+    
     let state = this.getState();
 
     signState = dmGetSignState(state.bsdm);
     signMetadata = signState.sign;
     signProperties = signMetadata.properties;
 
-    const alphabetizeVariableNames : boolean = this.stringToBool(meta.alphabetizeVariableNames);
-    const autoCreateMediaCounterVariables : boolean = this.stringToBool(meta.autoCreateMediaCounterVariables);
+    const alphabetizeVariableNames : boolean = this.stringToBool(bacMeta.alphabetizeVariableNames);
+    const autoCreateMediaCounterVariables : boolean = this.stringToBool(bacMeta.autoCreateMediaCounterVariables);
     const backgroundScreenColor : BsColor = {
-      a: this.stringToNumber(meta.backgroundScreenColor['@a']),
-      r: this.stringToNumber(meta.backgroundScreenColor['@a']),
-      g: this.stringToNumber(meta.backgroundScreenColor['@a']),
-      b: this.stringToNumber(meta.backgroundScreenColor['@a']),
+      a: this.stringToNumber(bacMeta.backgroundScreenColor['@a']),
+      r: this.stringToNumber(bacMeta.backgroundScreenColor['@a']),
+      g: this.stringToNumber(bacMeta.backgroundScreenColor['@a']),
+      b: this.stringToNumber(bacMeta.backgroundScreenColor['@a']),
     };
-    const delayScheduleChangeUntilMediaEndEvent : boolean = this.stringToBool(meta.delayScheduleChangeUntilMediaEndEvent.toLowerCase());
-    const deviceWebPageDisplay : DeviceWebPageDisplay = meta.deviceWebPageDisplay;
-    const flipCoordinates : boolean =  this.stringToBool(meta.flipCoordinates);
-    const forceResolution : boolean = this.stringToBool(meta.forceResolution);
-    const graphicsZOrder : GraphicsZOrderType = meta.graphicsZOrder;
-    const htmlEnableJavascriptConsole : boolean = this.stringToBool(meta.htmlEnableJavascriptConsole);
-    const inactivityTime : number = this.stringToNumber(meta.inactivityTime);
-    const inactivityTimeout : boolean = this.stringToBool(meta.inactivityTimeout);
-    const isMosaic : boolean = this.stringToBool(meta.isMosaic);
-    const language : LanguageType = meta.language;
-    const languageKey : LanguageKeyType = meta.languageKey;
-    const monitorOrientation : MonitorOrientationType = meta.monitorOrientation;
-    const monitorOverscan : MonitorOverscanType = meta.monitorOverscan;
-    const resetVariablesOnPresentationStart : boolean = this.stringToBool(meta.resetVariablesOnPresentationStart);
-    const tenBitColorEnabled : boolean = this.stringToBool(meta.tenBitColorEnabled);
-    const touchCursorDisplayMode : TouchCursorDisplayModeType = meta.touchCursorDisplayMode;
-    const udpDestinationAddress : string = meta.udpDestinationAddress;
-    const udpDestinationAddressType : UdpAddressType = meta.udpDestinationAddressType;
-    const udpDestinationPort : number = this.stringToNumber(meta.udpDestinationPort);
-    const udpReceiverPort : number = this.stringToNumber(meta.udpReceiverPort);
-    const videoConnector : VideoConnectorType = meta.videoConnector;
+    const delayScheduleChangeUntilMediaEndEvent : boolean = this.stringToBool(bacMeta.delayScheduleChangeUntilMediaEndEvent.toLowerCase());
+    const deviceWebPageDisplay : DeviceWebPageDisplay = bacMeta.deviceWebPageDisplay;
+    const flipCoordinates : boolean =  this.stringToBool(bacMeta.flipCoordinates);
+    const forceResolution : boolean = this.stringToBool(bacMeta.forceResolution);
+    const graphicsZOrder : GraphicsZOrderType = bacMeta.graphicsZOrder;
+    const htmlEnableJavascriptConsole : boolean = this.stringToBool(bacMeta.htmlEnableJavascriptConsole);
+    const inactivityTime : number = this.stringToNumber(bacMeta.inactivityTime);
+    const inactivityTimeout : boolean = this.stringToBool(bacMeta.inactivityTimeout);
+    const isMosaic : boolean = this.stringToBool(bacMeta.isMosaic);
+    const language : LanguageType = bacMeta.language;
+    const languageKey : LanguageKeyType = bacMeta.languageKey;
+    const monitorOrientation : MonitorOrientationType = bacMeta.monitorOrientation;
+    const monitorOverscan : MonitorOverscanType = bacMeta.monitorOverscan;
+    const resetVariablesOnPresentationStart : boolean = this.stringToBool(bacMeta.resetVariablesOnPresentationStart);
+    const tenBitColorEnabled : boolean = this.stringToBool(bacMeta.tenBitColorEnabled);
+    const touchCursorDisplayMode : TouchCursorDisplayModeType = bacMeta.touchCursorDisplayMode;
+    const udpDestinationAddress : string = bacMeta.udpDestinationAddress;
+    const udpDestinationAddressType : UdpAddressType = bacMeta.udpDestinationAddressType;
+    const udpDestinationPort : number = this.stringToNumber(bacMeta.udpDestinationPort);
+    const udpReceiverPort : number = this.stringToNumber(bacMeta.udpReceiverPort);
+    const videoConnector : VideoConnectorType = bacMeta.videoConnector;
 
     signAction = this.dispatch(dmUpdateSignProperties(
       {
@@ -393,14 +414,12 @@ export class BSP {
 
   }
 
-  updateAutoplaySerialPorts(autoplayBac : any) {
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
+  updateAutoplaySerialPorts(bacMeta : any) {
+    
     let serialPortConfiguration : DmSerialPortConfiguration;
     let serialPortList : DmSerialPortList = [];
 
-    meta.SerialPortConfiguration.forEach( (serialPortConfigurationBac : any) => {
+    bacMeta.SerialPortConfiguration.forEach( (serialPortConfigurationBac : any) => {
       serialPortConfiguration = {
         port : this.stringToNumber(serialPortConfigurationBac.port),
         baudRate : this.stringToNumber(serialPortConfigurationBac.baudRate),
@@ -423,14 +442,12 @@ export class BSP {
     this.dispatch(dmUpdateSignSerialPorts(serialPortListParams));
   }
 
-  updateAutoplayGpio(autoplayBac : any) {
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
+  updateAutoplayGpio(bacMeta : any) {
+    
     let gpioList : DmGpioList = [];
 
     for (let i = 0; i < 8; i++) {
-      const gpio : GpioType = meta['gpio' + i.toString()];
+      const gpio : GpioType = bacMeta['gpio' + i.toString()];
       gpioList.push(gpio);
     }
     let gpioListParams : GpioListParams = {
@@ -440,13 +457,11 @@ export class BSP {
     this.dispatch(dmUpdateSignGpio(gpioListParams));
   }
 
-  updateAutoplayButtonPanels(autoplayBac : any) {
+  updateAutoplayButtonPanels(bacMeta : any) {
 
     let bpConfiguration : DmBpConfiguration;
     let buttonPanelMap : DmButtonPanelMap = {};
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
+    
     let buttonPanelNames : Array<string> = [
       'BP200A',
       'BP200B',
@@ -458,8 +473,8 @@ export class BSP {
       'BP900D',
     ];
     for (let buttonPanelName of buttonPanelNames) {
-      let configureAutomatically : boolean = this.stringToBool(meta[buttonPanelName +  'ConfigureAutomatically']);
-      let configuration : number = this.stringToNumber(meta[buttonPanelName + 'Configuration']);
+      let configureAutomatically : boolean = this.stringToBool(bacMeta[buttonPanelName +  'ConfigureAutomatically']);
+      let configuration : number = this.stringToNumber(bacMeta[buttonPanelName + 'Configuration']);
       bpConfiguration = {
         configureAutomatically,
         configuration
@@ -474,14 +489,11 @@ export class BSP {
     this.dispatch(dmUpdateSignButtonPanelMap(buttonPanelMapParams));
   }
 
-  updateAutoplayAudio(autoplayBac : any) {
+  updateAutoplayAudio(bacMeta : any) {
 
     let audioSignPropertyMap : DmAudioSignPropertyMap = {};
     let audioSignProperties : DmAudioSignProperties;
-
-    const meta = autoplayBac.BrightAuthor.meta;
-
-    // note - unused 'analog1', 'analog2', and 'analog3' don't appear in bac
+    
     let badAudioNames : Array<string> = [
       'audio1',
       'audio2',
@@ -496,8 +508,8 @@ export class BSP {
 
     for (let bacAudioName of badAudioNames) {
       audioSignProperties = {
-        min : this.stringToNumber(meta[bacAudioName + 'MinVolume']),
-        max : this.stringToNumber(meta[bacAudioName + 'MaxVolume'])
+        min : this.stringToNumber(bacMeta[bacAudioName + 'MinVolume']),
+        max : this.stringToNumber(bacMeta[bacAudioName + 'MaxVolume'])
       };
 
       let audioName : string = bacAudioName;
@@ -525,19 +537,176 @@ export class BSP {
     this.dispatch(dmUpdateSignAudioPropertyMap(audioSignPropertyMapParams));
   }
 
+  updateAutoplayZones(bacZones : any) {
+
+    debugger;
+
+    bacZones.forEach( (bacZone : any) => {
+
+      let bsRect : BsRect = {
+        x: this.stringToNumber(bacZone.x),
+        y: this.stringToNumber(bacZone.y),
+        width: this.stringToNumber(bacZone.width),
+        height: this.stringToNumber(bacZone.height),
+        pct: false
+      };
+
+      this.dispatch(dmAddZone(bacZone.name, bacZone.type, bacZone.id, bsRect,
+        bacZone.playlist.type === 'non-interactive'));
+
+      // dmUpdateZone - to set initialMediaStateId
+
+      let viewMode : ViewModeType;
+      switch (bacZone.viewMode) {
+        case 'Fill Screen and Centered': {
+          viewMode = ViewModeType.FillAndCenter;
+          break;
+        }
+        case '?0': {
+          viewMode = ViewModeType.ScaleToFill;
+          break;
+        }
+        default: {
+          viewMode = ViewModeType.Letterboxed;
+          break;
+        }
+      }
+
+      let zoneSpecificParameters : any = bacZone.zoneSpecificParameters;
+
+      // TODO - maxContentResolution
+      // TODO - mosaic decoder name
+      // TODO - audioOutputAssignments : DmAudioOutputAssignmentMap;
+      // TODO - enumerate all values output by BAC
+
+      let videoOrImagesZonePropertyParams : VideoOrImagesZonePropertyParams = {
+        viewMode : viewMode,
+        liveVideoInput : zoneSpecificParameters.liveVideoInput,
+        liveVideoStandard : zoneSpecificParameters.liveVideoStandard,
+        videoVolume : this.stringToNumber(zoneSpecificParameters.videoVolume),
+        brightness : this.stringToNumber(zoneSpecificParameters.brightness),
+        contrast : this.stringToNumber(zoneSpecificParameters.contrast),
+        saturation : this.stringToNumber(zoneSpecificParameters.saturation),
+        hue : this.stringToNumber(zoneSpecificParameters.hue),
+        zOrderFront : this.stringToBool(zoneSpecificParameters.zOrderFront),
+        mosaic : this.stringToBool(zoneSpecificParameters.mosaic),
+        maxContentResolution : MosaicMaxContentResolutionType.NotApplicable,
+        audioOutput : this.getAudioOutput(zoneSpecificParameters.audioOutput),
+        audioMode : this.getAudioMode(zoneSpecificParameters.audioMode),
+        audioMapping : this.getAudioMapping(zoneSpecificParameters.audioMapping),
+        audioMixMode : this.getAudioMixMode(zoneSpecificParameters.audioMixMode),
+        minimumVolume : this.stringToNumber(zoneSpecificParameters.minimumVolume),
+        maximumVolume : this.stringToNumber(zoneSpecificParameters.maximumVolume),
+        imageMode: ImageModeType.ScaleToFill,
+      };
+
+      let zonePropertyUpdateParams : ZonePropertyUpdateParams = {
+        id : bacZone.id,
+        type: bacZone.type,
+        properties : videoOrImagesZonePropertyParams
+      };
+
+      this.dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
+    });
+
+    let state = this.getState().bsdm;
+    debugger;
+  }
+
+  getAudioMixMode(bacAudioMixMode : string) : AudioMixModeType {
+    switch (bacAudioMixMode) {
+      case 'Stereo': {
+        return AudioMixModeType.Stereo;
+      }
+      case 'Left': {
+        return AudioMixModeType.Left;
+      }
+      case 'Right': {
+        return AudioMixModeType.Right;
+      }
+    }
+  }
+
+  getAudioMapping(bacAudioMapping : string) : AudioMappingType {
+    switch (bacAudioMapping) {
+      case 'Audio-1': {
+        return AudioMappingType.Audio1;
+      }
+      case 'Audio-2': {
+        return AudioMappingType.Audio2;
+      }
+      case 'Audio-3': {
+        return AudioMappingType.Audio3;
+      }
+      case '0?': {
+        return AudioMappingType.AudioAll;
+      }
+    }
+  }
+
+  // TODO - Multichannel Surround??
+  getAudioMode(bacAudioMode : string) : AudioModeType {
+    switch (bacAudioMode) {
+      case 'Multichannel Surround': {
+        return AudioModeType.Surround;
+      }
+      case '0?': {
+        return AudioModeType.Stereo;
+      }
+      case '1?': {
+        return AudioModeType.NoAudio;
+      }
+      case '2?': {
+        return AudioModeType.Left;
+      }
+      case '3?': {
+        return AudioModeType.Right;
+      }
+    }
+  }
+  getAudioOutput(bacAudioOutput : string) : AudioOutputSelectionType {
+    switch (bacAudioOutput) {
+      case 'Analog Audio': {
+        return AudioOutputSelectionType.Analog;
+      }
+      case '0?': {
+        return AudioOutputSelectionType.Usb;
+      }
+      case '1?': {
+        return AudioOutputSelectionType.DigitalPcm;
+      }
+      case '2?': {
+        return AudioOutputSelectionType.DigitalAc3;
+      }
+      case '3?': {
+        return AudioOutputSelectionType.AnalogHdmiAc3;
+      }
+    }
+  }
   convertAutoplay(autoplayBac : any) : DmSignState {
 
     let state : any;
     let signAction : SignAction;
 
-    const meta = autoplayBac.BrightAuthor.meta;
-    signAction = this.dispatch(dmNewSign(meta.name, meta.videoMode, meta.model));
+    const bacMeta = autoplayBac.BrightAuthor.meta;
+    signAction = this.dispatch(dmNewSign(bacMeta.name, bacMeta.videoMode, bacMeta.model));
 
-    this.updateAutoplaySignProperties(autoplayBac);
-    this.updateAutoplaySerialPorts(autoplayBac);
-    this.updateAutoplayGpio(autoplayBac);
-    this.updateAutoplayButtonPanels(autoplayBac);
-    this.updateAutoplayAudio(autoplayBac);
+    this.updateAutoplaySignProperties(bacMeta);
+    this.updateAutoplaySerialPorts(bacMeta);
+    this.updateAutoplayGpio(bacMeta);
+    this.updateAutoplayButtonPanels(bacMeta);
+    this.updateAutoplayAudio(bacMeta);
+
+    let bacZones : any = [];
+    const bacZone = autoplayBac.BrightAuthor.zones;
+    if (bacZone instanceof Array) {
+      bacZones = autoplayBac.BrightAuthor.zones;
+    }
+    else {
+      bacZones = [autoplayBac.BrightAuthor.zones.zone];
+    }
+
+    this.updateAutoplayZones(bacZones);
 
     return dmGetSignState(this.getState().bsdm);
   }
