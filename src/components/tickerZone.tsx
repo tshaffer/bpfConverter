@@ -23,8 +23,8 @@ export default class TickerZone extends React.Component<tickerZoneProps, object>
       const { left, top, width, height } = this.props;
 
       // $FlowBrightSignExternalObject
-      this.bsTicker = new BSTicker(left, top, width, height, 0);
-      this.bsTicker.SetPixelsPerSecond(400);
+      // this.bsTicker = new BSTicker(left, top, width, height, 0);
+      // this.bsTicker.SetPixelsPerSecond(400);
     }
   }
 
