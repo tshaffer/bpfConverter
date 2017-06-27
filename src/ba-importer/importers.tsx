@@ -1,4 +1,9 @@
 import {
+  AssetLocation,
+  bscGetLocalAssetLocator,
+  bscGetFileMediaType,
+  AssetType,
+  BsAssetItem,
   GraphicsZOrderType,
   DeviceWebPageDisplay,
   LanguageKeyType,
@@ -21,12 +26,33 @@ import {
   AudioMappingType,
   AudioMixModeType,
   ImageModeType,
+  EventType,
+  MediaType,
+  TransitionType,
+  BsAssetId,
 } from '@brightsign/bscore';
 
 import {
+  dmAddZone
+} from '@brightsign/bsdatamodel';
+
+import {
+  DmCondition,
+  TransitionAction,
+  dmAddTransition,
+  DmTimer,
+  dmAddEvent,
+  BsDmId,
+  DmEventData,
+  EventAction,
+  MediaStateParams,
+  dmGetZoneMediaStateContainer,
+  BsDmAction,
+  ZoneParams,
+  dmAddMediaState,
+  // dmCreateAssetItemFromLocalFile,
   DmAudioOutputAssignmentMap,
   DmSignState,
-
   dmGetSignState,
   dmNewSign, DmSignMetadata, DmSignProperties,
   dmUpdateSignProperties,
@@ -46,7 +72,6 @@ import {
   DmAudioSignPropertyMap,
   dmUpdateSignAudioPropertyMap,
   AudioSignPropertyMapParams,
-  dmAddZone,
   dmUpdateZoneProperties,
   ZonePropertyUpdateParams,
   BsDmThunkAction,
@@ -69,7 +94,26 @@ import {
 } from '../types';
 
 import * as Converters from './converters';
+import * as Utilities from '../utilities/utilities';
 
+export function dmCreateAssetItemFromLocalFile(
+  fullPath: string,
+  id: BsAssetId = '',
+  mediaType: MediaType = null,
+): BsAssetItem {
+  const name = fullPath.replace(/^.*[\\\/]/, '');
+  const path = fullPath.substr(0, fullPath.length - name.length);
+  return {
+    id,
+    name,
+    path,
+    networkId: 0,
+    location: AssetLocation.Local,
+    locator: bscGetLocalAssetLocator(fullPath),
+    assetType: AssetType.Content,
+    mediaType: mediaType ? mediaType : bscGetFileMediaType(name),
+  };
+}
 export function convertAutoschedule(autoScheduleBac : any) : any {
 
   // only works now for a single scheduledPresentation
@@ -297,8 +341,6 @@ function updateAutoplayAudio(bacMeta : any, dispatch: Function) {
 
 function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Function) {
 
-  debugger;
-
   bacZones.forEach( (bacZone : any) => {
 
     let bsRect : BsRect = {
@@ -309,10 +351,11 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       pct: false
     };
 
-    dispatch(dmAddZone(bacZone.name, bacZone.type, bacZone.id, bsRect,
+    const actionParams : BsDmAction<ZoneParams> = dispatch(dmAddZone(bacZone.name, bacZone.type, bacZone.id, bsRect,
       bacZone.playlist.type === 'non-interactive'));
-
-    // dmUpdateZone - to set initialMediaStateId
+    console.log(actionParams);
+    const zoneId = actionParams.payload.id;
+    // need to call dmUpdateZone - to set initialMediaStateId
 
     let viewMode : ViewModeType;
     switch (bacZone.viewMode) {
@@ -365,10 +408,60 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
     };
 
     dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
+
+    let state = getState().bsdm;
+
+    // add media states, etc.
+    const states = bacZone.playlist.states;
+    const initialMediaStateId = states.initialState;
+
+    states.state.forEach( (bacMediaState : any) => {
+      // let mediaState = {
+      //   name : bacMediaState.name,
+      //   brightSignExitCommands : bacMediaState.brightSignExitCommands, // unlikely to really work this easily
+      // };
+      // if (bacMediaState.imageItem) {
+      //   mediaState = Object.assign(mediaState,
+      //     {
+      //       fileIsLocal : bacMediaState.fileIsLocal,
+      //       slideDelayInterval : bacMediaState.slideDelayInterval,
+      //       slideTransition : bacMediaState.slideTransition,
+      //       transitionDuration : bacMediaState.transitionDuration,
+      //       videoPlayerRequired : bacMediaState.videoPlayerRequired
+      //     });
+      // }
+
+      // debugger;
+
+      const filePath = Utilities.getPoolFilePath(bacMediaState.imageItem.file['@name']);
+      const bsAssetItem : BsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+      // const bsAssetItem : BsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '');
+      debugger;
+
+      dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem)).then(
+        (action : BsDmAction<MediaStateParams>) => {
+          console.log(action);
+          console.log(getState().bsdm);
+
+          const mediaStateId : BsDmId = action.payload.id;
+          const eventAction : EventAction = dmAddEvent('eventName', EventType.Timer, mediaStateId, {interval : 69});
+
+          state = getState().bsdm;
+          console.log(eventAction);
+          console.log(state);
+
+          // move this - add transitions after all media states have been added
+          const ta : TransitionAction = dmAddTransition('transitionName', eventAction.payload.id, 'targetMediaStateId', TransitionType.Fade, 5);
+          debugger;
+        }
+      );
+    });
+
   });
 
   let state = getState().bsdm;
-  debugger;
+
+
 }
 
 export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) : DmSignState {
