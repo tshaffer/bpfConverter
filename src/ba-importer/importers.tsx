@@ -412,14 +412,10 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
     let state = getState().bsdm;
 
     // add media states, etc.
-    const states = bacZone.playlist.states;
-    const initialMediaStateId = states.initialState;
+    const initialMediaStateId = bacZone.playlist.states.initialState;
+    const states = bacZone.playlist.states.state;
+    const transitions = bacZone.playlist.states.transition;
 
-    states.state.forEach( (bacMediaState : any) => {
-      // let mediaState = {
-      //   name : bacMediaState.name,
-      //   brightSignExitCommands : bacMediaState.brightSignExitCommands, // unlikely to really work this easily
-      // };
       // if (bacMediaState.imageItem) {
       //   mediaState = Object.assign(mediaState,
       //     {
@@ -431,35 +427,103 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       //     });
       // }
 
-      // debugger;
 
-      const filePath = Utilities.getPoolFilePath(bacMediaState.imageItem.file['@name']);
-      const bsAssetItem : BsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
-      // const bsAssetItem : BsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '');
-      debugger;
+      // From BA
+      // state members
+      //    brightSignExitCommands
+      //    imageItem
+      //        file
+      //        fileIsLocal
+      //        slideDelayInterval
+      //        slideTransition
+      //        videoPlayerRequired
+      //    name
 
-      dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem)).then(
-        (action : BsDmAction<MediaStateParams>) => {
-          console.log(action);
-          console.log(getState().bsdm);
+      // transition members
+      //    assignInputToUserVariable
+      //    assignWildcardToUserVariable
+      //    remainOnCurrentStateActions
+      //    sourceMediaState
+      //    targetMediaState
+      //    userEvent
+      //        name
+      //        parameters
+      //            parameter
 
-          const mediaStateId : BsDmId = action.payload.id;
-          const eventAction : EventAction = dmAddEvent('eventName', EventType.Timer, mediaStateId, {interval : 69});
+      // Bacon
+      //  dmAddEvent
+      //      name
+      //      EventType
+      //      mediaStateId
+      //      eventData?
 
-          state = getState().bsdm;
-          console.log(eventAction);
-          console.log(state);
+      //  dmAddTransition
+      //      transitionName
+      //      eventId
+      //      targetMediaStateId
+      //      TransitionType
+      //      transitino duration
+      //
+      //
+      //  Strategy
+      //      iterate through BAC states - create all mediaStates, store in mediaStatesById (or use bsdm)
+      //      iterate through Transitions
+      //          for each transition
+      //              get sourceMediaState, id
+      //              get targetMediaState, id
+      //              get userEvent, parameter
+      //          invoke dmAddEvent
+      //              eventType
+      //              mediaStateId
+      //              eventData
+      //          invoke dmAddTransition
+      //              eventId
+      //              targetMediaStateId
+      //              transition type
+      //              transition duration
 
-          // move this - add transitions after all media states have been added
-          const ta : TransitionAction = dmAddTransition('transitionName', eventAction.payload.id, 'targetMediaStateId', TransitionType.Fade, 5);
-          debugger;
-        }
-      );
+    let addMediaStatePromises : Array<any> = [];
+    states.forEach( (bacMediaState : any) => {
+
+      let filePath;
+      let bsAssetItem : BsAssetItem;
+      if (bacMediaState.imageItem) {
+        filePath = Utilities.getPoolFilePath(bacMediaState.imageItem.file['@name']);
+        bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+      }
+      else if (bacMediaState.videoItem) {
+        debugger;
+      }
+
+      const addMediaStatePromise : Promise<BsDmAction<MediaStateParams>> = dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem));
+      addMediaStatePromises.push(addMediaStatePromise);
+    });
+
+    Promise.all(addMediaStatePromises).then(() => {
+      let state = getState().bsdm;
+      console.log(state);
+      console.log('all media states added');
+
+      // dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem)).then(
+        // (action : BsDmAction<MediaStateParams>) => {
+        //   console.log(action);
+        //   console.log(getState().bsdm);
+        //
+        //   const mediaStateId : BsDmId = action.payload.id;
+        //   const eventAction : EventAction = dmAddEvent('eventName', EventType.Timer, mediaStateId, {interval : 69});
+        //
+        //   state = getState().bsdm;
+        //   console.log(eventAction);
+        //   console.log(state);
+        //
+        //   // move this - add transitions after all media states have been added
+        //   const ta : TransitionAction = dmAddTransition('transitionName', eventAction.payload.id, 'targetMediaStateId', TransitionType.Fade, 5);
+        //   debugger;
+        // }
     });
 
   });
 
-  let state = getState().bsdm;
 
 
 }
