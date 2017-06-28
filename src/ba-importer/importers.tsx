@@ -37,6 +37,8 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  DmcMediaState,
+  EventParams,
   dmGetMediaStateByName,
   DmCondition,
   TransitionAction,
@@ -414,77 +416,11 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
 
     // add media states, etc.
     const initialMediaStateId = bacZone.playlist.states.initialState;
-    const states = bacZone.playlist.states.state;
+    const bacStates = bacZone.playlist.states.state;
     const transitions = bacZone.playlist.states.transition;
 
-      // if (bacMediaState.imageItem) {
-      //   mediaState = Object.assign(mediaState,
-      //     {
-      //       fileIsLocal : bacMediaState.fileIsLocal,
-      //       slideDelayInterval : bacMediaState.slideDelayInterval,
-      //       slideTransition : bacMediaState.slideTransition,
-      //       transitionDuration : bacMediaState.transitionDuration,
-      //       videoPlayerRequired : bacMediaState.videoPlayerRequired
-      //     });
-      // }
-
-
-      // From BA
-      // state members
-      //    brightSignExitCommands
-      //    imageItem
-      //        file
-      //        fileIsLocal
-      //        slideDelayInterval
-      //        slideTransition
-      //        videoPlayerRequired
-      //    name
-
-      // transition members
-      //    assignInputToUserVariable
-      //    assignWildcardToUserVariable
-      //    remainOnCurrentStateActions
-      //    sourceMediaState
-      //    targetMediaState
-      //    userEvent
-      //        name
-      //        parameters
-      //            parameter
-
-      // Bacon
-      //  dmAddEvent
-      //      name
-      //      EventType
-      //      mediaStateId
-      //      eventData?
-
-      //  dmAddTransition
-      //      transitionName
-      //      eventId
-      //      targetMediaStateId
-      //      TransitionType
-      //      transitino duration
-      //
-      //
-      //  Strategy
-      //      iterate through BAC states - create all mediaStates, store in mediaStatesById (or use bsdm)
-      //      iterate through Transitions
-      //          for each transition
-      //              get sourceMediaState, id
-      //              get targetMediaState, id
-      //              get userEvent, parameter
-      //          invoke dmAddEvent
-      //              eventType
-      //              mediaStateId
-      //              eventData
-      //          invoke dmAddTransition
-      //              eventId
-      //              targetMediaStateId
-      //              transition type
-      //              transition duration
-
     let addMediaStatePromises : Array<any> = [];
-    states.forEach( (bacMediaState : any) => {
+    bacStates.forEach( (bacMediaState : any) => {
 
       let filePath;
       let bsAssetItem : BsAssetItem;
@@ -501,13 +437,13 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
     });
 
     Promise.all(addMediaStatePromises).then(() => {
+
       let state = getState().bsdm;
-      console.log(state);
-      console.log('all media states added');
 
       transitions.forEach( (bacTransition : any) => {
         console.log(bacTransition);
 
+        // TODO I don't see the following 3 variables used in bsdm - ??
         const assignInputToUserVariable : boolean = Converters.stringToBool(bacTransition.assignInputToUserVariable);
         const assignWildcardToUserVariable : boolean = Converters.stringToBool(bacTransition.assignWildcardToUserVariable);
         const remainOnCurrentStateActions : string = bacTransition.remainOnCurrentStateActions;
@@ -517,41 +453,25 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
         const userEventName : string = userEvent.name;
         const parameters : any = userEvent.parameters;
         const parameter : string = parameters.parameter;
-        // TODO
+        // TODO - need code to properly convert parameters
         const duration : number = Number(parameter);
-        debugger;
 
-        // TODO - Timer
-        const mediaState : any = dmGetMediaStateByName(state, { name : sourceMediaStateName});
+        const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
+        const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
 
-        dispatch(dmAddEvent(userEventName, EventType.Timer, mediaState.id, { interval : duration} ));
+        // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
+        const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id, { interval : duration} ));
+        console.log(eventAction);
+
+        // TODO - where is the TransitionType specified? where is the TransitionDuration specified?
+        const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id, targetMediaState.id, TransitionType.Fade, 4));
+        console.log(transitionAction);
       });
 
       state = getState().bsdm;
       console.log(state);
-
-      // dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem)).then(
-        // (action : BsDmAction<MediaStateParams>) => {
-        //   console.log(action);
-        //   console.log(getState().bsdm);
-        //
-        //   const mediaStateId : BsDmId = action.payload.id;
-        //   const eventAction : EventAction = dmAddEvent('eventName', EventType.Timer, mediaStateId, {interval : 69});
-        //
-        //   state = getState().bsdm;
-        //   console.log(eventAction);
-        //   console.log(state);
-        //
-        //   // move this - add transitions after all media states have been added
-        //   const ta : TransitionAction = dmAddTransition('transitionName', eventAction.payload.id, 'targetMediaStateId', TransitionType.Fade, 5);
-        //   debugger;
-        // }
     });
-
   });
-
-
-
 }
 
 export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) : DmSignState {
