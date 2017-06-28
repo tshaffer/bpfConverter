@@ -37,6 +37,7 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  dmGetMediaStateByName,
   DmCondition,
   TransitionAction,
   dmAddTransition,
@@ -503,6 +504,31 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       let state = getState().bsdm;
       console.log(state);
       console.log('all media states added');
+
+      transitions.forEach( (bacTransition : any) => {
+        console.log(bacTransition);
+
+        const assignInputToUserVariable : boolean = Converters.stringToBool(bacTransition.assignInputToUserVariable);
+        const assignWildcardToUserVariable : boolean = Converters.stringToBool(bacTransition.assignWildcardToUserVariable);
+        const remainOnCurrentStateActions : string = bacTransition.remainOnCurrentStateActions;
+        const sourceMediaStateName : string = bacTransition.sourceMediaState;
+        const targetMediaStateName : string = bacTransition.targetMediaState;
+        const userEvent : any = bacTransition.userEvent;
+        const userEventName : string = userEvent.name;
+        const parameters : any = userEvent.parameters;
+        const parameter : string = parameters.parameter;
+        // TODO
+        const duration : number = Number(parameter);
+        debugger;
+
+        // TODO - Timer
+        const mediaState : any = dmGetMediaStateByName(state, { name : sourceMediaStateName});
+
+        dispatch(dmAddEvent(userEventName, EventType.Timer, mediaState.id, { interval : duration} ));
+      });
+
+      state = getState().bsdm;
+      console.log(state);
 
       // dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem)).then(
         // (action : BsDmAction<MediaStateParams>) => {
