@@ -33,10 +33,11 @@ import {
 } from '@brightsign/bscore';
 
 import {
-  dmAddZone
+  dmAddZone, dmUpdateMediaState
 } from '@brightsign/bsdatamodel';
 
 import {
+  dmGetMediaStateById,
   DmcMediaState,
   EventParams,
   dmGetMediaStateByName,
@@ -98,6 +99,8 @@ import {
 
 import * as Converters from './converters';
 import * as Utilities from '../utilities/utilities';
+
+let mapMediaStateNameToMediaStateProps : any;
 
 export function dmCreateAssetItemFromLocalFile(
   fullPath: string,
@@ -425,8 +428,23 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       let filePath;
       let bsAssetItem : BsAssetItem;
       if (bacMediaState.imageItem) {
-        filePath = Utilities.getPoolFilePath(bacMediaState.imageItem.file['@name']);
+
+        const imageItem : any = bacMediaState.imageItem;
+
+        filePath = Utilities.getPoolFilePath(imageItem.file['@name']);
         bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+
+        const mediaStateDuration : number = Converters.stringToNumber(imageItem.slideDelayInterval);
+        const transitionType : TransitionType = Converters.getTransitionType(imageItem.slideTransition);
+        const transitionDuration : number = Converters.stringToNumber(imageItem.transitionDuration);
+        const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
+
+        mapMediaStateNameToMediaStateProps[bacMediaState.name] = {
+          mediaStateDuration,
+          transitionType,
+          transitionDuration,
+          videoPlayerRequired
+        }
       }
       else if (bacMediaState.videoItem) {
         debugger;
@@ -436,9 +454,14 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       addMediaStatePromises.push(addMediaStatePromise);
     });
 
-    Promise.all(addMediaStatePromises).then(() => {
+    Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
 
-      let state = getState().bsdm;
+      // bogus code that was going to add videoPlayerRequired to a media state
+      // mediaStateParamActions.forEach( (mediaStateParamAction) => {
+      //   const mediaStateParams : MediaStateParams = mediaStateParamAction.payload;
+      //   const mediaState : DmcMediaState= dmGetMediaStateById(getState().bsdm, { id : mediaStateParams.id});
+      // })
+      // let state = getState().bsdm;
 
       transitions.forEach( (bacTransition : any) => {
         console.log(bacTransition);
@@ -456,15 +479,35 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
         // TODO - need code to properly convert parameters
         const duration : number = Number(parameter);
 
+        // TODO - what is duration vs. mediaStateDuration?
+        // TODO - looks like they are set to the same value.
+
         const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
+        // bogus code to add videoPlayerRequired to a media state
+        // const videoPlayerRequired : boolean = sourceMediaState.contentItem.videoPlayerRequired;
+        // dispatch(dmUpdateMediaState( {
+        //   id : sourceMediaState.id,
+        //   contentItem: {
+        //     ...sourceMediaState.contentItem,
+        //     videoPlayerRequired
+        //   }
+        // }));
+        // state = getState().bsdm;
+        // console.log(state);
+
+        const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
+        const { mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
+
         const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
 
         // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
-        const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id, { interval : duration} ));
+        const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
+          { interval : duration} ));
         console.log(eventAction);
 
         // TODO - where is the TransitionType specified? where is the TransitionDuration specified?
-        const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id, targetMediaState.id, TransitionType.Fade, 4));
+        const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
+          targetMediaState.id, transitionType, transitionDuration));
         console.log(transitionAction);
       });
 

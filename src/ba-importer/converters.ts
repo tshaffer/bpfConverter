@@ -3,6 +3,7 @@ import {
   AudioModeType,
   AudioMappingType,
   AudioMixModeType,
+  TransitionType,
 } from '@brightsign/bscore';
 
 export function stringToBool(s : string) : boolean {
@@ -230,3 +231,11 @@ export function getAudioOutput(bacAudioOutput : string) : AudioOutputSelectionTy
   }
 }
 
+export function getTransitionType(bacTransition : string) {
+  switch (bacTransition) {
+    case 'No effect':
+      return TransitionType.NoEffect;
+    default:
+      return TransitionType.NoEffect;
+  }
+}
