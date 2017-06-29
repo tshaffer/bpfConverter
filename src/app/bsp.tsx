@@ -20,6 +20,7 @@ import {
   dmGetZoneById,
   dmGetDataFeedIdsForSign,
   dmGetDataFeedById,
+  dmGetSignState,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -193,29 +194,33 @@ export class BSP {
         this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
           console.log(autoPlay);
 
-          autoPlay = convertAutoplay(autoPlay, this.dispatch, this.getState);
+          autoPlay = convertAutoplay(autoPlay, this.dispatch, this.getState).then( () => {
 
-          const signState = autoPlay as DmSignState;
-          this.dispatch(dmOpenSign(signState));
+            const signState : DmSignState = dmGetSignState(this.getState().bsdm);
+            // const signState = autoPlay as DmSignState;
+            this.dispatch(dmOpenSign(signState));
 
-          // get data feeds for the sign
-          const bsdm: DmState = this.getState().bsdm;
-          const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
-          dataFeedIds.forEach((dataFeedId: BsDmId) => {
-            const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
+            // get data feeds for the sign
+            const bsdm: DmState = this.getState().bsdm;
+            const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
+            dataFeedIds.forEach((dataFeedId: BsDmId) => {
+              const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
 
-            if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
-              const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
-              this.dispatch(addDataFeed(dataFeed));
-            } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
-              const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
-              this.dispatch(addDataFeed(dataFeed));
-            } else {
-              debugger;
-            }
+              if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
+                const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
+                this.dispatch(addDataFeed(dataFeed));
+              } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+                const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
+                this.dispatch(addDataFeed(dataFeed));
+              } else {
+                debugger;
+              }
+            });
+
+            resolve();
+
           });
 
-          resolve();
         });
       });
     });

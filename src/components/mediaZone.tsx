@@ -66,7 +66,11 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     const assetId : string = mediaContentItem.assetId;
     const assetItem : BsAssetItem = dmGetAssetItemById(this.props.bsdm, { id : assetId });
-    const fileId : string = assetItem.name;
+
+    // TODO - near term (likely) fix
+    // const fileId : string = assetItem.name;
+    const fileId : string = mediaState.name;
+
     const poolFilePath : string = getPoolFilePath(fileId);
     const src : string = path.join('file://', poolFilePath);
 

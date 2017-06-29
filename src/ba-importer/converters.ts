@@ -231,7 +231,7 @@ export function getAudioOutput(bacAudioOutput : string) : AudioOutputSelectionTy
   }
 }
 
-export function getTransitionType(bacTransition : string) {
+export function getTransitionType(bacTransition : string) : TransitionType {
   switch (bacTransition) {
     case 'No effect':
       return TransitionType.NoEffect;

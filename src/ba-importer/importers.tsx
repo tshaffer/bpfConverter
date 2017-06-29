@@ -100,7 +100,7 @@ import {
 import * as Converters from './converters';
 import * as Utilities from '../utilities/utilities';
 
-let mapMediaStateNameToMediaStateProps : any;
+let mapMediaStateNameToMediaStateProps : any = {};
 
 export function dmCreateAssetItemFromLocalFile(
   fullPath: string,
@@ -345,10 +345,9 @@ function updateAutoplayAudio(bacMeta : any, dispatch: Function) {
   dispatch(dmUpdateSignAudioPropertyMap(audioSignPropertyMapParams));
 }
 
-function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Function) {
+function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Function) {
 
-  bacZones.forEach( (bacZone : any) => {
-
+  return new Promise( (resolve) => {
     let bsRect : BsRect = {
       x: Converters.stringToNumber(bacZone.x),
       y: Converters.stringToNumber(bacZone.y),
@@ -361,6 +360,7 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       bacZone.playlist.type === 'non-interactive'));
     console.log(actionParams);
     const zoneId = actionParams.payload.id;
+    const zoneType = actionParams.payload.type;
     // need to call dmUpdateZone - to set initialMediaStateId
 
     let viewMode : ViewModeType;
@@ -408,8 +408,8 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
     };
 
     let zonePropertyUpdateParams : ZonePropertyUpdateParams = {
-      id : bacZone.id,
-      type: bacZone.type,
+      id : zoneId,
+      type: zoneType,
       properties : videoOrImagesZonePropertyParams
     };
 
@@ -425,13 +425,15 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
     let addMediaStatePromises : Array<any> = [];
     bacStates.forEach( (bacMediaState : any) => {
 
+      let fileName;
       let filePath;
       let bsAssetItem : BsAssetItem;
       if (bacMediaState.imageItem) {
 
         const imageItem : any = bacMediaState.imageItem;
 
-        filePath = Utilities.getPoolFilePath(imageItem.file['@name']);
+        fileName = imageItem.file['@name'];
+        filePath = Utilities.getPoolFilePath(fileName);
         bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
 
         const mediaStateDuration : number = Converters.stringToNumber(imageItem.slideDelayInterval);
@@ -440,6 +442,7 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
         const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
 
         mapMediaStateNameToMediaStateProps[bacMediaState.name] = {
+          name : fileName,
           mediaStateDuration,
           transitionType,
           transitionDuration,
@@ -454,14 +457,11 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
       addMediaStatePromises.push(addMediaStatePromise);
     });
 
+    let namesToUpdateById : any = {};
+
     Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
 
-      // bogus code that was going to add videoPlayerRequired to a media state
-      // mediaStateParamActions.forEach( (mediaStateParamAction) => {
-      //   const mediaStateParams : MediaStateParams = mediaStateParamAction.payload;
-      //   const mediaState : DmcMediaState= dmGetMediaStateById(getState().bsdm, { id : mediaStateParams.id});
-      // })
-      // let state = getState().bsdm;
+      state = getState().bsdm;
 
       transitions.forEach( (bacTransition : any) => {
         console.log(bacTransition);
@@ -479,70 +479,91 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
         // TODO - need code to properly convert parameters
         const duration : number = Number(parameter);
 
-        // TODO - what is duration vs. mediaStateDuration?
-        // TODO - looks like they are set to the same value.
+        // TODO - what is duration vs. mediaStateDuration? answer - they are set to the same value.
 
         const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
-        // bogus code to add videoPlayerRequired to a media state
-        // const videoPlayerRequired : boolean = sourceMediaState.contentItem.videoPlayerRequired;
-        // dispatch(dmUpdateMediaState( {
-        //   id : sourceMediaState.id,
-        //   contentItem: {
-        //     ...sourceMediaState.contentItem,
-        //     videoPlayerRequired
-        //   }
-        // }));
-        // state = getState().bsdm;
-        // console.log(state);
-
-        const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
-        const { mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
 
         const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
+
+        const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
+        const { name, mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
+        namesToUpdateById[sourceMediaState.id] = name;
 
         // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
         const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
           { interval : duration} ));
         console.log(eventAction);
 
-        // TODO - where is the TransitionType specified? where is the TransitionDuration specified?
         const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
           targetMediaState.id, transitionType, transitionDuration));
         console.log(transitionAction);
       });
 
-      state = getState().bsdm;
-      console.log(state);
+      updateNames(namesToUpdateById, dispatch);
+      state = getState();
+
+      resolve();
     });
   });
 }
 
-export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) : DmSignState {
-
-  let state : any;
-  let signAction : SignAction;
-
-  const bacMeta = autoplayBac.BrightAuthor.meta;
-  signAction = dispatch(dmNewSign(bacMeta.name, bacMeta.videoMode, bacMeta.model));
-
-  updateAutoplaySignProperties(bacMeta, dispatch, getState);
-  updateAutoplaySerialPorts(bacMeta, dispatch);
-  updateAutoplayGpio(bacMeta, dispatch);
-  updateAutoplayButtonPanels(bacMeta, dispatch);
-  updateAutoplayAudio(bacMeta, dispatch);
-
-  let bacZones : any = [];
-  const bacZone = autoplayBac.BrightAuthor.zones;
-  if (bacZone instanceof Array) {
-    bacZones = autoplayBac.BrightAuthor.zones;
+function updateNames(namesToUpdateById : any, dispatch : Function){
+  // rename media states to something rational
+  for (let mediaStateId in namesToUpdateById) {
+    if (namesToUpdateById.hasOwnProperty(mediaStateId)) {
+      const name = namesToUpdateById[mediaStateId];
+      dispatch(dmUpdateMediaState( {
+        id : mediaStateId,
+        name
+      }));
+    }
   }
-  else {
-    bacZones = [autoplayBac.BrightAuthor.zones.zone];
-  }
+}
 
-  updateAutoplayZones(bacZones, dispatch, getState);
+function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Function) {
 
-  return dmGetSignState(getState().bsdm);
+  let promises : Array<any> = [];
+
+  return new Promise( (resolve) => {
+    bacZones.forEach( (bacZone : any) => {
+      promises.push(updateAutoplayZone(bacZone, dispatch, getState));
+    });
+    Promise.all(promises).then( () => {
+      resolve();
+    });
+  });
+}
+
+export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) {
+
+  return new Promise( (resolve) => {
+    let state : any;
+    let signAction : SignAction;
+
+    const bacMeta = autoplayBac.BrightAuthor.meta;
+    signAction = dispatch(dmNewSign(bacMeta.name, bacMeta.videoMode, bacMeta.model));
+
+    updateAutoplaySignProperties(bacMeta, dispatch, getState);
+    updateAutoplaySerialPorts(bacMeta, dispatch);
+    updateAutoplayGpio(bacMeta, dispatch);
+    updateAutoplayButtonPanels(bacMeta, dispatch);
+    updateAutoplayAudio(bacMeta, dispatch);
+
+    let bacZones : any = [];
+    const bacZone = autoplayBac.BrightAuthor.zones;
+    if (bacZone instanceof Array) {
+      bacZones = autoplayBac.BrightAuthor.zones;
+    }
+    else {
+      bacZones = [autoplayBac.BrightAuthor.zones.zone];
+    }
+
+    updateAutoplayZones(bacZones, dispatch, getState).then( () => {
+      resolve();
+    });
+  })
+
+  // return dmGetSignState(getState().bsdm);
 }
 
 export function convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
