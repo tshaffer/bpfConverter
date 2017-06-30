@@ -219,7 +219,6 @@ function updateAutoplaySignProperties(bacMeta : any, dispatch: Function, getStat
       videoConnector,
     })
   );
-
 }
 
 function updateAutoplaySerialPorts(bacMeta : any, dispatch: Function) {
@@ -302,7 +301,7 @@ function updateAutoplayAudio(bacMeta : any, dispatch: Function) {
   let audioSignPropertyMap : DmAudioSignPropertyMap = {};
   let audioSignProperties : DmAudioSignProperties;
 
-  let badAudioNames : Array<string> = [
+  let bacAudioNames : Array<string> = [
     'audio1',
     'audio2',
     'audio3',
@@ -314,7 +313,7 @@ function updateAutoplayAudio(bacMeta : any, dispatch: Function) {
     'hdmi',
   ];
 
-  for (let bacAudioName of badAudioNames) {
+  for (let bacAudioName of bacAudioNames) {
     audioSignProperties = {
       min : Converters.stringToNumber(bacMeta[bacAudioName + 'MinVolume']),
       max : Converters.stringToNumber(bacMeta[bacAudioName + 'MaxVolume'])
@@ -345,75 +344,92 @@ function updateAutoplayAudio(bacMeta : any, dispatch: Function) {
   dispatch(dmUpdateSignAudioPropertyMap(audioSignPropertyMapParams));
 }
 
+function createZone(bacZone : any, dispatch : Function) : any {
+
+  let bsRect : BsRect = {
+    x: Converters.stringToNumber(bacZone.x),
+    y: Converters.stringToNumber(bacZone.y),
+    width: Converters.stringToNumber(bacZone.width),
+    height: Converters.stringToNumber(bacZone.height),
+    pct: false
+  };
+
+  const actionParams : BsDmAction<ZoneParams> = dispatch(dmAddZone(bacZone.name, bacZone.type, bacZone.id, bsRect,
+    bacZone.playlist.type === 'non-interactive'));
+  console.log(actionParams);
+  const zoneId = actionParams.payload.id;
+  const zoneType = actionParams.payload.type;
+  // need to call dmUpdateZone - to set initialMediaStateId
+
+  return {
+    zoneId,
+    zoneType
+  };
+}
+
+function convertZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any, dispatch : Function) {
+
+  let viewMode : ViewModeType;
+  switch (bacZone.viewMode) {
+    case 'Fill Screen and Centered': {
+      viewMode = ViewModeType.FillAndCenter;
+      break;
+    }
+    case 'Scale to Fill': {
+      viewMode = ViewModeType.ScaleToFill;
+      break;
+    }
+    default: {
+      viewMode = ViewModeType.Letterboxed;
+      break;
+    }
+  }
+
+  let zoneSpecificParameters : any = bacZone.zoneSpecificParameters;
+
+  // TODO - maxContentResolution
+  // TODO - mosaic decoder name
+  // TODO - audioOutputAssignments : DmAudioOutputAssignmentMap;
+  // TODO - enumerate all values output by BAC
+
+  let videoOrImagesZonePropertyParams : VideoOrImagesZonePropertyParams = {
+    viewMode : viewMode,
+    liveVideoInput : zoneSpecificParameters.liveVideoInput,
+    liveVideoStandard : zoneSpecificParameters.liveVideoStandard,
+    videoVolume : Converters.stringToNumber(zoneSpecificParameters.videoVolume),
+    brightness : Converters.stringToNumber(zoneSpecificParameters.brightness),
+    contrast : Converters.stringToNumber(zoneSpecificParameters.contrast),
+    saturation : Converters.stringToNumber(zoneSpecificParameters.saturation),
+    hue : Converters.stringToNumber(zoneSpecificParameters.hue),
+    zOrderFront : Converters.stringToBool(zoneSpecificParameters.zOrderFront),
+    mosaic : Converters.stringToBool(zoneSpecificParameters.mosaic),
+    maxContentResolution : MosaicMaxContentResolutionType.NotApplicable,
+    audioOutput : Converters.getAudioOutput(zoneSpecificParameters.audioOutput),
+    audioMode : Converters.getAudioMode(zoneSpecificParameters.audioMode),
+    audioMapping : Converters.getAudioMapping(zoneSpecificParameters.audioMapping),
+    audioMixMode : Converters.getAudioMixMode(zoneSpecificParameters.audioMixMode),
+    minimumVolume : Converters.stringToNumber(zoneSpecificParameters.minimumVolume),
+    maximumVolume : Converters.stringToNumber(zoneSpecificParameters.maximumVolume),
+    imageMode: ImageModeType.ScaleToFill,
+  };
+
+  let zonePropertyUpdateParams : ZonePropertyUpdateParams = {
+    id : zoneId,
+    type: zoneType,
+    properties : videoOrImagesZonePropertyParams
+  };
+
+  dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
+}
+
 function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Function) {
 
   return new Promise( (resolve) => {
-    let bsRect : BsRect = {
-      x: Converters.stringToNumber(bacZone.x),
-      y: Converters.stringToNumber(bacZone.y),
-      width: Converters.stringToNumber(bacZone.width),
-      height: Converters.stringToNumber(bacZone.height),
-      pct: false
-    };
 
-    const actionParams : BsDmAction<ZoneParams> = dispatch(dmAddZone(bacZone.name, bacZone.type, bacZone.id, bsRect,
-      bacZone.playlist.type === 'non-interactive'));
-    console.log(actionParams);
-    const zoneId = actionParams.payload.id;
-    const zoneType = actionParams.payload.type;
-    // need to call dmUpdateZone - to set initialMediaStateId
+    const zoneIdParams : any = createZone(bacZone, dispatch);
+    const { zoneId, zoneType } = zoneIdParams;
 
-    let viewMode : ViewModeType;
-    switch (bacZone.viewMode) {
-      case 'Fill Screen and Centered': {
-        viewMode = ViewModeType.FillAndCenter;
-        break;
-      }
-      case '?0': {
-        viewMode = ViewModeType.ScaleToFill;
-        break;
-      }
-      default: {
-        viewMode = ViewModeType.Letterboxed;
-        break;
-      }
-    }
-
-    let zoneSpecificParameters : any = bacZone.zoneSpecificParameters;
-
-    // TODO - maxContentResolution
-    // TODO - mosaic decoder name
-    // TODO - audioOutputAssignments : DmAudioOutputAssignmentMap;
-    // TODO - enumerate all values output by BAC
-
-    let videoOrImagesZonePropertyParams : VideoOrImagesZonePropertyParams = {
-      viewMode : viewMode,
-      liveVideoInput : zoneSpecificParameters.liveVideoInput,
-      liveVideoStandard : zoneSpecificParameters.liveVideoStandard,
-      videoVolume : Converters.stringToNumber(zoneSpecificParameters.videoVolume),
-      brightness : Converters.stringToNumber(zoneSpecificParameters.brightness),
-      contrast : Converters.stringToNumber(zoneSpecificParameters.contrast),
-      saturation : Converters.stringToNumber(zoneSpecificParameters.saturation),
-      hue : Converters.stringToNumber(zoneSpecificParameters.hue),
-      zOrderFront : Converters.stringToBool(zoneSpecificParameters.zOrderFront),
-      mosaic : Converters.stringToBool(zoneSpecificParameters.mosaic),
-      maxContentResolution : MosaicMaxContentResolutionType.NotApplicable,
-      audioOutput : Converters.getAudioOutput(zoneSpecificParameters.audioOutput),
-      audioMode : Converters.getAudioMode(zoneSpecificParameters.audioMode),
-      audioMapping : Converters.getAudioMapping(zoneSpecificParameters.audioMapping),
-      audioMixMode : Converters.getAudioMixMode(zoneSpecificParameters.audioMixMode),
-      minimumVolume : Converters.stringToNumber(zoneSpecificParameters.minimumVolume),
-      maximumVolume : Converters.stringToNumber(zoneSpecificParameters.maximumVolume),
-      imageMode: ImageModeType.ScaleToFill,
-    };
-
-    let zonePropertyUpdateParams : ZonePropertyUpdateParams = {
-      id : zoneId,
-      type: zoneType,
-      properties : videoOrImagesZonePropertyParams
-    };
-
-    dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
+    convertZoneProperties(zoneId, zoneType, bacZone, dispatch);
 
     let state = getState().bsdm;
 
@@ -508,6 +524,7 @@ function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Funct
 }
 
 function updateNames(namesToUpdateById : any, dispatch : Function){
+
   // rename media states to something rational
   for (let mediaStateId in namesToUpdateById) {
     if (namesToUpdateById.hasOwnProperty(mediaStateId)) {
