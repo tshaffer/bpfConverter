@@ -15,16 +15,9 @@ import {
   VideoConnectorType,
   BsColor,
   GpioType,
-  AudioOutputType,
-  ZoneType,
   BsRect,
-  LiveVideoInputType,
   ViewModeType,
   MosaicMaxContentResolutionType,
-  AudioOutputSelectionType,
-  AudioModeType,
-  AudioMappingType,
-  AudioMixModeType,
   ImageModeType,
   EventType,
   MediaType,
@@ -37,25 +30,18 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-  dmGetMediaStateById,
   DmcMediaState,
-  EventParams,
   dmGetMediaStateByName,
-  DmCondition,
   TransitionAction,
   dmAddTransition,
-  DmTimer,
   dmAddEvent,
   BsDmId,
-  DmEventData,
   EventAction,
   MediaStateParams,
   dmGetZoneMediaStateContainer,
   BsDmAction,
   ZoneParams,
   dmAddMediaState,
-  // dmCreateAssetItemFromLocalFile,
-  DmAudioOutputAssignmentMap,
   DmSignState,
   dmGetSignState,
   dmNewSign, DmSignMetadata, DmSignProperties,
@@ -78,30 +64,18 @@ import {
   AudioSignPropertyMapParams,
   dmUpdateZoneProperties,
   ZonePropertyUpdateParams,
-  BsDmThunkAction,
   VideoOrImagesZonePropertyParams,
-  DmVideoOrImagesZoneProperties,
-  DmVideoZoneProperties,
-  DmImageZoneProperties,
-  DmAudioZoneProperties,
-  DmVideoZonePropertyData,
-  DmImageZonePropertyData,
-  DmAudioZonePropertyData,
 } from '@brightsign/bsdatamodel';
 
 import {
-  ArEventType,
   ArSyncSpec,
-  ArSyncSpecDownload,
-  ArState,
-  ArFileLUT,
 } from '../types';
 
 import * as Converters from './converters';
 import * as Utilities from '../utilities/utilities';
 
-let mapMediaStateNameToMediaStateProps : any = {};
-let namesToUpdateById : any = {};
+let mapBacMediaStateNameToMediaStateProps : any = {};
+let mediaStateNamesToUpdateByMediaStateId : any = {};
 
 export function dmCreateAssetItemFromLocalFile(
   fullPath: string,
@@ -446,7 +420,7 @@ function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : a
       const transitionDuration : number = Converters.stringToNumber(imageItem.transitionDuration);
       const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
 
-      mapMediaStateNameToMediaStateProps[bacMediaState.name] = {
+      mapBacMediaStateNameToMediaStateProps[bacMediaState.name] = {
         name : fileName,
         mediaStateDuration,
         transitionType,
@@ -493,9 +467,9 @@ function addTransitions(bacZone : any, dispatch : Function, getState : Function)
 
     const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
 
-    const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
+    const mediaStateProps : any = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
     const { name, mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
-    namesToUpdateById[sourceMediaState.id] = name;
+    mediaStateNamesToUpdateByMediaStateId[sourceMediaState.id] = name;
 
     // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
     const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
@@ -522,7 +496,7 @@ function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Funct
     const addMediaStatePromises : any = addMediaStates(zoneId, bacZone, dispatch);
     Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
       addTransitions(bacZone, dispatch, getState);
-      updateNames(namesToUpdateById, dispatch);
+      updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
       resolve();
     });
   });
