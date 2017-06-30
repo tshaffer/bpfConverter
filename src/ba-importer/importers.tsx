@@ -101,6 +101,7 @@ import * as Converters from './converters';
 import * as Utilities from '../utilities/utilities';
 
 let mapMediaStateNameToMediaStateProps : any = {};
+let namesToUpdateById : any = {};
 
 export function dmCreateAssetItemFromLocalFile(
   fullPath: string,
@@ -367,7 +368,7 @@ function createZone(bacZone : any, dispatch : Function) : any {
   };
 }
 
-function convertZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any, dispatch : Function) {
+function setZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any, dispatch : Function) {
 
   let viewMode : ViewModeType;
   switch (bacZone.viewMode) {
@@ -422,102 +423,106 @@ function convertZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any
   dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
 }
 
+function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : any {
+
+  const bacStates = bacZone.playlist.states.state;
+
+  let addMediaStatePromises : Array<any> = [];
+  bacStates.forEach( (bacMediaState : any) => {
+
+    let fileName;
+    let filePath;
+    let bsAssetItem : BsAssetItem;
+    if (bacMediaState.imageItem) {
+
+      const imageItem : any = bacMediaState.imageItem;
+
+      fileName = imageItem.file['@name'];
+      filePath = Utilities.getPoolFilePath(fileName);
+      bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+
+      const mediaStateDuration : number = Converters.stringToNumber(imageItem.slideDelayInterval);
+      const transitionType : TransitionType = Converters.getTransitionType(imageItem.slideTransition);
+      const transitionDuration : number = Converters.stringToNumber(imageItem.transitionDuration);
+      const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
+
+      mapMediaStateNameToMediaStateProps[bacMediaState.name] = {
+        name : fileName,
+        mediaStateDuration,
+        transitionType,
+        transitionDuration,
+        videoPlayerRequired
+      }
+    }
+    else if (bacMediaState.videoItem) {
+      debugger;
+    }
+
+    const addMediaStatePromise : Promise<BsDmAction<MediaStateParams>> = dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem));
+    addMediaStatePromises.push(addMediaStatePromise);
+  });
+
+  return addMediaStatePromises;
+}
+
+function addTransitions(bacZone : any, dispatch : Function, getState : Function) {
+
+  const state = getState().bsdm;
+
+  const transitions = bacZone.playlist.states.transition;
+
+  transitions.forEach( (bacTransition : any) => {
+    console.log(bacTransition);
+
+    // TODO I don't see the following 3 variables used in bsdm - ??
+    const assignInputToUserVariable : boolean = Converters.stringToBool(bacTransition.assignInputToUserVariable);
+    const assignWildcardToUserVariable : boolean = Converters.stringToBool(bacTransition.assignWildcardToUserVariable);
+    const remainOnCurrentStateActions : string = bacTransition.remainOnCurrentStateActions;
+    const sourceMediaStateName : string = bacTransition.sourceMediaState;
+    const targetMediaStateName : string = bacTransition.targetMediaState;
+    const userEvent : any = bacTransition.userEvent;
+    const userEventName : string = userEvent.name;
+    const parameters : any = userEvent.parameters;
+    const parameter : string = parameters.parameter;
+    // TODO - need code to properly convert parameters
+    const duration : number = Number(parameter);
+
+    // TODO - what is duration vs. mediaStateDuration? answer - they are set to the same value.
+
+    const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
+
+    const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
+
+    const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
+    const { name, mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
+    namesToUpdateById[sourceMediaState.id] = name;
+
+    // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
+    const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
+      { interval : duration} ));
+    console.log(eventAction);
+
+    const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
+      targetMediaState.id, transitionType, transitionDuration));
+    console.log(transitionAction);
+  });
+}
+
+
 function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Function) {
 
   return new Promise( (resolve) => {
 
-    const zoneIdParams : any = createZone(bacZone, dispatch);
-    const { zoneId, zoneType } = zoneIdParams;
+    let { zoneId, zoneType } = createZone(bacZone, dispatch);
 
-    convertZoneProperties(zoneId, zoneType, bacZone, dispatch);
+    setZoneProperties(zoneId, zoneType, bacZone, dispatch);
 
-    let state = getState().bsdm;
-
-    // add media states, etc.
     const initialMediaStateId = bacZone.playlist.states.initialState;
-    const bacStates = bacZone.playlist.states.state;
-    const transitions = bacZone.playlist.states.transition;
 
-    let addMediaStatePromises : Array<any> = [];
-    bacStates.forEach( (bacMediaState : any) => {
-
-      let fileName;
-      let filePath;
-      let bsAssetItem : BsAssetItem;
-      if (bacMediaState.imageItem) {
-
-        const imageItem : any = bacMediaState.imageItem;
-
-        fileName = imageItem.file['@name'];
-        filePath = Utilities.getPoolFilePath(fileName);
-        bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
-
-        const mediaStateDuration : number = Converters.stringToNumber(imageItem.slideDelayInterval);
-        const transitionType : TransitionType = Converters.getTransitionType(imageItem.slideTransition);
-        const transitionDuration : number = Converters.stringToNumber(imageItem.transitionDuration);
-        const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
-
-        mapMediaStateNameToMediaStateProps[bacMediaState.name] = {
-          name : fileName,
-          mediaStateDuration,
-          transitionType,
-          transitionDuration,
-          videoPlayerRequired
-        }
-      }
-      else if (bacMediaState.videoItem) {
-        debugger;
-      }
-
-      const addMediaStatePromise : Promise<BsDmAction<MediaStateParams>> = dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem));
-      addMediaStatePromises.push(addMediaStatePromise);
-    });
-
-    let namesToUpdateById : any = {};
-
+    const addMediaStatePromises : any = addMediaStates(zoneId, bacZone, dispatch);
     Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
-
-      state = getState().bsdm;
-
-      transitions.forEach( (bacTransition : any) => {
-        console.log(bacTransition);
-
-        // TODO I don't see the following 3 variables used in bsdm - ??
-        const assignInputToUserVariable : boolean = Converters.stringToBool(bacTransition.assignInputToUserVariable);
-        const assignWildcardToUserVariable : boolean = Converters.stringToBool(bacTransition.assignWildcardToUserVariable);
-        const remainOnCurrentStateActions : string = bacTransition.remainOnCurrentStateActions;
-        const sourceMediaStateName : string = bacTransition.sourceMediaState;
-        const targetMediaStateName : string = bacTransition.targetMediaState;
-        const userEvent : any = bacTransition.userEvent;
-        const userEventName : string = userEvent.name;
-        const parameters : any = userEvent.parameters;
-        const parameter : string = parameters.parameter;
-        // TODO - need code to properly convert parameters
-        const duration : number = Number(parameter);
-
-        // TODO - what is duration vs. mediaStateDuration? answer - they are set to the same value.
-
-        const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
-
-        const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
-
-        const mediaStateProps : any = mapMediaStateNameToMediaStateProps[sourceMediaState.name];
-        const { name, mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
-        namesToUpdateById[sourceMediaState.id] = name;
-
-        // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
-        const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
-          { interval : duration} ));
-        console.log(eventAction);
-
-        const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
-          targetMediaState.id, transitionType, transitionDuration));
-        console.log(transitionAction);
-      });
-
+      addTransitions(bacZone, dispatch, getState);
       updateNames(namesToUpdateById, dispatch);
-      state = getState();
-
       resolve();
     });
   });
@@ -579,8 +584,6 @@ export function convertAutoplay(autoplayBac : any, dispatch: Function, getState 
       resolve();
     });
   })
-
-  // return dmGetSignState(getState().bsdm);
 }
 
 export function convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
