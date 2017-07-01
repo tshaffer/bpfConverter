@@ -1,3 +1,9 @@
+import fs = require('fs');
+import path = require('path');
+
+const StringDecoder = require('string_decoder').StringDecoder;
+const decoder = new StringDecoder('utf8');
+
 import {
   AssetLocation,
   bscGetLocalAssetLocator,
@@ -67,12 +73,13 @@ import {
   VideoOrImagesZonePropertyParams,
 } from '@brightsign/bsdatamodel';
 
-import {
-  ArSyncSpec,
-} from '../types';
-
 import * as Converters from './converters';
 import * as Utilities from '../utilities/utilities';
+
+import {
+  setPoolAssetFiles,
+} from '../utilities/utilities';
+
 
 let mapBacMediaStateNameToMediaStateProps : any = {};
 let mediaStateNamesToUpdateByMediaStateId : any = {};
@@ -95,6 +102,216 @@ export function dmCreateAssetItemFromLocalFile(
     mediaType: mediaType ? mediaType : bscGetFileMediaType(name),
   };
 }
+
+type ArFileLUT = { [fileName:string]: string };
+
+interface ArSyncSpecHash {
+  method : string;
+  hex : string;
+}
+
+interface ArSyncSpecDownload {
+  name : string;
+  hash : ArSyncSpecHash;
+  size : number;
+  link : string;
+}
+
+export interface ArSyncSpec {
+  meta : any;
+  files : any;
+}
+
+export function importPublishedFiles(rootPath : string, dispatch : Function, getState : Function) : Promise<any> {
+
+  return new Promise( (resolve, reject) => {
+    // TODO - first pass, assume local-sync.json
+    getSyncSpec(rootPath).then( (syncSpec) => {
+
+      const poolAssetFiles: ArFileLUT = buildPoolAssetFiles(syncSpec, rootPath);
+      setPoolAssetFiles(poolAssetFiles);
+      getAutoschedule(syncSpec, rootPath).then((autoSchedule: any) => {
+
+        // TODO - only a single scheduled item is currently supported
+
+        const scheduledPresentation = autoSchedule.scheduledPresentations[0];
+        const presentationToSchedule = scheduledPresentation.presentationToSchedule;
+        const presentationName = presentationToSchedule.name;
+
+        const autoplayFileName = 'autoplay-' + presentationName + '.json';
+        getSyncSpecReferencedFile(autoplayFileName, syncSpec, rootPath).then((autoPlay: object) => {
+          console.log(autoPlay);
+
+          autoPlay = convertAutoplay(autoPlay, dispatch, getState).then(() => {
+            console.log(getState());
+            debugger;
+          });
+        });
+      });
+    });
+  });
+}
+
+function getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) {
+
+  return new Promise( (resolve) => {
+    getSyncSpecReferencedFile('autoschedule.json', syncSpec, rootPath).then( (autoScheduleBac : any) => {
+      const autoSchedule = convertAutoschedule(autoScheduleBac);
+      resolve(autoSchedule);
+    });
+  });
+}
+
+function getSyncSpecReferencedFile(fileName: string, syncSpec: ArSyncSpec, rootPath: string): Promise<object> {
+
+  return new Promise<object>((resolve: Function, reject: Function) => {
+
+    const syncSpecFile: ArSyncSpecDownload = getFile(syncSpec, fileName);
+    if (syncSpecFile == null) {
+      debugger;
+      // syncSpecFile = { };    // required to eliminate flow warnings
+    }
+
+    // const fileSize = syncSpecFile.size;
+    const filePath: string = path.join(rootPath, syncSpecFile.link);
+
+    fs.readFile(filePath, (err: Error, dataBuffer: Buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        const fileStr: string = decoder.write(dataBuffer);
+        const file: object = JSON.parse(fileStr);
+
+        // I have commented out the following code to allow hacking of files -
+        // that is, overwriting files in the pool without updating the sync spec with updated sha1
+        // if (fileSize !== fileStr.length) {
+        //   debugger;
+        // }
+        resolve(file);
+      }
+    });
+  });
+}
+
+function getFile(syncSpec: ArSyncSpec, fileName: string): ArSyncSpecDownload {
+
+  let file: ArSyncSpecDownload = null;
+
+  syncSpec.files.download.forEach((syncSpecFile: ArSyncSpecDownload) => {
+    if (syncSpecFile.name === fileName) {
+      file = syncSpecFile;
+      return;
+    }
+  });
+
+  return file;
+}
+
+function buildPoolAssetFiles(syncSpec: ArSyncSpec, pathToPool: string): ArFileLUT {
+
+  const poolAssetFiles: ArFileLUT = {};
+
+  syncSpec.files.download.forEach((syncSpecFile: ArSyncSpecDownload) => {
+    poolAssetFiles[syncSpecFile.name] = path.join(pathToPool, syncSpecFile.link);
+  });
+
+  return poolAssetFiles;
+}
+
+
+// TODO - write syncSpec (and all converted files)? or just leave them in memory? or make this configurable?
+function getSyncSpec(syncSpecDirectory : string) : Promise<ArSyncSpec> {
+  return new Promise( (resolve, reject) => {
+    const bacSyncSpecFilePath = path.join(syncSpecDirectory, "local-sync.json");
+    readJsonFile(bacSyncSpecFilePath).then( (bacSyncSpec) => {
+      const syncSpec: ArSyncSpec = convertSyncSpec(bacSyncSpec);
+      resolve(syncSpec);
+    })
+  });
+}
+
+export function convertSyncSpec(bacSyncSpec : any) : ArSyncSpec {
+
+  let syncSpec : ArSyncSpec = {
+    meta : {},
+    files : {}
+  };
+
+  syncSpec.meta = {};
+  syncSpec.meta.server = {};
+
+  let client : any = {};
+  let clientKeys : Array<string> = [
+    'diagnosticLoggingEnabled',
+    'enableSerialDebugging',
+    'enableSystemLogDebugging',
+    'eventLoggingEnabled',
+    'limitStorageSpace',
+    'playbackLoggingEnabled',
+    'stateLoggingEnabled',
+    'uploadLogFilesAtBoot',
+    'uploadLogFilesAtSpecificTime',
+    'uploadLogFilesTime',
+    'variableLoggingEnabled'
+  ]
+  for (let clientKey of clientKeys) {
+    client[clientKey] = bacSyncSpec.sync.meta.client[clientKey];
+  }
+  // TODO - some of these types are WRONG
+  syncSpec.meta.client = client;
+
+  syncSpec.files = {};
+
+  syncSpec.files.delete = bacSyncSpec.sync.files.delete;
+
+  syncSpec.files.ignore = bacSyncSpec.sync.files.ignore;
+
+  syncSpec.files.download = [];
+
+  bacSyncSpec.sync.files.download.forEach( (downloadRaw : any) => {
+    let download : any = {};
+    download.link = downloadRaw.link;
+    download.name = downloadRaw.name;
+    download.size = Number(downloadRaw.size);
+    download.hash = {};
+    download.hash.hex = downloadRaw.hash['#text'];
+    download.hash.method = downloadRaw.hash['@method'];
+
+    syncSpec.files.download.push(download);
+  });
+
+  return syncSpec;
+}
+
+
+
+
+
+
+// read a json file - convert to json object
+function readJsonFile(filePath : string) : Promise<any> {
+
+  return new Promise<any>((resolve: Function, reject: Function) => {
+
+    fs.readFile(filePath, (err: Error, dataBuffer: Buffer) => {
+
+      if (err) {
+        reject(err);
+      } else {
+        const fileContents: string = decoder.write(dataBuffer);
+        const fileContentsJson : any = JSON.parse(fileContents);
+        resolve(fileContentsJson);
+
+        // TODO - how does the code know whether this is a BAC sync spec?
+        // const syncSpec: ArSyncSpec = JSON.parse(syncSpecStr);
+        const syncSpec: ArSyncSpec = convertSyncSpec(fileContentsJson);
+        resolve(syncSpec);
+      }
+    });
+  });
+
+}
+
 export function convertAutoschedule(autoScheduleBac : any) : any {
 
   // only works now for a single scheduledPresentation
@@ -558,58 +775,5 @@ export function convertAutoplay(autoplayBac : any, dispatch: Function, getState 
       resolve();
     });
   })
-}
-
-export function convertSyncSpec(syncSpecRaw : any) : ArSyncSpec {
-
-  let syncSpec : ArSyncSpec = {
-    meta : {},
-    files : {}
-  };
-
-  syncSpec.meta = {};
-  syncSpec.meta.server = {};
-
-  let client : any = {};
-  let clientKeys : Array<string> = [
-    'diagnosticLoggingEnabled',
-    'enableSerialDebugging',
-    'enableSystemLogDebugging',
-    'eventLoggingEnabled',
-    'limitStorageSpace',
-    'playbackLoggingEnabled',
-    'stateLoggingEnabled',
-    'uploadLogFilesAtBoot',
-    'uploadLogFilesAtSpecificTime',
-    'uploadLogFilesTime',
-    'variableLoggingEnabled'
-  ]
-  for (let clientKey of clientKeys) {
-    client[clientKey] = syncSpecRaw.sync.meta.client[clientKey];
-  }
-  // TODO - some of these types are WRONG
-  syncSpec.meta.client = client;
-
-  syncSpec.files = {};
-
-  syncSpec.files.delete = syncSpecRaw.sync.files.delete;
-
-  syncSpec.files.ignore = syncSpecRaw.sync.files.ignore;
-
-  syncSpec.files.download = [];
-
-  syncSpecRaw.sync.files.download.forEach( (downloadRaw : any) => {
-    let download : any = {};
-    download.link = downloadRaw.link;
-    download.name = downloadRaw.name;
-    download.size = Number(downloadRaw.size);
-    download.hash = {};
-    download.hash.hex = downloadRaw.hash['#text'];
-    download.hash.method = downloadRaw.hash['@method'];
-
-    syncSpec.files.download.push(download);
-  });
-
-  return syncSpec;
 }
 

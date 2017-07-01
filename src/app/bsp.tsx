@@ -34,10 +34,11 @@ import {
 import PlatformService from '../platform';
 
 import {
+  importPublishedFiles,
   convertAutoplay,
   convertAutoschedule,
   convertSyncSpec,
-} from '../ba-importer/importers';
+} from '../ba-importer/importer';
 
 import {
   setPoolAssetFiles,
@@ -98,6 +99,17 @@ export class BSP {
     }
   }
 
+  importBAPublishedFiles(rootPath : any): Promise<any> {
+
+    return new Promise( (resolve, reject) => {
+      importPublishedFiles(rootPath, this.dispatch, this.getState).then( () => {
+        console.log(this.getState());
+        debugger;
+        resolve();
+      });
+    });
+  }
+
   initialize(reduxStore: Store<ArState>) {
 
     console.log('bsp initialization');
@@ -110,6 +122,10 @@ export class BSP {
     console.log(PlatformService);
     const rootPath = PlatformService.default.getRootDirectory();
     const pathToPool = PlatformService.default.getPathToPool();
+
+    this.importBAPublishedFiles(rootPath).then( () => {
+      debugger;
+    });
 
     let state: ArState;
 
