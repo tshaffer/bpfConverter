@@ -35,9 +35,6 @@ import PlatformService from '../platform';
 
 import {
   importPublishedFiles,
-  convertAutoplay,
-  convertAutoschedule,
-  convertSyncSpec,
 } from '../ba-importer/importer';
 
 import {
@@ -215,14 +212,14 @@ export class BSP {
         const presentationName = presentationToSchedule.name;
 
         // for bacon
-        // const autoplayFileName = presentationName + '.bml';
+        const autoplayFileName = presentationName + '.bml';
         // for bac
-        const autoplayFileName = 'autoplay-' + presentationName + '.json';
+        // const autoplayFileName = 'autoplay-' + presentationName + '.json';
         this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
           console.log(autoPlay);
 
-          const signState : DmSignState = dmGetSignState(this.getState().bsdm);
-          // const signState = autoPlay as DmSignState;
+          // const signState : DmSignState = dmGetSignState(this.getState().bsdm);
+          const signState = autoPlay as DmSignState;
           this.dispatch(dmOpenSign(signState));
 
           // get data feeds for the sign
