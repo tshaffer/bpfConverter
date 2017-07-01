@@ -1,6 +1,7 @@
 class DesktopPlatformService {
 
-  static srcDirectory = '/Users/tedshaffer/Desktop/aaa_bac';
+  // static srcDirectory = '/Users/tedshaffer/Desktop/aaa_bac';
+  static srcDirectory = '/Users/tedshaffer/Desktop/baconTestCard';
 
   static getRootDirectory(): string {
     return DesktopPlatformService.srcDirectory;

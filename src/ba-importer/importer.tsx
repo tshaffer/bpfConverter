@@ -124,27 +124,31 @@ export interface ArSyncSpec {
 
 export function importPublishedFiles(rootPath : string, dispatch : Function, getState : Function) : Promise<any> {
 
+  let convertedPackage : any = {};
+
   return new Promise( (resolve, reject) => {
     // TODO - first pass, assume local-sync.json
     getSyncSpec(rootPath).then( (syncSpec) => {
+
+      convertedPackage.syncSpec = syncSpec;
 
       const poolAssetFiles: ArFileLUT = buildPoolAssetFiles(syncSpec, rootPath);
       setPoolAssetFiles(poolAssetFiles);
       getAutoschedule(syncSpec, rootPath).then((autoSchedule: any) => {
 
-        // TODO - only a single scheduled item is currently supported
+        convertedPackage.autoSchedule = autoSchedule;
 
+        // TODO - only a single scheduled item is currently supported
         const scheduledPresentation = autoSchedule.scheduledPresentations[0];
         const presentationToSchedule = scheduledPresentation.presentationToSchedule;
         const presentationName = presentationToSchedule.name;
 
         const autoplayFileName = 'autoplay-' + presentationName + '.json';
         getSyncSpecReferencedFile(autoplayFileName, syncSpec, rootPath).then((autoPlay: object) => {
-          console.log(autoPlay);
-
-          autoPlay = convertAutoplay(autoPlay, dispatch, getState).then(() => {
+          convertAutoplay(autoPlay, dispatch, getState).then(() => {
             console.log(getState());
             debugger;
+            resolve(convertedPackage);
           });
         });
       });
@@ -282,11 +286,6 @@ export function convertSyncSpec(bacSyncSpec : any) : ArSyncSpec {
 
   return syncSpec;
 }
-
-
-
-
-
 
 // read a json file - convert to json object
 function readJsonFile(filePath : string) : Promise<any> {

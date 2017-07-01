@@ -78,7 +78,7 @@ import
 
 import {
   addDataFeed
-} from '../store/dataFeeds';
+} from   '../store/dataFeeds';
 
 let _singleton: BSP = null;
 
@@ -88,6 +88,7 @@ export class BSP {
   dispatch: Function;
   getState: Function;
   syncSpec: ArSyncSpec;
+  autoSchedule : any;
   hsmList: HSM[];
   playerHSM: PlayerHSM;
   liveDataFeedsToDownload: DataFeed[];
@@ -102,10 +103,10 @@ export class BSP {
   importBAPublishedFiles(rootPath : any): Promise<any> {
 
     return new Promise( (resolve, reject) => {
-      importPublishedFiles(rootPath, this.dispatch, this.getState).then( () => {
+      importPublishedFiles(rootPath, this.dispatch, this.getState).then( (convertedPackage : any) => {
         console.log(this.getState());
         debugger;
-        resolve();
+        resolve(convertedPackage);
       });
     });
   }
@@ -123,36 +124,46 @@ export class BSP {
     const rootPath = PlatformService.default.getRootDirectory();
     const pathToPool = PlatformService.default.getPathToPool();
 
-    this.importBAPublishedFiles(rootPath).then( () => {
-      debugger;
-    });
+    let importBAFiles = false;
 
-    let state: ArState;
+    if (importBAFiles) {
+      this.importBAPublishedFiles(rootPath).then( (convertedPackage) => {
+        this.syncSpec = convertedPackage.syncSpec;
+        this.autoSchedule = convertedPackage.autoSchedule;
+        debugger;
+      });
+    }
+    else {
+      this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
 
-    this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
+        console.log(cardSyncSpec);
 
-      console.log(cardSyncSpec);
+        this.syncSpec = cardSyncSpec;
 
-      this.syncSpec = cardSyncSpec;
+        // FileNameToFilePathLUT
+        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
+        setPoolAssetFiles(poolAssetFiles);
 
-      // FileNameToFilePathLUT
-      const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
-      console.log(poolAssetFiles);
+        this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
+          this.autoSchedule = autoSchedule;
+          this.postInit();
+        });
 
-      setPoolAssetFiles(poolAssetFiles);
+      }).catch((err: Error) => {
+        console.log(err);
+        debugger;
+      });
+    }
+  }
 
-      state = this.store.getState();
+  postInit() {
 
+    let state = this.getState();
 // Create player state machine
-      this.playerHSM = new PlayerHSM(this, this.dispatch, this.getState, state.bsdm);
+    this.playerHSM = new PlayerHSM(this, this.dispatch, this.getState, state.bsdm);
 
 // Zone state machines are created by the Player state machine when it parses the schedule and autoplay files
-      this.playerHSM.initialize();
-
-    }).catch((err: Error) => {
-      console.log(err);
-      debugger;
-    });
+    this.playerHSM.initialize();
   }
 
   startPlayback() {
@@ -210,32 +221,28 @@ export class BSP {
         this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
           console.log(autoPlay);
 
-          autoPlay = convertAutoplay(autoPlay, this.dispatch, this.getState).then( () => {
+          const signState : DmSignState = dmGetSignState(this.getState().bsdm);
+          // const signState = autoPlay as DmSignState;
+          this.dispatch(dmOpenSign(signState));
 
-            const signState : DmSignState = dmGetSignState(this.getState().bsdm);
-            // const signState = autoPlay as DmSignState;
-            this.dispatch(dmOpenSign(signState));
+          // get data feeds for the sign
+          const bsdm: DmState = this.getState().bsdm;
+          const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
+          dataFeedIds.forEach((dataFeedId: BsDmId) => {
+            const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
 
-            // get data feeds for the sign
-            const bsdm: DmState = this.getState().bsdm;
-            const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
-            dataFeedIds.forEach((dataFeedId: BsDmId) => {
-              const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
-
-              if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
-                const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
-                this.dispatch(addDataFeed(dataFeed));
-              } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
-                const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
-                this.dispatch(addDataFeed(dataFeed));
-              } else {
-                debugger;
-              }
-            });
-
-            resolve();
-
+            if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
+              const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
+              this.dispatch(addDataFeed(dataFeed));
+            } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+              const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
+              this.dispatch(addDataFeed(dataFeed));
+            } else {
+              debugger;
+            }
           });
+
+          resolve();
 
         });
       });
@@ -260,14 +267,13 @@ export class BSP {
   }
 
   getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) {
-    // return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
-
-    return new Promise( (resolve) => {
-      this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath).then( (autoScheduleBac) => {
-        const autoSchedule = convertAutoschedule(autoScheduleBac);
-        resolve(autoSchedule);
-      });
-    });
+    return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
+    // return new Promise( (resolve) => {
+    //   this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath).then( (autoSchedule) => {
+    //     // const autoSchedule = convertAutoschedule(autoScheduleBac);
+    //     resolve(autoSchedule);
+    //   });
+    // });
   }
 
   openSyncSpec(filePath: string = ''): Promise<ArSyncSpec> {
@@ -280,11 +286,7 @@ export class BSP {
           reject(err);
         } else {
           const syncSpecStr: string = decoder.write(dataBuffer);
-          const syncSpecBac : any = JSON.parse(syncSpecStr);
-
-          // TODO - how does the code know whether this is a BAC sync spec?
-          // const syncSpec: ArSyncSpec = JSON.parse(syncSpecStr);
-          const syncSpec: ArSyncSpec = convertSyncSpec(syncSpecBac);
+          const syncSpec: ArSyncSpec = JSON.parse(syncSpecStr);
           resolve(syncSpec);
         }
       });
