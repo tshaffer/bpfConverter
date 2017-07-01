@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {
     DmState,
-    DmZone,
+  DmcZone,
     dmGetZoneById,
     dmGetZonesForSign,
 } from '@brightsign/bsdatamodel';
@@ -17,17 +17,17 @@ export interface SignProps {
 
 export default class Sign extends React.Component<SignProps, object> {
 
-    getMediaZoneJSX(zone : DmZone) : object {
+    getMediaZoneJSX(zone : DmcZone) : object {
 
         return (
             <div
                 key={zone.id}
                 style={{
                   position: 'absolute',
-                  left: zone.position.x,
-                  top: zone.position.y,
-                  width: zone.position.width,
-                  height: zone.position.height,
+                  left: zone.absolutePosition.x,
+                  top: zone.absolutePosition.y,
+                  width: zone.absolutePosition.width,
+                  height: zone.absolutePosition.height,
                 }}
             >
                 <MediaZoneContainer
@@ -35,25 +35,25 @@ export default class Sign extends React.Component<SignProps, object> {
                     playbackState={this.props.playbackState}
                     bsdm={this.props.bsdm}
                     zone={zone}
-                    width={Number(zone.position.width)}
-                    height={Number(zone.position.height)}
+                    width={Number(zone.absolutePosition.width)}
+                    height={Number(zone.absolutePosition.height)}
                     activeMediaStateId={''}
                 />
             </div>
         );
     }
 
-    getTickerZoneJSX(zone : DmZone) {
+    getTickerZoneJSX(zone : DmcZone) {
 
         return (
             <div
                 key={zone.id}
                 style={{
           position: 'absolute',
-          left: zone.position.x,
-          top: zone.position.y,
-          width: zone.position.width,
-          height: zone.position.height,
+          left: zone.absolutePosition.x,
+          top: zone.absolutePosition.y,
+          width: zone.absolutePosition.width,
+          height: zone.absolutePosition.height,
         }}
             >
                 <TickerZoneContainer
@@ -61,10 +61,10 @@ export default class Sign extends React.Component<SignProps, object> {
                     playbackState={this.props.playbackState}
                     bsdm={this.props.bsdm}
                     zone={zone}
-                    left={Number(zone.position.x)}
-                    top={Number(zone.position.y)}
-                    width={Number(zone.position.width)}
-                    height={Number(zone.position.height)}
+                    left={Number(zone.absolutePosition.x)}
+                    top={Number(zone.absolutePosition.y)}
+                    width={Number(zone.absolutePosition.width)}
+                    height={Number(zone.absolutePosition.height)}
                 />
             </div>
         );
@@ -72,7 +72,7 @@ export default class Sign extends React.Component<SignProps, object> {
 
     getZoneJSX(zoneId : string) : object {
 
-        const zone : DmZone = dmGetZoneById(this.props.bsdm, { id: zoneId });
+        const zone : DmcZone = dmGetZoneById(this.props.bsdm, { id: zoneId });
 
         switch (zone.type) {
             case 'VideoOrImages': {
