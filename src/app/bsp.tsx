@@ -89,6 +89,7 @@ export class BSP {
   hsmList: HSM[];
   playerHSM: PlayerHSM;
   liveDataFeedsToDownload: DataFeed[];
+  importBAFiles : boolean;
 
   constructor() {
     if (!_singleton) {
@@ -102,7 +103,6 @@ export class BSP {
     return new Promise( (resolve, reject) => {
       importPublishedFiles(rootPath, this.dispatch, this.getState).then( (convertedPackage : any) => {
         console.log(this.getState());
-        debugger;
         resolve(convertedPackage);
       });
     });
@@ -121,13 +121,17 @@ export class BSP {
     const rootPath = PlatformService.default.getRootDirectory();
     const pathToPool = PlatformService.default.getPathToPool();
 
-    let importBAFiles = false;
+    this.importBAFiles = false;
 
-    if (importBAFiles) {
+    if (this.importBAFiles) {
       this.importBAPublishedFiles(rootPath).then( (convertedPackage) => {
         this.syncSpec = convertedPackage.syncSpec;
         this.autoSchedule = convertedPackage.autoSchedule;
-        debugger;
+
+        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
+        setPoolAssetFiles(poolAssetFiles);
+
+        this.postInit();
       });
     }
     else {
@@ -203,23 +207,45 @@ export class BSP {
     const rootPath = PlatformService.default.getRootDirectory();
 
     return new Promise<void>((resolve: Function) => {
-      this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
 
         // TODO - only a single scheduled item is currently supported
-
-        const scheduledPresentation = autoSchedule.scheduledPresentations[0];
+        const scheduledPresentation = this.autoSchedule.scheduledPresentations[0];
         const presentationToSchedule = scheduledPresentation.presentationToSchedule;
         const presentationName = presentationToSchedule.name;
 
-        // for bacon
-        const autoplayFileName = presentationName + '.bml';
-        // for bac
-        // const autoplayFileName = 'autoplay-' + presentationName + '.json';
-        this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
-          console.log(autoPlay);
+        if (!this.importBAFiles) {
+          const autoplayFileName = presentationName + '.bml';
+          this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
 
-          // const signState : DmSignState = dmGetSignState(this.getState().bsdm);
-          const signState = autoPlay as DmSignState;
+            console.log(autoPlay);
+
+            const signState = autoPlay as DmSignState;
+            this.dispatch(dmOpenSign(signState));
+
+            // get data feeds for the sign
+            const bsdm: DmState = this.getState().bsdm;
+            const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
+            dataFeedIds.forEach((dataFeedId: BsDmId) => {
+              const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
+
+              if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
+                const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
+                this.dispatch(addDataFeed(dataFeed));
+              } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+                const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
+                this.dispatch(addDataFeed(dataFeed));
+              } else {
+                debugger;
+              }
+            });
+
+            resolve();
+
+          });
+
+        }
+        else {
+          const signState : DmSignState = dmGetSignState(this.getState().bsdm);
           this.dispatch(dmOpenSign(signState));
 
           // get data feeds for the sign
@@ -241,8 +267,7 @@ export class BSP {
 
           resolve();
 
-        });
-      });
+        }
     });
   }
 
