@@ -81,9 +81,7 @@ import {
 } from '../utilities/utilities';
 
 import ScheduledPresentation from './scheduledPresentation';
-
-let mapBacMediaStateNameToMediaStateProps : any = {};
-let mediaStateNamesToUpdateByMediaStateId : any = {};
+import PresentationToSchedule from "./presentationToSchedule";
 
 export function dmCreateAssetItemFromLocalFile(
   fullPath: string,
@@ -132,7 +130,32 @@ export interface AutoSchedule {
   scheduledPresentations : Array<ScheduledPresentation>
 };
 
+type MediaStateIdToMediaStateName = { [mediaStateId:string]: string };
+
+interface MediaStateProperties {
+  name : string;
+  mediaStateDuration : number;
+  transitionType : TransitionType;
+  transitionDuration : number;
+  videoPlayerRequired : boolean;
+};
+
+type MediaStateNameToMediaStateProperties = { [mediaStateName : string]: MediaStateProperties };
+
+let mapBacMediaStateNameToMediaStateProps : MediaStateNameToMediaStateProperties = {};
+let mediaStateNamesToUpdateByMediaStateId : MediaStateIdToMediaStateName = {};
+
+// type MyProp1 = string;
+// type MyProp2 = number;
+//
+// interface MyObj {
+//   prop1 : MyProp1,
+//   prop2 : MyProp2
+// };
+
 export function importPublishedFiles(rootPath : string, dispatch : Function, getState : Function) : Promise<ConvertedPackage> {
+
+  // let myObj : MyObj = {} as MyObj;
 
   let convertedPackage : ConvertedPackage = {
     syncSpec : null,
@@ -172,7 +195,7 @@ function getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) : Promise<AutoS
 
   return new Promise( (resolve) => {
     getSyncSpecReferencedFile('autoschedule.json', syncSpec, rootPath).then( (autoScheduleBac : any) => {
-      const autoSchedule : AutoSchedule= convertAutoschedule(autoScheduleBac);
+      const autoSchedule : AutoSchedule= convertAutoSchedule(autoScheduleBac);
       resolve(autoSchedule);
     });
   });
@@ -284,14 +307,14 @@ export function convertSyncSpec(bacSyncSpec : any) : ArSyncSpec {
 
   syncSpec.files.download = [];
 
-  bacSyncSpec.sync.files.download.forEach( (downloadRaw : any) => {
+  bacSyncSpec.sync.files.download.forEach( (downloadBac : any) => {
     let download : any = {};
-    download.link = downloadRaw.link;
-    download.name = downloadRaw.name;
-    download.size = Number(downloadRaw.size);
+    download.link = downloadBac.link;
+    download.name = downloadBac.name;
+    download.size = Number(downloadBac.size);
     download.hash = {};
-    download.hash.hex = downloadRaw.hash['#text'];
-    download.hash.method = downloadRaw.hash['@method'];
+    download.hash.hex = downloadBac.hash['#text'];
+    download.hash.method = downloadBac.hash['@method'];
 
     syncSpec.files.download.push(download);
   });
@@ -323,28 +346,31 @@ function readJsonFile(filePath : string) : Promise<any> {
 
 }
 
-export function convertAutoschedule(autoScheduleBac : any) : AutoSchedule {
+export function convertAutoSchedule(autoScheduleBac : any) : AutoSchedule {
 
   // only works now for a single scheduledPresentation
-  let scheduledPresentation : any = {};
-  let rawScheduledPresentation : any = autoScheduleBac.autoschedule.scheduledPresentation;
-  scheduledPresentation.allDayEveryDay = (rawScheduledPresentation.allDayEveryDay.toLowerCase() === 'true');
-  scheduledPresentation.dateTime = rawScheduledPresentation.dateTime;
-  scheduledPresentation.duration = Number(rawScheduledPresentation.duration);
-  scheduledPresentation.interruption = (rawScheduledPresentation.interruption.toLowerCase() === 'true');
-  scheduledPresentation.presentationToSchedule = {
-    fileName: rawScheduledPresentation.presentationToSchedule.fileName,
-    filePath: rawScheduledPresentation.presentationToSchedule.filePath,
-    name: rawScheduledPresentation.presentationToSchedule.name,
-  };
-  scheduledPresentation.recurrence = (rawScheduledPresentation.recurrence.toLowerCase() === 'true');
-  scheduledPresentation.recurrenceEndDate = rawScheduledPresentation.recurrenceEndDate;
-  scheduledPresentation.recurrenceGoesForever = (rawScheduledPresentation.recurrenceGoesForever.toLowerCase() === 'true');
-  scheduledPresentation.recurrencePattern = rawScheduledPresentation.recurrencePattern;
-  scheduledPresentation.recurrencePatternDaily = rawScheduledPresentation.recurrencePatternDaily;
-  scheduledPresentation.recurrencePatternDaysOfWeek = Number(rawScheduledPresentation.recurrencePatternDaysOfWeek);
-  scheduledPresentation.recurrenceStartDate = rawScheduledPresentation.recurrenceStartDate;
+  let scheduledPresentationBac : any = autoScheduleBac.autoschedule.scheduledPresentation;
 
+  const presentationToSchedule = new PresentationToSchedule(
+    scheduledPresentationBac.presentationToSchedule.name,
+    scheduledPresentationBac.presentationToSchedule.fileName,
+    scheduledPresentationBac.presentationToSchedule.filePath,
+    {}
+  );
+
+  const scheduledPresentation = new ScheduledPresentation(
+    presentationToSchedule,
+    scheduledPresentationBac.dateTime,
+    Number(scheduledPresentationBac.duration),
+    (scheduledPresentationBac.allDayEveryDay.toLowerCase() === 'true'),
+    (scheduledPresentationBac.recurrence.toLowerCase() === 'true'),
+    scheduledPresentationBac.recurrencePattern,
+    scheduledPresentationBac.recurrencePatternDaily,
+    Number(scheduledPresentationBac.recurrencePatternDaysOfWeek),
+    scheduledPresentationBac.recurrenceStartDate,
+    (scheduledPresentationBac.recurrenceGoesForever.toLowerCase() === 'true'),
+    scheduledPresentationBac.recurrenceEndDate,
+     false);
   let autoSchedule : AutoSchedule = {
     scheduledPresentations : [scheduledPresentation]
   };
@@ -636,16 +662,16 @@ function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : a
     let bsAssetItem : BsAssetItem;
     if (bacMediaState.imageItem) {
 
-      const imageItem : any = bacMediaState.imageItem;
+      const bacImageItem : any = bacMediaState.imageItem;
 
-      fileName = imageItem.file['@name'];
+      fileName = bacImageItem.file['@name'];
       filePath = Utilities.getPoolFilePath(fileName);
       bsAssetItem = dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
 
-      const mediaStateDuration : number = Converters.stringToNumber(imageItem.slideDelayInterval);
-      const transitionType : TransitionType = Converters.getTransitionType(imageItem.slideTransition);
-      const transitionDuration : number = Converters.stringToNumber(imageItem.transitionDuration);
-      const videoPlayerRequired : boolean = Converters.stringToBool(imageItem.videoPlayerRequired);
+      const mediaStateDuration : number = Converters.stringToNumber(bacImageItem.slideDelayInterval);
+      const transitionType : TransitionType = Converters.getTransitionType(bacImageItem.slideTransition);
+      const transitionDuration : number = Converters.stringToNumber(bacImageItem.transitionDuration);
+      const videoPlayerRequired : boolean = Converters.stringToBool(bacImageItem.videoPlayerRequired);
 
       mapBacMediaStateNameToMediaStateProps[bacMediaState.name] = {
         name : fileName,
@@ -694,7 +720,7 @@ function addTransitions(bacZone : any, dispatch : Function, getState : Function)
 
     const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
 
-    const mediaStateProps : any = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
+    const mediaStateProps : MediaStateProperties = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
     const { name, mediaStateDuration, transitionType, transitionDuration, videoPlayerRequired } = mediaStateProps;
     mediaStateNamesToUpdateByMediaStateId[sourceMediaState.id] = name;
 
@@ -729,7 +755,7 @@ function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Funct
   });
 }
 
-function updateNames(namesToUpdateById : any, dispatch : Function){
+function updateNames(namesToUpdateById : MediaStateIdToMediaStateName, dispatch : Function){
 
   // rename media states to something rational
   for (let mediaStateId in namesToUpdateById) {
