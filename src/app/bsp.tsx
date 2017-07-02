@@ -89,7 +89,7 @@ export class BSP {
   hsmList: HSM[];
   playerHSM: PlayerHSM;
   liveDataFeedsToDownload: DataFeed[];
-  importBAFiles : boolean;
+  importPublishedFiles : boolean;
 
   constructor() {
     if (!_singleton) {
@@ -98,12 +98,30 @@ export class BSP {
     }
   }
 
-  importBAPublishedFiles(rootPath : any): Promise<any> {
-
+  parseImportedPublishedFiles(rootPath : string, pathToPool : string): Promise<any> {
     return new Promise( (resolve, reject) => {
       importPublishedFiles(rootPath, this.dispatch, this.getState).then( (convertedPackage : any) => {
-        console.log(this.getState());
-        resolve(convertedPackage);
+        // autoplay results have been written to redux store.
+        this.syncSpec = convertedPackage.syncSpec;
+        this.autoSchedule = convertedPackage.autoSchedule;
+        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
+        setPoolAssetFiles(poolAssetFiles);
+        resolve();
+      });
+    });
+  }
+
+  parseNativeFiles(rootPath : string, pathToPool : string) : Promise<any> {
+    return new Promise( (resolve, reject) => {
+      this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
+        this.syncSpec = cardSyncSpec;
+        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
+        setPoolAssetFiles(poolAssetFiles);
+        this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
+          this.autoSchedule = autoSchedule;
+          resolve();
+          this.launchHSM();
+        });
       });
     });
   }
@@ -121,45 +139,24 @@ export class BSP {
     const rootPath = PlatformService.default.getRootDirectory();
     const pathToPool = PlatformService.default.getPathToPool();
 
-    this.importBAFiles = false;
+    this.importPublishedFiles = false;
 
-    if (this.importBAFiles) {
-      this.importBAPublishedFiles(rootPath).then( (convertedPackage) => {
-        this.syncSpec = convertedPackage.syncSpec;
-        this.autoSchedule = convertedPackage.autoSchedule;
-
-        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
-        setPoolAssetFiles(poolAssetFiles);
-
-        this.postInit();
+    if (this.importPublishedFiles) {
+      this.parseImportedPublishedFiles(rootPath, pathToPool).then( () => {
+        this.launchHSM();
       });
     }
     else {
-      this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
-
-        console.log(cardSyncSpec);
-
-        this.syncSpec = cardSyncSpec;
-
-        // FileNameToFilePathLUT
-        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
-        setPoolAssetFiles(poolAssetFiles);
-
-        this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
-          this.autoSchedule = autoSchedule;
-          this.postInit();
-        });
-
-      }).catch((err: Error) => {
-        console.log(err);
-        debugger;
+      this.parseNativeFiles(rootPath, pathToPool).then( () => {
+        this.launchHSM();
       });
     }
   }
 
-  postInit() {
+  launchHSM() {
 
     let state = this.getState();
+
 // Create player state machine
     this.playerHSM = new PlayerHSM(this, this.dispatch, this.getState, state.bsdm);
 
@@ -213,61 +210,41 @@ export class BSP {
         const presentationToSchedule = scheduledPresentation.presentationToSchedule;
         const presentationName = presentationToSchedule.name;
 
-        if (!this.importBAFiles) {
+        if (!this.importPublishedFiles) {
           const autoplayFileName = presentationName + '.bml';
-          this.getSyncSpecFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
-
+          this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
             console.log(autoPlay);
-
             const signState = autoPlay as DmSignState;
             this.dispatch(dmOpenSign(signState));
-
-            // get data feeds for the sign
-            const bsdm: DmState = this.getState().bsdm;
-            const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
-            dataFeedIds.forEach((dataFeedId: BsDmId) => {
-              const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
-
-              if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
-                const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
-                this.dispatch(addDataFeed(dataFeed));
-              } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
-                const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
-                this.dispatch(addDataFeed(dataFeed));
-              } else {
-                debugger;
-              }
-            });
-
+            this.getDataFeeds();
             resolve();
-
           });
 
         }
         else {
           const signState : DmSignState = dmGetSignState(this.getState().bsdm);
           this.dispatch(dmOpenSign(signState));
-
-          // get data feeds for the sign
-          const bsdm: DmState = this.getState().bsdm;
-          const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
-          dataFeedIds.forEach((dataFeedId: BsDmId) => {
-            const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
-
-            if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
-              const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
-              this.dispatch(addDataFeed(dataFeed));
-            } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
-              const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
-              this.dispatch(addDataFeed(dataFeed));
-            } else {
-              debugger;
-            }
-          });
-
+          this.getDataFeeds();
           resolve();
-
         }
+    });
+  }
+
+  getDataFeeds() {
+    const bsdm: DmState = this.getState().bsdm;
+    const dataFeedIds: BsDmId[] = dmGetDataFeedIdsForSign(bsdm);
+    dataFeedIds.forEach((dataFeedId: BsDmId) => {
+      const dmDataFeed = dmGetDataFeedById(bsdm, {id: dataFeedId});
+
+      if (dmDataFeed.usage === DataFeedUsageType.Mrss) {
+        const dataFeed: MrssDataFeed = new MrssDataFeed(dmDataFeed);
+        this.dispatch(addDataFeed(dataFeed));
+      } else if (dmDataFeed.usage === DataFeedUsageType.Text) {
+        const dataFeed: TextDataFeed = new TextDataFeed(dmDataFeed);
+        this.dispatch(addDataFeed(dataFeed));
+      } else {
+        debugger;
+      }
     });
   }
 
@@ -289,13 +266,7 @@ export class BSP {
   }
 
   getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) {
-    return this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath);
-    // return new Promise( (resolve) => {
-    //   this.getSyncSpecFile('autoschedule.json', syncSpec, rootPath).then( (autoSchedule) => {
-    //     // const autoSchedule = convertAutoschedule(autoScheduleBac);
-    //     resolve(autoSchedule);
-    //   });
-    // });
+    return this.getSyncSpecReferencedFile('autoschedule.json', syncSpec, rootPath);
   }
 
   openSyncSpec(filePath: string = ''): Promise<ArSyncSpec> {
@@ -316,7 +287,7 @@ export class BSP {
   }
 
   // Gets a file referenced by a syncSpec, not an actual sync spec
-  getSyncSpecFile(fileName: string, syncSpec: ArSyncSpec, rootPath: string): Promise<object> {
+  getSyncSpecReferencedFile(fileName: string, syncSpec: ArSyncSpec, rootPath: string): Promise<object> {
 
     return new Promise<object>((resolve: Function, reject: Function) => {
 
