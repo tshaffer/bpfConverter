@@ -335,11 +335,6 @@ function readJsonFile(filePath : string) : Promise<any> {
         const fileContents: string = decoder.write(dataBuffer);
         const fileContentsJson : any = JSON.parse(fileContents);
         resolve(fileContentsJson);
-
-        // TODO - how does the code know whether this is a BAC sync spec?
-        // const syncSpec: ArSyncSpec = JSON.parse(syncSpecStr);
-        const syncSpec: ArSyncSpec = convertSyncSpec(fileContentsJson);
-        resolve(syncSpec);
       }
     });
   });
@@ -655,6 +650,7 @@ function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : a
   const bacStates = bacZone.playlist.states.state;
 
   let addMediaStatePromises : Array<any> = [];
+  // let addMediaStatePromises : Array<Promise<BsDmAction<MediaStateParams>>> = [];
   bacStates.forEach( (bacMediaState : any) => {
 
     let fileName;
