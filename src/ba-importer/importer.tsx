@@ -80,6 +80,7 @@ import {
   setPoolAssetFiles,
 } from '../utilities/utilities';
 
+import ScheduledPresentation from './scheduledPresentation';
 
 let mapBacMediaStateNameToMediaStateProps : any = {};
 let mediaStateNamesToUpdateByMediaStateId : any = {};
@@ -122,9 +123,21 @@ export interface ArSyncSpec {
   files : any;
 }
 
-export function importPublishedFiles(rootPath : string, dispatch : Function, getState : Function) : Promise<any> {
+export interface ConvertedPackage {
+  syncSpec : any;
+  autoSchedule : AutoSchedule;
+}
 
-  let convertedPackage : any = {};
+export interface AutoSchedule {
+  scheduledPresentations : Array<ScheduledPresentation>
+};
+
+export function importPublishedFiles(rootPath : string, dispatch : Function, getState : Function) : Promise<ConvertedPackage> {
+
+  let convertedPackage : ConvertedPackage = {
+    syncSpec : null,
+    autoSchedule: null
+  };
 
   return new Promise( (resolve, reject) => {
     // TODO - first pass, assume local-sync.json
@@ -134,7 +147,7 @@ export function importPublishedFiles(rootPath : string, dispatch : Function, get
 
       const poolAssetFiles: ArFileLUT = buildPoolAssetFiles(syncSpec, rootPath);
       setPoolAssetFiles(poolAssetFiles);
-      getAutoschedule(syncSpec, rootPath).then((autoSchedule: any) => {
+      getAutoschedule(syncSpec, rootPath).then((autoSchedule: AutoSchedule) => {
 
         convertedPackage.autoSchedule = autoSchedule;
 
@@ -147,7 +160,6 @@ export function importPublishedFiles(rootPath : string, dispatch : Function, get
         getSyncSpecReferencedFile(autoplayFileName, syncSpec, rootPath).then((autoPlay: object) => {
           convertAutoplay(autoPlay, dispatch, getState).then(() => {
             console.log(getState());
-            debugger;
             resolve(convertedPackage);
           });
         });
@@ -156,11 +168,11 @@ export function importPublishedFiles(rootPath : string, dispatch : Function, get
   });
 }
 
-function getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) {
+function getAutoschedule(syncSpec: ArSyncSpec, rootPath: string) : Promise<AutoSchedule> {
 
   return new Promise( (resolve) => {
     getSyncSpecReferencedFile('autoschedule.json', syncSpec, rootPath).then( (autoScheduleBac : any) => {
-      const autoSchedule = convertAutoschedule(autoScheduleBac);
+      const autoSchedule : AutoSchedule= convertAutoschedule(autoScheduleBac);
       resolve(autoSchedule);
     });
   });
@@ -311,7 +323,7 @@ function readJsonFile(filePath : string) : Promise<any> {
 
 }
 
-export function convertAutoschedule(autoScheduleBac : any) : any {
+export function convertAutoschedule(autoScheduleBac : any) : AutoSchedule {
 
   // only works now for a single scheduledPresentation
   let scheduledPresentation : any = {};
@@ -333,8 +345,9 @@ export function convertAutoschedule(autoScheduleBac : any) : any {
   scheduledPresentation.recurrencePatternDaysOfWeek = Number(rawScheduledPresentation.recurrencePatternDaysOfWeek);
   scheduledPresentation.recurrenceStartDate = rawScheduledPresentation.recurrenceStartDate;
 
-  let autoSchedule : any = {};
-  autoSchedule.scheduledPresentations = [scheduledPresentation];
+  let autoSchedule : AutoSchedule = {
+    scheduledPresentations : [scheduledPresentation]
+  };
   return autoSchedule;
 }
 
@@ -581,6 +594,7 @@ function setZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any, di
   // TODO - maxContentResolution
   // TODO - mosaic decoder name
   // TODO - audioOutputAssignments : DmAudioOutputAssignmentMap;
+  // TODO - audioVolume?
   // TODO - enumerate all values output by BAC
 
   let videoOrImagesZonePropertyParams : VideoOrImagesZonePropertyParams = {
