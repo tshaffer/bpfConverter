@@ -1,6 +1,7 @@
 module.exports = {
   entry: "./src/index.tsx",
   output: {
+    libraryTarget: "umd",
     publicPath: './build/',
     filename: "bundle.js",
     path: __dirname + "/build"
@@ -13,6 +14,10 @@ module.exports = {
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: [".ts", ".tsx", ".js", ".json"]
+  },
+
+  externals: {
+    '@brightsign/videomodeconfiguration': 'commonjs @brightsign/videomodeconfiguration'
   },
 
   module: {
