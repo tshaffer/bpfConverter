@@ -732,25 +732,15 @@ function addTransitions(bacZone : any, dispatch : Function, getState : Function)
 
 function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Function) {
 
-  return new Promise( (resolve) => {
+  let { zoneId, zoneType } = createZone(bacZone, dispatch);
 
-    let { zoneId, zoneType } = createZone(bacZone, dispatch);
+  setZoneProperties(zoneId, zoneType, bacZone, dispatch);
 
-    setZoneProperties(zoneId, zoneType, bacZone, dispatch);
+  const initialMediaStateId = bacZone.playlist.states.initialState;
 
-    const initialMediaStateId = bacZone.playlist.states.initialState;
-
-    addMediaStates(zoneId, bacZone, dispatch);
-    addTransitions(bacZone, dispatch, getState);
-    updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
-    resolve();
-
-    // Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
-    //   addTransitions(bacZone, dispatch, getState);
-    //   updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
-    //   resolve();
-    // });
-  });
+  addMediaStates(zoneId, bacZone, dispatch);
+  addTransitions(bacZone, dispatch, getState);
+  updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
 }
 
 function updateNames(namesToUpdateById : MediaStateIdToMediaStateName, dispatch : Function){
@@ -768,16 +758,8 @@ function updateNames(namesToUpdateById : MediaStateIdToMediaStateName, dispatch 
 }
 
 function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Function) {
-
-  let promises : Array<any> = [];
-
-  return new Promise( (resolve) => {
-    bacZones.forEach( (bacZone : any) => {
-      promises.push(updateAutoplayZone(bacZone, dispatch, getState));
-    });
-    Promise.all(promises).then( () => {
-      resolve();
-    });
+  bacZones.forEach( (bacZone : any) => {
+    updateAutoplayZone(bacZone, dispatch, getState);
   });
 }
 
@@ -805,9 +787,8 @@ export function convertAutoplay(autoplayBac : any, dispatch: Function, getState 
       bacZones = [autoplayBac.BrightAuthor.zones.zone];
     }
 
-    updateAutoplayZones(bacZones, dispatch, getState).then( () => {
-      resolve();
-    });
+    updateAutoplayZones(bacZones, dispatch, getState);
+    resolve();
   })
 }
 
