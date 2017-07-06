@@ -182,10 +182,8 @@ export function importPublishedFiles(rootPath : string, dispatch : Function, get
 
         const autoplayFileName = 'autoplay-' + presentationName + '.json';
         getSyncSpecReferencedFile(autoplayFileName, syncSpec, rootPath).then((autoPlay: object) => {
-          convertAutoplay(autoPlay, dispatch, getState).then(() => {
-            console.log(getState());
-            resolve(convertedPackage);
-          });
+          convertAutoplay(autoPlay, dispatch, getState);
+          resolve(convertedPackage);
         });
       });
     });
@@ -763,32 +761,29 @@ function updateAutoplayZones(bacZones : any, dispatch: Function, getState : Func
   });
 }
 
-export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) {
+export function convertAutoplay(autoplayBac : any, dispatch: Function, getState : Function) : void {
 
-  return new Promise( (resolve) => {
-    let state : any;
-    let signAction : SignAction;
+  let state : any;
+  let signAction : SignAction;
 
-    const bacMeta = autoplayBac.BrightAuthor.meta;
-    signAction = dispatch(dmNewSign(bacMeta.name, bacMeta.videoMode, bacMeta.model));
+  const bacMeta = autoplayBac.BrightAuthor.meta;
+  signAction = dispatch(dmNewSign(bacMeta.name, bacMeta.videoMode, bacMeta.model));
 
-    updateAutoplaySignProperties(bacMeta, dispatch, getState);
-    updateAutoplaySerialPorts(bacMeta, dispatch);
-    updateAutoplayGpio(bacMeta, dispatch);
-    updateAutoplayButtonPanels(bacMeta, dispatch);
-    updateAutoplayAudio(bacMeta, dispatch);
+  updateAutoplaySignProperties(bacMeta, dispatch, getState);
+  updateAutoplaySerialPorts(bacMeta, dispatch);
+  updateAutoplayGpio(bacMeta, dispatch);
+  updateAutoplayButtonPanels(bacMeta, dispatch);
+  updateAutoplayAudio(bacMeta, dispatch);
 
-    let bacZones : any = [];
-    const bacZone = autoplayBac.BrightAuthor.zones;
-    if (bacZone instanceof Array) {
-      bacZones = autoplayBac.BrightAuthor.zones;
-    }
-    else {
-      bacZones = [autoplayBac.BrightAuthor.zones.zone];
-    }
+  let bacZones : any = [];
+  const bacZone = autoplayBac.BrightAuthor.zones;
+  if (bacZone instanceof Array) {
+    bacZones = autoplayBac.BrightAuthor.zones;
+  }
+  else {
+    bacZones = [autoplayBac.BrightAuthor.zones.zone];
+  }
 
-    updateAutoplayZones(bacZones, dispatch, getState);
-    resolve();
-  })
+  updateAutoplayZones(bacZones, dispatch, getState);
 }
 
