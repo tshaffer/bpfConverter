@@ -36,6 +36,7 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  BsDmThunkAction,
   DmcMediaState,
   dmGetMediaStateByName,
   TransitionAction,
@@ -645,12 +646,10 @@ function setZoneProperties(zoneId : BsDmId, zoneType : string, bacZone : any, di
   dispatch(dmUpdateZoneProperties(zonePropertyUpdateParams));
 }
 
-function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : any {
+function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) {
 
   const bacStates = bacZone.playlist.states.state;
 
-  let addMediaStatePromises : Array<any> = [];
-  // let addMediaStatePromises : Array<Promise<BsDmAction<MediaStateParams>>> = [];
   bacStates.forEach( (bacMediaState : any) => {
 
     let fileName;
@@ -681,11 +680,10 @@ function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : a
       debugger;
     }
 
-    const addMediaStatePromise : Promise<BsDmAction<MediaStateParams>> = dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem));
-    addMediaStatePromises.push(addMediaStatePromise);
+    const addMediaStateThunk : BsDmThunkAction<MediaStateParams> = (dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), bsAssetItem));
+    const bsDmAction : BsDmAction<MediaStateParams> = dispatch(addMediaStateThunk);
+    const mediaStateParams : MediaStateParams = bsDmAction.payload;
   });
-
-  return addMediaStatePromises;
 }
 
 function addTransitions(bacZone : any, dispatch : Function, getState : Function) {
@@ -742,12 +740,16 @@ function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Funct
 
     const initialMediaStateId = bacZone.playlist.states.initialState;
 
-    const addMediaStatePromises : any = addMediaStates(zoneId, bacZone, dispatch);
-    Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
-      addTransitions(bacZone, dispatch, getState);
-      updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
-      resolve();
-    });
+    addMediaStates(zoneId, bacZone, dispatch);
+    addTransitions(bacZone, dispatch, getState);
+    updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
+    resolve();
+
+    // Promise.all(addMediaStatePromises).then((mediaStateParamActions : Array<BsDmAction<MediaStateParams>>) => {
+    //   addTransitions(bacZone, dispatch, getState);
+    //   updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
+    //   resolve();
+    // });
   });
 }
 
