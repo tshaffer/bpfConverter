@@ -2,17 +2,17 @@ import * as React from 'react';
 import Slider from 'react-slick';
 
 import path = require('path');
+
 import {
-  BsDmId,
-  DmDataFeed,
-  dmGetSimpleStringFromParameterizedString,
-} from "@brightsign/bsdatamodel";
+  BsAssetItem,
+} from '@brightsign/bscore';
+
 
 export interface SlickProps {
   height: number;
   width: number;
+  contentItems: BsAssetItem[];
   filePaths: string [];
-  dataFeedId: BsDmId;
 }
 
 export default class Slick extends React.Component<SlickProps, object> {

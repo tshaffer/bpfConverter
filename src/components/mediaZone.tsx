@@ -26,6 +26,7 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  DmSlickCarouselContentItem,
   BsDmId,
   DmDataFeedContentItem,
   DmDerivedContentItem,
@@ -138,18 +139,20 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     );
   }
 
-  renderSlickItem(slickItem : DmDataFeedContentItem) {
+  renderSlickItem(slickItem : DmSlickCarouselContentItem) {
+
+    // let foo : DmSlickCarouselContentItem | {} = {};
 
     return (
       <SlickContainer
         width={this.props.width}
         height={this.props.height}
-        dataFeedId={slickItem.dataFeedId}
+        contentItems={slickItem.contentItems}
         filePaths={[]}
       />
     );
-
   }
+
   getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
     const eventIds : BsDmId[] = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
@@ -187,11 +190,11 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       case 'Image': {
         return this.renderMediaItem(mediaState, contentItem as DmMediaContentItem, event);
       }
-      // case 'MrssFeed': {
-      //   return this.renderMrssItem(contentItem as DmDataFeedContentItem);
-      // }
-      case 'MrssFeed': {  // Slick
-        return this.renderSlickItem(contentItem as DmDataFeedContentItem);
+      case 'MrssFeed': {
+        return this.renderMrssItem(contentItem as DmDataFeedContentItem);
+      }
+      case 'SlickCarousel': {
+        return this.renderSlickItem(contentItem as DmSlickCarouselContentItem);
       }
       default: {
         break;

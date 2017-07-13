@@ -25,7 +25,7 @@ import {
 } from '@brightsign/bscore';
 
 import {
-  dmAddZone, DmDerivedNonMediaContentItem, dmUpdateMediaState
+  dmAddZone, dmUpdateMediaState
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -669,7 +669,7 @@ function updateAutoplayZone(bacZone : any, dispatch : Function, getState : Funct
 
   const initialMediaStateId = bacZone.playlist.states.initialState;
 
-  addMediaStates(zoneId, bacZone, dispatch);
+  addMediaStates(zoneId, bacZone, dispatch, getState);
   addTransitions(bacZone, dispatch, getState);
   updateNames(mediaStateNamesToUpdateByMediaStateId, dispatch);
 }

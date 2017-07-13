@@ -27,59 +27,19 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  MediaStateAction,
+  dmAddMediaStateWithContentItem,
+  dmCreateSlickCarouselContentItem,
+  DmSlickCarouselContentItem,
   DmImageContentItemData,
-  DmMrssDataFeedContentItem,
-  dmCreateMrssDataFeedContentItem,
-  DmDataFeedContentItem,
-  DataFeedParams,
-  dmGetParameterizedStringFromString,
-  DmDataFeed,
-  DmParameterizedString,
-  dmCreateDataFeedContentItem,
-  dmGetSimpleStringFromParameterizedString,
-  DataFeedAction,
-  dmAddDataFeed,
   dmCreateHtmlContentItem,
-  DmcMediaState,
-  dmGetMediaStateByName,
-  TransitionAction,
-  dmAddTransition,
-  dmAddEvent,
   BsDmId,
-  EventAction,
   MediaStateParams,
   dmGetZoneMediaStateContainer,
   BsDmAction,
-  ZoneParams,
   dmAddMediaState,
-  DmSignState,
-  dmGetSignState,
-  dmNewSign, DmSignMetadata, DmSignProperties,
-  dmUpdateSignProperties,
-  SignAction,
-  DmSerialPortConfiguration,
-  DmSerialPortList,
-  SerialPortListParams,
-  dmUpdateSignSerialPorts,
-  GpioListParams,
-  DmGpioList,
-  dmUpdateSignGpio,
-  DmButtonPanelMap,
-  ButtonPanelMapParams,
-  dmUpdateSignButtonPanelMap,
-  DmBpConfiguration,
-  DmAudioSignProperties,
-  DmAudioSignPropertyMap,
-  dmUpdateSignAudioPropertyMap,
-  AudioSignPropertyMapParams,
-  dmUpdateZoneProperties,
-  ZonePropertyUpdateParams,
-  VideoOrImagesZonePropertyParams,
   dmCreateAssetItemFromLocalFile,
-} from '@brightsign/bsdatamodel';
-
-import {
-  dmAddZone, DmDerivedNonMediaContentItem, dmUpdateMediaState
+  DmDerivedNonMediaContentItem,
 } from '@brightsign/bsdatamodel';
 
 import * as Converters from './converters';
@@ -123,7 +83,36 @@ function addImageItem(name : string, bacImageItem : any, zoneId : BsDmId, dispat
   return addMediaStatePromise;
 
 }
-export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function) : any {
+
+function addSlickCarouselItem(name : string, bacSlickItem : any, zoneId : BsDmId, dispatch : Function) {
+
+  // create an array of file names
+  let files : string[] = [];
+  let contentItems : BsAssetItem[] = [];
+
+  bacSlickItem.files.imageItem.forEach( (fileItem : any) => {
+    files.push(fileItem.file['@name']);
+
+    const fileName : string = fileItem.file['@name'];
+    const filePath : string = Utilities.getPoolFilePath(fileName);
+    const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+    contentItems.push(bsAssetItem);
+  });
+
+  const liveDataFeedName : string = bacSlickItem.liveDataFeedName || '';
+
+  const slickCarouselContentItem : DmSlickCarouselContentItem = dmCreateSlickCarouselContentItem(
+    bacSlickItem.name,
+    contentItems,
+    bacSlickItem.populateFromMediaLibrary,
+    // optional parameters
+  );
+  const mediaStateAction: MediaStateAction = dmAddMediaStateWithContentItem(bacSlickItem.name, dmGetZoneMediaStateContainer(zoneId),
+    slickCarouselContentItem);
+  const mediaStateParamsAction : BsDmAction<MediaStateParams> = dispatch(mediaStateAction);
+}
+
+export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function, getState : Function) {
 
   const bacStates = bacZone.playlist.states.state;
 
@@ -146,28 +135,27 @@ export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Functi
     }
     else if (bacMediaState.slickItem) {
       const bacSlickItem : any = bacMediaState.slickItem;
+      addSlickCarouselItem(bacMediaState.name, bacSlickItem, zoneId, dispatch);
+      // export function dmCreateSlickCarouselContentItem(
+      //   name: string,
+      //   files: string[],
+      //   populateFromMediaLibrary: boolean,
+      //   dataFeedId?: BsDmId,
+      //   dots?: boolean,
+      //   infinite?: boolean,
+      //   speed?: number,
+      //   slidesToShow?: number,
+      //   slidesToScroll?: number,
+      //   autoplay?: boolean,
+      //   autoplaySpeed?: number,
+      //   fade?: boolean,
+      // ): DmSlickCarouselContentItem {
 
-      // try to fool bsdm
-      const url : DmParameterizedString = dmGetParameterizedStringFromString(JSON.stringify(bacSlickItem));
-      const dataFeedAction : BsDmAction<DataFeedParams> = dmAddDataFeed(bacSlickItem.name, url, DataFeedUsageType.Mrss);
-      const dataFeedParamAction : BsDmAction<DataFeedParams> = dispatch(dataFeedAction);
-      const dataFeedParams : DataFeedParams = dataFeedParamAction.payload;
-      const dataFeedId : BsDmId = dataFeedParams.id;
-      const dataFeedContentItem : DmMrssDataFeedContentItem = dmCreateMrssDataFeedContentItem(bacSlickItem.name, dataFeedId);
-      console.log(dataFeedContentItem);
-
-      contentItem = dataFeedContentItem;
-
-      addMediaStatePromise = dispatch(dmAddMediaState(bacMediaState.name, dmGetZoneMediaStateContainer(zoneId), contentItem));
     }
     else if (bacMediaState.videoItem) {
       debugger;
     }
-
-    addMediaStatePromises.push(addMediaStatePromise);
   });
-
-  return addMediaStatePromises;
 }
 
 const createHtmlContentItem = (asset : any = {}) => {

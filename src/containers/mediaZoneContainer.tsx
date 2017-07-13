@@ -25,7 +25,6 @@ export interface MediaZoneStateProps {
     width : number;
     height : number;
     activeMediaStateId : string;
-    // fileId : string;
 }
 
 export interface MediaZoneDispatchProps {
