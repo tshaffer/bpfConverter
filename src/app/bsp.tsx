@@ -99,8 +99,9 @@ export class BSP {
       _singleton = this;
 
       const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
-      importBPF(bpfFilePath).then( () => {
-        console.log('poo');
+      importBPF(bpfFilePath).then( (bpf) => {
+        console.log(bpf);
+        debugger;
       });
     }
   }
