@@ -1,29 +1,8 @@
 import {
-  DataFeedUsageType,
-  AssetLocation,
-  bscGetLocalAssetLocator,
-  bscGetFileMediaType,
-  AssetType,
   BsAssetItem,
-  GraphicsZOrderType,
-  DeviceWebPageDisplay,
-  LanguageKeyType,
-  LanguageType,
-  MonitorOrientationType,
-  MonitorOverscanType,
-  TouchCursorDisplayModeType,
-  UdpAddressType,
-  VideoConnectorType,
-  BsColor,
-  GpioType,
-  BsRect,
-  ViewModeType,
-  MosaicMaxContentResolutionType,
-  ImageModeType,
-  EventType,
   MediaType,
   TransitionType,
-  BsAssetId,
+  VideoDisplayModeType,
 } from '@brightsign/bscore';
 
 import {
@@ -32,6 +11,7 @@ import {
   dmCreateSlickCarouselContentItem,
   DmSlickCarouselContentItem,
   DmImageContentItemData,
+  DmVideoContentItemData,
   dmCreateHtmlContentItem,
   BsDmId,
   MediaStateParams,
@@ -39,7 +19,6 @@ import {
   BsDmAction,
   dmAddMediaState,
   dmCreateAssetItemFromLocalFile,
-  DmDerivedNonMediaContentItem,
 } from '@brightsign/bsdatamodel';
 
 import * as Converters from './converters';
@@ -47,52 +26,72 @@ import * as Utilities from '../utilities/utilities';
 
 interface MediaStateProperties {
   name : string;
-  transitionType : TransitionType;
-  transitionDuration : number;
+  transitionType? : TransitionType;
+  transitionDuration? : number;
 };
 type MediaStateNameToMediaStateProperties = { [mediaStateName : string]: MediaStateProperties };
 
 export let mapBacMediaStateNameToMediaStateProps : MediaStateNameToMediaStateProperties = {};
 
-function addImageItem(name : string, bacImageItem : any, zoneId : BsDmId, dispatch : Function) : Promise<BsDmAction<MediaStateParams>> {
+function getBsAssetItem(bacMediaItem : any, mediaType : MediaType) : BsAssetItem {
+
+  const fileName : string = bacMediaItem.file['@name'];
+  const filePath : string = Utilities.getPoolFilePath(fileName);
+  const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', mediaType);
+
+  return bsAssetItem;
+}
+
+function addVideoItem(name : string, bacVideoItem : any, zoneId : BsDmId, dispatch : Function) : void {
+
+  const bsAssetItem : BsAssetItem = getBsAssetItem(bacVideoItem, MediaType.Video);
+
+  const fileName : string = bacVideoItem.file['@name'];
+  mapBacMediaStateNameToMediaStateProps[name] = {
+    name : fileName
+  };
+
+  const volume : number = 100;
+  const videoDisplayMode : VideoDisplayModeType = VideoDisplayModeType.m2D;
+  const automaticallyLoop : boolean = false;
+  const videoContentItemData : DmVideoContentItemData = {
+    volume,
+    videoDisplayMode,
+    automaticallyLoop
+  };
+
+  dispatch(dmAddMediaState(name, dmGetZoneMediaStateContainer(zoneId),
+    bsAssetItem, videoContentItemData));
+}
+
+function addImageItem(name : string, bacImageItem : any, zoneId : BsDmId, dispatch : Function) : void {
+
+  const bsAssetItem : BsAssetItem = getBsAssetItem(bacImageItem, MediaType.Image);
 
   const fileName : string = bacImageItem.file['@name'];
-  const filePath : string = Utilities.getPoolFilePath(fileName);
-  const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
-
-  const mediaStateDuration : number = Converters.stringToNumber(bacImageItem.slideDelayInterval);
   const transitionType : TransitionType = Converters.getTransitionType(bacImageItem.slideTransition);
   const transitionDuration : number = Converters.stringToNumber(bacImageItem.transitionDuration);
-  const videoPlayerRequired : boolean = Converters.stringToBool(bacImageItem.videoPlayerRequired);
-
   mapBacMediaStateNameToMediaStateProps[name] = {
     name : fileName,
     transitionType,
     transitionDuration,
-  }
+  };
 
+  const videoPlayerRequired : boolean = Converters.stringToBool(bacImageItem.videoPlayerRequired);
   const imageContentItemData : DmImageContentItemData = {
     useImageBuffer : false,
     videoPlayerRequired
   };
 
-  const contentItem  : BsAssetItem | DmDerivedNonMediaContentItem= bsAssetItem;
-
-  const addMediaStatePromise  : Promise<BsDmAction<MediaStateParams>> = dispatch(dmAddMediaState(name, dmGetZoneMediaStateContainer(zoneId),
-    contentItem, imageContentItemData));
-  return addMediaStatePromise;
-
+  dispatch(dmAddMediaState(name, dmGetZoneMediaStateContainer(zoneId),
+    bsAssetItem, imageContentItemData));
 }
 
 function addSlickCarouselItem(name : string, bacSlickItem : any, zoneId : BsDmId, dispatch : Function) {
 
-  // create an array of file names
-  let files : string[] = [];
   let contentItems : BsAssetItem[] = [];
 
   bacSlickItem.files.imageItem.forEach( (fileItem : any) => {
-    files.push(fileItem.file['@name']);
-
     const fileName : string = fileItem.file['@name'];
     const filePath : string = Utilities.getPoolFilePath(fileName);
     const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
@@ -121,39 +120,18 @@ export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Functi
     iterableStates = [bacStates];
   }
 
-  let addMediaStatePromises : Array<any> = [];
-  // let addMediaStatePromises : Array<Promise<BsDmAction<MediaStateParams>>> = [];
   iterableStates.forEach( (bacMediaState : any) => {
-
-    let contentItem : BsAssetItem | DmDerivedNonMediaContentItem;
-    let addMediaStatePromise : Promise<BsDmAction<MediaStateParams>>;
-
     if (bacMediaState.imageItem) {
-
       const bacImageItem : any = bacMediaState.imageItem;
-      addMediaStatePromise = addImageItem(bacMediaState.name, bacImageItem, zoneId, dispatch);
+      addImageItem(bacMediaState.name, bacImageItem, zoneId, dispatch);
     }
     else if (bacMediaState.slickItem) {
       const bacSlickItem : any = bacMediaState.slickItem;
       addSlickCarouselItem(bacMediaState.name, bacSlickItem, zoneId, dispatch);
-      // export function dmCreateSlickCarouselContentItem(
-      //   name: string,
-      //   files: string[],
-      //   populateFromMediaLibrary: boolean,
-      //   dataFeedId?: BsDmId,
-      //   dots?: boolean,
-      //   infinite?: boolean,
-      //   speed?: number,
-      //   slidesToShow?: number,
-      //   slidesToScroll?: number,
-      //   autoplay?: boolean,
-      //   autoplaySpeed?: number,
-      //   fade?: boolean,
-      // ): DmSlickCarouselContentItem {
-
     }
     else if (bacMediaState.videoItem) {
-      debugger;
+      const bacVideoItem : any = bacMediaState.videoItem;
+      addVideoItem(bacMediaState.name, bacVideoItem, zoneId, dispatch);
     }
   });
 }

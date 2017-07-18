@@ -107,8 +107,8 @@ type MediaStateIdToMediaStateName = { [mediaStateId:string]: string };
 
 interface MediaStateProperties {
   name : string;
-  transitionType : TransitionType;
-  transitionDuration : number;
+  transitionType? : TransitionType;
+  transitionDuration? : number;
 };
 
 type MediaStateNameToMediaStateProperties = { [mediaStateName : string]: MediaStateProperties };
@@ -635,27 +635,37 @@ function addTransitions(bacZone : any, dispatch : Function, getState : Function)
       const userEventName : string = userEvent.name;
       const parameters : any = userEvent.parameters;
       const parameter : string = parameters.parameter;
-      // TODO - need code to properly convert parameters
-      const duration : number = Number(parameter);
-
-      // TODO - what is duration vs. mediaStateDuration? answer - they are set to the same value.
 
       const sourceMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : sourceMediaStateName});
-
       const targetMediaState : DmcMediaState = dmGetMediaStateByName(state, { name : targetMediaStateName});
 
-      const mediaStateProps : MediaStateProperties = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
-      const { name, transitionType, transitionDuration } = mediaStateProps;
-      mediaStateNamesToUpdateByMediaStateId[sourceMediaState.id] = name;
+      let eventAction : EventAction;
+      switch (userEventName) {
+        case 'timeout': {
 
-      // TODO - what is the proper js method to convert from string to enum value, in this case EventType.Timer?
-      const eventAction : EventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
-        { interval : duration} ));
-      console.log(eventAction);
+          eventAction = dispatch(dmAddEvent(userEventName, EventType.Timer, sourceMediaState.id,
+            { interval : Number(parameter)} ));
 
-      const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
-        targetMediaState.id, transitionType, transitionDuration));
-      console.log(transitionAction);
+          const mediaStateProps : MediaStateProperties = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
+          const { name, transitionType, transitionDuration } = mediaStateProps;
+          mediaStateNamesToUpdateByMediaStateId[sourceMediaState.id] = name;
+
+          const transitionAction : TransitionAction = dispatch(dmAddTransition('myTransition', eventAction.payload.id,
+            targetMediaState.id, transitionType, transitionDuration));
+          console.log(transitionAction);
+
+          break;
+        }
+        case 'mediaEnd': {
+          eventAction = dispatch(dmAddEvent(userEventName, EventType.MediaEnd, sourceMediaState.id));
+
+          const mediaStateProps : MediaStateProperties = mapBacMediaStateNameToMediaStateProps[sourceMediaState.name];
+          const { name } = mediaStateProps;
+          mediaStateNamesToUpdateByMediaStateId[sourceMediaState.id] = name;
+
+          break;
+        }
+      }
     });
   }
 }
