@@ -77,6 +77,8 @@ import {
   addDataFeed
 } from   '../store/dataFeeds';
 
+import { importBPF } from '../bpfImporter/importer';
+
 let _singleton: BSP = null;
 
 export class BSP {
@@ -95,6 +97,11 @@ export class BSP {
     if (!_singleton) {
       console.log('bsp constructor invoked');
       _singleton = this;
+
+      const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
+      importBPF(bpfFilePath).then( () => {
+        console.log('poo');
+      });
     }
   }
 
