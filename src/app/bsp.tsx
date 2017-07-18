@@ -97,12 +97,6 @@ export class BSP {
     if (!_singleton) {
       console.log('bsp constructor invoked');
       _singleton = this;
-
-      const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
-      importBPF(bpfFilePath).then( (bpf) => {
-        console.log(bpf);
-        debugger;
-      });
     }
   }
 
@@ -142,6 +136,17 @@ export class BSP {
     this.dispatch = this.store.dispatch;
     this.getState = this.store.getState;
     this.hsmList = [];
+
+
+    const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
+    importBPF(bpfFilePath, this.dispatch, this.getState).then( (bpf) => {
+      console.log(bpf);
+      debugger;
+    });
+
+
+
+
 
     console.log(PlatformService);
     const rootPath = PlatformService.default.getRootDirectory();

@@ -63,11 +63,86 @@ import {
 
 import * as Converters from './converters';
 
-export function importBPF(pathToBpf: string): Promise<any> {
+export function importBPF(pathToBpf: string, dispatch: Function, getState: Function): Promise<any> {
   return new Promise((resolve) => {
     readBPF(pathToBpf).then((rawBPF : any) => {
       console.log(rawBPF);
       const bpf : any = convertRawBPF(rawBPF);
+
+      let { name, videoMode, model } = bpf.meta;
+      let {
+        alphabetizeVariableNames,
+        autoCreateMediaCounterVariables,
+        backgroundScreenColor,
+        delayScheduleChangeUntilMediaEndEvent,
+        deviceWebPageDisplay,
+        flipCoordinates,
+        forceResolution,
+        graphicsZOrder,
+        htmlEnableJavascriptConsole,
+        inactivityTime,
+        inactivityTimeout,
+        isMosaic,
+        language,
+        languageKey,
+        monitorOrientation,
+        monitorOverscan,
+        resetVariablesOnPresentationStart,
+        tenBitColorEnabled,
+        touchCursorDisplayMode,
+        udpDestinationAddress,
+        udpDestinationAddressType,
+        udpDestinationPort,
+        udpReceiverPort,
+        videoConnector,
+      } = bpf.meta;
+
+      dispatch(dmNewSign(name, videoMode, model));
+      let state = getState();
+      console.log(state);
+
+      let signAction : SignAction;
+      let signState : DmSignState;
+      let signMetadata : DmSignMetadata;
+      let signProperties : DmSignProperties;
+
+      signState = dmGetSignState(state.bsdm);
+      signMetadata = signState.sign;
+      signProperties = signMetadata.properties;
+
+      signAction = dispatch(dmUpdateSignProperties(
+        {
+          id : signProperties.id,
+          alphabetizeVariableNames,
+          autoCreateMediaCounterVariables,
+          backgroundScreenColor,
+          delayScheduleChangeUntilMediaEndEvent,
+          deviceWebPageDisplay,
+          flipCoordinates,
+          forceResolution,
+          graphicsZOrder,
+          htmlEnableJavascriptConsole,
+          inactivityTime,
+          inactivityTimeout,
+          isMosaic,
+          language,
+          languageKey,
+          monitorOrientation,
+          monitorOverscan,
+          resetVariablesOnPresentationStart,
+          tenBitColorEnabled,
+          touchCursorDisplayMode,
+          udpDestinationAddress,
+          udpDestinationAddressType,
+          udpDestinationPort,
+          udpReceiverPort,
+          videoConnector,
+        })
+      );
+
+      state = getState();
+      console.log(state);
+
       console.log(bpf);
       resolve(bpf);
     });
