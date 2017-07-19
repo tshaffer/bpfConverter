@@ -181,7 +181,7 @@ function convertRawBPF(rawBPF : any) : any {
   const zones : any = brightAuthor.zones;
 
   bpf.meta = convertRawBPFMetadata(metaData);
-
+  bpf.zones = convertRawBPFZones(zones);
   return bpf;
 }
 
@@ -340,4 +340,81 @@ function convertRawBPFAudio(rawMetadata: any, bpfMetadata: any) : void {
   }
 
   bpfMetadata.audioSignPropertyMap = audioSignPropertyMap;
+}
+
+function convertRawBPFZones(rawZones: any) : any {
+
+  let bpfZones: any = [];
+
+  rawZones.forEach( (rawZoneA : any) => {
+    const rawZone = rawZoneA.zone[0];
+    const bpfZone = convertRawBPFZone(rawZone);
+    console.log(bpfZone);
+
+    bpfZones.push(bpfZone);
+  });
+
+  return bpfZones;
+}
+
+function convertRawBPFZone(rawZone: any) : any {
+
+  let bpfZone: any = {};
+
+  bpfZone.height = Converters.stringToNumber(rawZone.height[0]);
+  bpfZone.horizontalOffset = Converters.stringToNumber(rawZone.horizontalOffset[0]);
+  bpfZone.id = rawZone.id[0];
+  bpfZone.name = rawZone.name[0];
+  bpfZone.type = rawZone.type[0];
+  bpfZone.verticalOffset = Converters.stringToNumber(rawZone.verticalOffset[0]);
+  bpfZone.width = Converters.stringToNumber(rawZone.width[0]);
+  bpfZone.x = Converters.stringToNumber(rawZone.x[0]);
+  bpfZone.y = Converters.stringToNumber(rawZone.y[0]);
+  bpfZone.zoomValue = Converters.stringToNumber(rawZone.zoomValue[0]);
+
+  bpfZone.zoneSpecificParameters = convertRawBPFZoneSpecificParameters(rawZone.zoneSpecificParameters[0]);
+
+  // playlist
+
+  console.log(bpfZone);
+
+  return bpfZone;
+}
+
+function convertRawBPFZoneSpecificParameters(rawZoneSpecificParameters: any) : any {
+
+  let zoneSpecificParameters : any = {};
+
+  zoneSpecificParameters.liveVideoInput = rawZoneSpecificParameters.liveVideoInput[0];
+  zoneSpecificParameters.liveVideoStandard = rawZoneSpecificParameters.liveVideoStandard[0];
+  zoneSpecificParameters.videoVolume = Converters.stringToNumber(rawZoneSpecificParameters.videoVolume[0]);
+  zoneSpecificParameters.brightness = Converters.stringToNumber(rawZoneSpecificParameters.brightness[0]);
+  zoneSpecificParameters.contrast = Converters.stringToNumber(rawZoneSpecificParameters.contrast[0]);
+  zoneSpecificParameters.saturation = Converters.stringToNumber(rawZoneSpecificParameters.saturation[0]);
+  zoneSpecificParameters.hue = Converters.stringToNumber(rawZoneSpecificParameters.hue[0]);
+  zoneSpecificParameters.zOrderFront = Converters.stringToBool(rawZoneSpecificParameters.zOrderFront[0]);
+  zoneSpecificParameters.mosaic = Converters.stringToBool(rawZoneSpecificParameters.mosaic[0]);
+
+   zoneSpecificParameters.analog2Output = rawZoneSpecificParameters.analog2Output[0];
+   zoneSpecificParameters.analog3Output = rawZoneSpecificParameters.analog3Output[0];
+   zoneSpecificParameters.analogOutput = rawZoneSpecificParameters.analogOutput[0];
+   zoneSpecificParameters.audioMapping = rawZoneSpecificParameters.audioMapping[0];
+   zoneSpecificParameters.audioMixMode = rawZoneSpecificParameters.audioMixMode[0];
+   zoneSpecificParameters.audioMode = rawZoneSpecificParameters.audioMode[0];
+   zoneSpecificParameters.audioOutput = rawZoneSpecificParameters.audioOutput[0];
+   zoneSpecificParameters.audioVolume = Converters.stringToNumber(rawZoneSpecificParameters.audioVolume[0]);
+   zoneSpecificParameters.hdmiOutput = rawZoneSpecificParameters.hdmiOutput[0];
+   zoneSpecificParameters.imageMode = rawZoneSpecificParameters.imageMode[0];
+   zoneSpecificParameters.maxContentResolution = rawZoneSpecificParameters.maxContentResolution[0];
+   zoneSpecificParameters.maximumVolume = Converters.stringToNumber(rawZoneSpecificParameters.maximumVolume[0]);
+   zoneSpecificParameters.minimumVolume = Converters.stringToNumber(rawZoneSpecificParameters.minimumVolume[0]);
+   zoneSpecificParameters.spdifOutput = rawZoneSpecificParameters.spdifOutput[0];
+   zoneSpecificParameters.usbOutput = rawZoneSpecificParameters.usbOutput[0];
+   zoneSpecificParameters.usbOutputA = rawZoneSpecificParameters.usbOutputA[0];
+   zoneSpecificParameters.usbOutputB = rawZoneSpecificParameters.usbOutputB[0];
+   zoneSpecificParameters.usbOutputC = rawZoneSpecificParameters.usbOutputC[0];
+   zoneSpecificParameters.usbOutputD = rawZoneSpecificParameters.usbOutputD[0];
+   zoneSpecificParameters.viewMode = rawZoneSpecificParameters.viewMode[0];
+
+   return zoneSpecificParameters;
 }
