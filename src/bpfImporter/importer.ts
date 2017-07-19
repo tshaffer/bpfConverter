@@ -156,7 +156,7 @@ function readBPF(bpfFilePath: string = '') : Promise<any> {
         reject(err);
       } else {
         try {
-          let parser = new xml2js.Parser();
+          let parser = new xml2js.Parser({explicitArray: false});
           parser.parseString(buf, (err: any, bpfRaw: any) => {
             if (err) {
               reject(err);
@@ -176,15 +176,97 @@ function convertRawBPF(rawBPF : any) : any {
 
   const bpf : any = {};
 
-  const brightAuthor : any = rawBPF.BrightAuthor;
-  const metaData : any = brightAuthor.meta[0];
-  const zones : any = brightAuthor.zones;
+  const rawBrightAuthor : any = rawBPF.BrightAuthor;
+  const rawPresentationParameters : any = rawBrightAuthor.$;
+  const rawMetadata = rawBrightAuthor.meta;
 
-  bpf.meta = convertRawBPFMetadata(metaData);
-  bpf.zones = convertRawBPFZones(zones);
-  return bpf;
+  // check for array vs. non array for zones
+  const rawZones = rawBrightAuthor.zones;
+  const rawZone = rawZones.zone;
+
+  debugger;
+
+  const presentationParameters = getPresentationParameters(rawPresentationParameters);
+  const metadata = getMetadata(rawMetadata);
+
+  return null;
+
+  // const metaData : any = brightAuthor.meta[0];
+  // const zones : any = brightAuthor.zones;
+  //
+  // bpf.meta = convertRawBPFMetadata(metaData);
+  // bpf.zones = convertRawBPFZones(zones);
+  // return bpf;
 }
 
+function getPresentationParameters(rawPresentationParameters: any) : any {
+
+  const presentationParametersSpec: any[] = [
+    { name: 'BrightAuthorVersion', type: 'string'},
+    { name: 'type', type: 'string'},
+    { name: 'version', type: 'number'}
+  ];
+
+  return fixJson(presentationParametersSpec, rawPresentationParameters);
+}
+
+function getMetadata(rawMetadata: any) : any {
+
+  const metadataSpec: any[] = [
+    { name:'name', type: 'string'},
+    { name:'videoMode', type: 'string'},
+    { name:'model', type: 'string'},
+    { name:'alphabetizeVariableNames', type: 'boolean'},
+    { name:'autoCreateMediaCounterVariables', type: 'boolean'},
+    { name:'delayScheduleChangeUntilMediaEndEvent', type: 'boolean'},
+    { name:'deviceWebPageDisplay', type: 'string'},
+    { name:'flipCoordinates', type: 'boolean'},
+    { name:'forceResolution', type: 'boolean'},
+    { name:'graphicsZOrder', type: 'string'},
+    { name:'htmlEnableJavascriptConsole', type: 'boolean'},
+    { name:'inactivityTime', type: 'number'},
+    { name:'inactivityTimeout', type: 'boolean'},
+    { name:'isMosaic', type: 'boolean'},
+    { name:'language', type: 'string'},
+    { name:'languageKey', type: 'string'},
+    { name:'monitorOrientation', type: 'string'},
+    { name:'monitorOverscan', type: 'string'},
+    { name:'resetVariablesOnPresentationStart', type: 'boolean'},
+    { name:'tenBitColorEnabled', type: 'boolean'},
+    { name:'touchCursorDisplayMode', type: 'string'},
+    { name:'udpDestinationAddress', type: 'string'},
+    { name:'udpDestinationAddressType', type: 'string'},
+    { name:'udpDestinationPort', type: 'number'},
+    { name:'udpReceiverPort', type: 'number'},
+    { name:'videoConnector', type: 'string'},
+  ];
+
+  return fixJson(metadataSpec, rawMetadata);
+}
+
+function fixJson(parametersSpec: any[], parameters: any) : any {
+
+  let convertedParameters: any = {};
+  
+  parametersSpec.forEach( (parameterSpec : any) => {
+    if (parameters.hasOwnProperty(parameterSpec.name)) {
+      let parameterValue = parameters[parameterSpec.name];
+      switch(parameterSpec.type) {
+        case 'string':
+          convertedParameters[parameterSpec.name] = parameterValue;
+          break;
+        case 'boolean':
+          convertedParameters[parameterSpec.name] = Converters.stringToBool(parameterValue);
+          break;
+        case 'number':
+          convertedParameters[parameterSpec.name] = Converters.stringToNumber(parameterValue);
+          break;
+      }
+    }
+  });
+
+  return convertedParameters;
+}
 function convertRawBPFMetadata(rawMetadata : any) : any {
 
   let bpfMetadata : any = {};
