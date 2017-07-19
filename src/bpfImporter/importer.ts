@@ -172,77 +172,6 @@ function readBPF(bpfFilePath: string = '') : Promise<any> {
   });
 }
 
-function convertRawBPFMetadata(rawMetadata : any) : any {
-
-  debugger;
-
-  const name : string = rawMetadata.name[0];
-  const videoMode : string = rawMetadata.videoMode[0];
-  const model : string = rawMetadata.model[0];
-
-  const alphabetizeVariableNames : boolean = Converters.stringToBool(rawMetadata.alphabetizeVariableNames[0]);
-  const autoCreateMediaCounterVariables : boolean = Converters.stringToBool(rawMetadata.autoCreateMediaCounterVariables[0]);
-  const backgroundScreenColor : BsColor = {
-    a: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['a']),
-    r: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['r']),
-    g: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['g']),
-    b: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['b']),
-  };
-  const delayScheduleChangeUntilMediaEndEvent : boolean = Converters.stringToBool(rawMetadata.delayScheduleChangeUntilMediaEndEvent[0].toLowerCase());
-  const deviceWebPageDisplay : DeviceWebPageDisplay = rawMetadata.deviceWebPageDisplay[0];
-  const flipCoordinates : boolean =  Converters.stringToBool(rawMetadata.flipCoordinates[0]);
-  const forceResolution : boolean = Converters.stringToBool(rawMetadata.forceResolution[0]);
-  const graphicsZOrder : GraphicsZOrderType = rawMetadata.graphicsZOrder[0];
-  const htmlEnableJavascriptConsole : boolean = Converters.stringToBool(rawMetadata.htmlEnableJavascriptConsole[0]);
-  const inactivityTime : number = Converters.stringToNumber(rawMetadata.inactivityTime[0]);
-  const inactivityTimeout : boolean = Converters.stringToBool(rawMetadata.inactivityTimeout[0]);
-  const isMosaic : boolean = Converters.stringToBool(rawMetadata.isMosaic[0]);
-  const language : LanguageType = rawMetadata.language[0];
-  const languageKey : LanguageKeyType = rawMetadata.languageKey[0];
-  const monitorOrientation : MonitorOrientationType = rawMetadata.monitorOrientation[0];
-  const monitorOverscan : MonitorOverscanType = rawMetadata.monitorOverscan[0];
-  const resetVariablesOnPresentationStart : boolean = Converters.stringToBool(rawMetadata.resetVariablesOnPresentationStart[0]);
-  const tenBitColorEnabled : boolean = Converters.stringToBool(rawMetadata.tenBitColorEnabled[0]);
-  const touchCursorDisplayMode : TouchCursorDisplayModeType = rawMetadata.touchCursorDisplayMode[0];
-  const udpDestinationAddress : string = rawMetadata.udpDestinationAddress[0];
-  const udpDestinationAddressType : UdpAddressType = rawMetadata.udpDestinationAddressType[0];
-  const udpDestinationPort : number = Converters.stringToNumber(rawMetadata.udpDestinationPort[0]);
-  const udpReceiverPort : number = Converters.stringToNumber(rawMetadata.udpReceiverPort[0]);
-  const videoConnector : VideoConnectorType = rawMetadata.videoConnector[0];
-
-  const metadata : any = {
-    name,
-    videoMode,
-    model,
-    alphabetizeVariableNames,
-    autoCreateMediaCounterVariables,
-    backgroundScreenColor,
-    delayScheduleChangeUntilMediaEndEvent,
-    deviceWebPageDisplay,
-    flipCoordinates,
-    forceResolution,
-    graphicsZOrder,
-    htmlEnableJavascriptConsole,
-    inactivityTime,
-    inactivityTimeout,
-    isMosaic,
-    language,
-    languageKey,
-    monitorOrientation,
-    monitorOverscan,
-    resetVariablesOnPresentationStart,
-    tenBitColorEnabled,
-    touchCursorDisplayMode,
-    udpDestinationAddress,
-    udpDestinationAddressType,
-    udpDestinationPort,
-    udpReceiverPort,
-    videoConnector
-  };
-
-  return metadata;
-}
-
 function convertRawBPF(rawBPF : any) : any {
 
   const bpf : any = {};
@@ -256,4 +185,73 @@ function convertRawBPF(rawBPF : any) : any {
   return bpf;
 }
 
+function convertRawBPFMetadata(rawMetadata : any) : any {
+
+  let bpfMetadata : any = {};
+  convertRawBPFSignProperties(rawMetadata, bpfMetadata);
+  convertRawBPFSerial(rawMetadata, bpfMetadata);
+
+  return bpfMetadata;
+}
+
+function convertRawBPFSignProperties(rawMetadata : any, bpfMetadata: any) : void {
+
+  bpfMetadata.name = rawMetadata.name[0];
+  bpfMetadata.videoMode = rawMetadata.videoMode[0];
+  bpfMetadata.model = rawMetadata.model[0];
+
+  bpfMetadata.alphabetizeVariableNames = Converters.stringToBool(rawMetadata.alphabetizeVariableNames[0]);
+  bpfMetadata.autoCreateMediaCounterVariables = Converters.stringToBool(rawMetadata.autoCreateMediaCounterVariables[0]);
+  bpfMetadata.backgroundScreenColor = {
+    a: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['a']),
+    r: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['r']),
+    g: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['g']),
+    b: Converters.stringToNumber(rawMetadata.backgroundScreenColor[0]['$']['b']),
+  };
+  bpfMetadata.delayScheduleChangeUntilMediaEndEvent = Converters.stringToBool(rawMetadata.delayScheduleChangeUntilMediaEndEvent[0].toLowerCase());
+  bpfMetadata.deviceWebPageDisplay = rawMetadata.deviceWebPageDisplay[0];
+  bpfMetadata.flipCoordinates =  Converters.stringToBool(rawMetadata.flipCoordinates[0]);
+  bpfMetadata.forceResolution = Converters.stringToBool(rawMetadata.forceResolution[0]);
+  bpfMetadata.graphicsZOrder = rawMetadata.graphicsZOrder[0];
+  bpfMetadata.htmlEnableJavascriptConsole = Converters.stringToBool(rawMetadata.htmlEnableJavascriptConsole[0]);
+  bpfMetadata.inactivityTime = Converters.stringToNumber(rawMetadata.inactivityTime[0]);
+  bpfMetadata.inactivityTimeout = Converters.stringToBool(rawMetadata.inactivityTimeout[0]);
+  bpfMetadata.isMosaic = Converters.stringToBool(rawMetadata.isMosaic[0]);
+  bpfMetadata.language = rawMetadata.language[0];
+  bpfMetadata.languageKey = rawMetadata.languageKey[0];
+  bpfMetadata.monitorOrientation = rawMetadata.monitorOrientation[0];
+  bpfMetadata.monitorOverscan = rawMetadata.monitorOverscan[0];
+  bpfMetadata.resetVariablesOnPresentationStart = Converters.stringToBool(rawMetadata.resetVariablesOnPresentationStart[0]);
+  bpfMetadata.tenBitColorEnabled = Converters.stringToBool(rawMetadata.tenBitColorEnabled[0]);
+  bpfMetadata.touchCursorDisplayMode = rawMetadata.touchCursorDisplayMode[0];
+  bpfMetadata.udpDestinationAddress = rawMetadata.udpDestinationAddress[0];
+  bpfMetadata.udpDestinationAddressType = rawMetadata.udpDestinationAddressType[0];
+  bpfMetadata.udpDestinationPort = Converters.stringToNumber(rawMetadata.udpDestinationPort[0]);
+  bpfMetadata.udpReceiverPort = Converters.stringToNumber(rawMetadata.udpReceiverPort[0]);
+  bpfMetadata.videoConnector = rawMetadata.videoConnector[0];
+}
+
+function convertRawBPFSerial(rawMetadata: any, bpfMetadata: any) : void {
+
+  let serialPortConfigurations: any[] = [];
+  let serialPortConfiguration : any = {};
+
+  rawMetadata.SerialPortConfiguration.forEach( (serialPortConfigurationBPF : any) => {
+    serialPortConfiguration = {
+      port : Converters.stringToNumber(serialPortConfigurationBPF.port[0]),
+      baudRate : Converters.stringToNumber(serialPortConfigurationBPF.baudRate[0]),
+      dataBits: Converters.stringToNumber(serialPortConfigurationBPF.dataBits[0]),
+      stopBits: Converters.stringToNumber(serialPortConfigurationBPF.stopBits[0]),
+      parity: serialPortConfigurationBPF.parity[0],
+      protocol: serialPortConfigurationBPF.protocol[0],
+      sendEol : serialPortConfigurationBPF.sendEol[0],
+      receiveEol : serialPortConfigurationBPF.receiveEol[0],
+      invertSignals : Converters.stringToBool(serialPortConfigurationBPF.invertSignals[0]),
+      connectedDevice : serialPortConfigurationBPF.connectedDevice[0],
+    };
+    serialPortConfigurations.push(serialPortConfiguration);
+  });
+
+  bpfMetadata.serialPortConfigurations = serialPortConfigurations;
+}
 
