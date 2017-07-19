@@ -190,6 +190,9 @@ function convertRawBPFMetadata(rawMetadata : any) : any {
   let bpfMetadata : any = {};
   convertRawBPFSignProperties(rawMetadata, bpfMetadata);
   convertRawBPFSerial(rawMetadata, bpfMetadata);
+  convertRawBPFGpio(rawMetadata, bpfMetadata);
+  convertRawBPFButtonPanels(rawMetadata, bpfMetadata);
+  convertRawBPFAudio(rawMetadata, bpfMetadata);
 
   return bpfMetadata;
 }
@@ -255,3 +258,86 @@ function convertRawBPFSerial(rawMetadata: any, bpfMetadata: any) : void {
   bpfMetadata.serialPortConfigurations = serialPortConfigurations;
 }
 
+function convertRawBPFGpio(rawMetadata: any, bpfMetadata: any) : void {
+
+  let gpioList : any[] = [];
+
+  for (let i = 0; i < 8; i++) {
+    const gpio : GpioType = rawMetadata['gpio' + i.toString()][0];
+    gpioList.push(gpio);
+  }
+
+  bpfMetadata.gpioList = gpioList;
+}
+
+function convertRawBPFButtonPanels(rawMetadata: any, bpfMetadata: any) : void {
+
+  let bpConfiguration : DmBpConfiguration;
+  let buttonPanelMap : DmButtonPanelMap = {};
+
+  let buttonPanelNames : Array<string> = [
+    'BP200A',
+    'BP200B',
+    'BP200C',
+    'BP200D',
+    'BP900A',
+    'BP900B',
+    'BP900C',
+    'BP900D',
+  ];
+  for (let buttonPanelName of buttonPanelNames) {
+    let configureAutomatically : boolean = Converters.stringToBool(rawMetadata[buttonPanelName +  'ConfigureAutomatically'][0]);
+    let configuration : number = Converters.stringToNumber(rawMetadata[buttonPanelName + 'Configuration'][0]);
+    bpConfiguration = {
+      configureAutomatically,
+      configuration
+    };
+    buttonPanelMap[buttonPanelName.toLowerCase()] = bpConfiguration;
+  }
+
+  bpfMetadata.buttonPanelMap = buttonPanelMap;
+}
+
+function convertRawBPFAudio(rawMetadata: any, bpfMetadata: any) : void {
+
+  let audioSignPropertyMap : DmAudioSignPropertyMap = {};
+  let audioSignProperties : DmAudioSignProperties;
+
+  let bacAudioNames : Array<string> = [
+    'audio1',
+    'audio2',
+    'audio3',
+    'spdif',
+    'usbA',
+    'usbB',
+    'usbC',
+    'usbD',
+    'hdmi',
+  ];
+
+  for (let bacAudioName of bacAudioNames) {
+    audioSignProperties = {
+      min : Converters.stringToNumber(rawMetadata[bacAudioName + 'MinVolume'][0]),
+      max : Converters.stringToNumber(rawMetadata[bacAudioName + 'MaxVolume'][0])
+    };
+
+    let audioName : string = bacAudioName;
+    switch (bacAudioName) {
+      case 'audio1': {
+        audioName = 'analog1';
+        break;
+      }
+      case 'audio2': {
+        audioName = 'analog2';
+        break;
+      }
+      case 'audio3': {
+        audioName = 'analog3';
+        break;
+      }
+    }
+    audioSignPropertyMap[audioName] = audioSignProperties;
+  }
+
+  bpfMetadata.audioSignPropertyMap = audioSignPropertyMap;
+}
