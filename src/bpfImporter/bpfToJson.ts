@@ -251,7 +251,84 @@ function fixZoneSpecificParameters(rawZoneSpecificParameters : any) : any {
 }
 
 function fixZonePlaylist(rawZonePlaylist : any) : any {
-  return null;
+
+  const playlistParametersSpec: any[] = [
+    { name: 'name', type: 'string'},
+    { name: 'type', type: 'string'},
+  ];
+
+  let playlist : any = fixJson(playlistParametersSpec, rawZonePlaylist);
+
+  if (playlist.type === 'non-interactive') {
+    playlist.states = fixZonePlaylistStates(rawZonePlaylist.$$);
+  }
+  else {
+    debugger;
+  }
+
+  return playlist;
+}
+
+function fixZonePlaylistStates(rawPlaylistItems: any) : any {
+
+  let playlistStates : any[] = [];
+
+  rawPlaylistItems.forEach( (rawPlaylistItem : any) => {
+    switch (rawPlaylistItem["#name"]) {
+      case 'imageItem': {
+        playlistStates.push(fixImageItem(rawPlaylistItem));
+        break;
+
+      }
+      case 'videoItem': {
+        playlistStates.push(fixVideoItem(rawPlaylistItem));
+        break;
+      }
+    }
+  });
+  return playlistStates;
+}
+
+function fixImageItem(rawImageItem : any) : any {
+
+  const imageItemParametersSpec: any[] = [
+    { name: 'fileIsLocal', type: 'boolean'},
+    { name: 'slideDelayInterval', type: 'number'},
+    { name: 'slideTransition', type: 'string'},
+    { name: 'transitionDuration', type: 'number'},
+    { name: 'videoPlayerRequired', type: 'boolean'},
+  ];
+
+  let imageItem : any = fixJson(imageItemParametersSpec, rawImageItem);
+  imageItem.file = fixRawFileItem(rawImageItem.file.$);
+  imageItem.type = 'imageItem';
+
+  return imageItem;
+}
+
+function fixVideoItem(rawVideoItem : any) : any {
+  
+  const videoItemParametersSpec: any[] = [
+    { name: 'automaticallyLoop', type: 'boolean'},
+    { name: 'fileIsLocal', type: 'boolean'},
+    { name: 'videoDisplayMode', type: 'string'},
+    { name: 'volume', type: 'number'},
+  ];
+
+  let videoItem : any = fixJson(videoItemParametersSpec, rawVideoItem);
+  videoItem.file = fixRawFileItem(rawVideoItem.file.$);
+  videoItem.type = 'videoItem';
+
+  return videoItem;
+}
+
+function fixRawFileItem(rawFileItem : any) : any {
+  const imageItemParametersSpec: any[] = [
+    { name: 'name', type: 'string'},
+    { name: 'path', type: 'string'},
+  ];
+
+  return fixJson(imageItemParametersSpec, rawFileItem);
 }
 
 function fixJson(parametersSpec: any[], parameters: any) : any {
@@ -282,7 +359,11 @@ function stringToJson(buf : Buffer) : any {
 
   return new Promise( (resolve, reject) => {
     try {
-      let parser = new xml2js.Parser({explicitArray: false});
+      let parser = new xml2js.Parser({
+        explicitArray: false,
+        explicitChildren: true,
+        preserveChildrenOrder: true
+      });
       parser.parseString(buf, (err: any, json: any) => {
         if (err) {
           reject(err);
