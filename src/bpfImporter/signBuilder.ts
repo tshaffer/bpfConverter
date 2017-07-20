@@ -1,19 +1,19 @@
 import {
   BsColor,
-  DeviceWebPageDisplay,
-  GraphicsZOrderType,
-  MonitorOrientationType,
-  MonitorOverscanType,
 } from '@brightsign/bscore';
 
 import {
+  DmSerialPortConfiguration,
+  DmSerialPortList,
   DmSignMetadata,
   DmSignProperties,
   DmSignState,
+  SerialPortListParams,
   SignAction,
   dmGetSignState,
   dmNewSign,
   dmUpdateSignProperties,
+  dmUpdateSignSerialPorts,
 } from '@brightsign/bsdatamodel';
 
 
@@ -23,6 +23,7 @@ export function createSign(bpf : any, dispatch: Function, getState: Function) : 
 
   newSign(bpf, dispatch);
   setSignProperties(bpf, dispatch, getState);
+  setSerialPortConfiguration(bpf, dispatch);
 
   let state = getState();
   console.log(state);
@@ -105,4 +106,19 @@ function setSignProperties(bpf : any, dispatch: Function, getState: Function) {
       videoConnector,
     }
   ));
+}
+
+function setSerialPortConfiguration(bpf : any, dispatch: Function) {
+
+  let serialPortList : DmSerialPortList = [];
+
+  bpf.metadata.SerialPortConfigurations.forEach( (serialPortConfiguration : any) => {
+    serialPortList.push(serialPortConfiguration);
+  });
+
+  let serialPortListParams : SerialPortListParams = {
+    params : serialPortList
+  };
+
+  dispatch(dmUpdateSignSerialPorts(serialPortListParams));
 }
