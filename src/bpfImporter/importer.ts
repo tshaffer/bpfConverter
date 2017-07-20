@@ -64,18 +64,17 @@ import {
 import * as Converters from './converters';
 
 import { bpfToJson } from './bpfToJson';
+import { createSign } from './signBuilder';
 
 export function importBPF(bpfFilePath: string, dispatch: Function, getState: Function): Promise<any> {
 
-  return new Promise( (resolve, reject) => {
-    fs.readFile(bpfFilePath, (err, buf) => {
-      if (err) {
-        reject(err);
-      } else {
-        bpfToJson(buf).then( (bpf : any) => {
-          console.log(bpf);
-        });
-      }
+  return new Promise( (resolve) => {
+    readFile(bpfFilePath).then( (bpfBuf : any) => {
+      return bpfToJson(bpfBuf);
+    }).then((bpf : any) => {
+      console.log(bpf);
+      const sign : any = createSign(bpf, dispatch, getState);
+      // resolve(bpf);
     });
   });
 
@@ -162,6 +161,18 @@ export function importBPF(bpfFilePath: string, dispatch: Function, getState: Fun
   //     resolve(bpf);
   //   });
   // });
+}
+
+function readFile(filePath : string) : Promise<Buffer> {
+
+  return new Promise( (resolve, reject) => {
+    fs.readFile(filePath, (err, buf) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(buf);
+    });
+  })
 }
 
 function readBPF(bpfFilePath: string = '') : Promise<any> {
