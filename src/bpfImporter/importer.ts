@@ -184,10 +184,11 @@ function convertRawBPF(rawBPF : any) : any {
   const rawZones = rawBrightAuthor.zones;
   const rawZone = rawZones.zone;
 
-  debugger;
-
   const presentationParameters = getPresentationParameters(rawPresentationParameters);
   const metadata = getMetadata(rawMetadata);
+
+  console.log(metadata);
+  debugger;
 
   return null;
 
@@ -239,9 +240,101 @@ function getMetadata(rawMetadata: any) : any {
     { name:'udpDestinationPort', type: 'number'},
     { name:'udpReceiverPort', type: 'number'},
     { name:'videoConnector', type: 'string'},
+    { name:'BP200AConfiguration', type: 'number'},
+    { name:'BP200AConfigureAutomatically', type: 'boolean'},
+    { name:'BP200BConfiguration', type: 'number'},
+    { name:'BP200BConfigureAutomatically', type: 'boolean'},
+    { name:'BP200CConfiguration', type: 'number'},
+    { name:'BP200CConfigureAutomatically', type: 'boolean'},
+    { name:'BP200DConfiguration', type: 'number'},
+    { name:'BP200DConfigureAutomatically', type: 'boolean'},
+    { name:'BP900AConfiguration', type: 'number'},
+    { name:'BP900AConfigureAutomatically', type: 'boolean'},
+    { name:'BP900BConfiguration', type: 'number'},
+    { name:'BP900BConfigureAutomatically', type: 'boolean'},
+    { name:'BP900CConfiguration', type: 'number'},
+    { name:'BP900CConfigureAutomatically', type: 'boolean'},
+    { name:'BP900DConfiguration', type: 'number'},
+    { name:'BP900DConfigureAutomatically', type: 'boolean'},
+    { name:'audio1MaxVolume', type: 'number'},
+    { name:'audio1MinVolume', type: 'number'},
+    { name:'audio2MaxVolume', type: 'number'},
+    { name:'audio2MinVolume', type: 'number'},
+    { name:'audio3MaxVolume', type: 'number'},
+    { name:'audio3MinVolume', type: 'number'},
+    { name:'audioConfiguration', type: 'string'},
+    { name:'fullResGraphicsEnabled', type: 'boolean'},
+    { name:'gpio0', type: 'string'},
+    { name:'gpio1', type: 'string'},
+    { name:'gpio2', type: 'string'},
+    { name:'gpio3', type: 'string'},
+    { name:'gpio4', type: 'string'},
+    { name:'gpio5', type: 'string'},
+    { name:'gpio6', type: 'string'},
+    { name:'gpio7', type: 'string'},
+    { name:'hdmiMaxVolume', type: 'number'},
+    { name:'hdmiMinVolume', type: 'number'},
+    { name:'isBackup', type: 'boolean'},
+    { name:'networkedVariablesUpdateInterval', type: 'number'},
+    { name:'spdifMaxVolume', type: 'number'},
+    { name:'spdifMinVolume', type: 'number'},
+    { name:'usbAMaxVolume', type: 'number'},
+    { name:'usbAMinVolume', type: 'number'},
+    { name:'usbBMaxVolume', type: 'number'},
+    { name:'usbBMinVolume', type: 'number'},
+    { name:'usbCMaxVolume', type: 'number'},
+    { name:'usbCMinVolume', type: 'number'},
+    { name:'usbDMaxVolume', type: 'number'},
+    { name:'usbDMinVolume', type: 'number'},
   ];
 
-  return fixJson(metadataSpec, rawMetadata);
+  const metadata : any = fixJson(metadataSpec, rawMetadata);
+
+  let {
+    DirectoryLocations, SerialPortConfiguration, backgroundScreenColor, beacons, htmlSites, liveDataFeeds,
+    parserPlugins, presentationIdentifiers, scriptPlugins, userDefinedEvents, userVariables
+  } = rawMetadata;
+
+  metadata.backgroundScreenColor = convertBackgroundScreenColor(backgroundScreenColor);
+  metadata.SerialPortConfigurations = convertSerialPortConfiguration(SerialPortConfiguration);
+  console.log(metadata);
+  debugger;
+
+}
+
+function convertSerialPortConfiguration(rawSerialPortConfigurations : any) : any {
+
+  let serialPortConfigurations : any[] = [];
+
+  const serialPortConfigurationSpec: any [] = [
+    { name:'baudRate', type: 'number'},
+    { name:'connectedDevice', type: 'string'},
+    { name:'dataBits', type: 'number'},
+    { name:'invertSignals', type: 'bool'},
+    { name:'parity', type: 'string'},
+    { name:'port', type: 'number'},
+    { name:'protocol', type: 'string'},
+    { name:'receiveEol', type: 'string'},
+    { name:'sendEol', type: 'string'},
+    { name:'stopBits', type: 'number'},
+  ];
+
+  rawSerialPortConfigurations.forEach( (rawSerialPortConfiguration : any) => {
+    serialPortConfigurations.push(fixJson(serialPortConfigurationSpec, rawSerialPortConfiguration));
+  });
+
+  return serialPortConfigurations;
+}
+
+function convertBackgroundScreenColor(rawBackgroundScreenColor : any) : any {
+  const backgroundScreenColorSpec: any[] = [
+    { name:'a', type: 'number'},
+    { name:'r', type: 'number'},
+    { name:'g', type: 'number'},
+    { name:'b', type: 'number'},
+  ];
+
+  return fixJson(backgroundScreenColorSpec, rawBackgroundScreenColor.$);
 }
 
 function fixJson(parametersSpec: any[], parameters: any) : any {
