@@ -25,8 +25,12 @@ function fixJsonBPF(rawBPF : any) : any {
   const rawZones = rawBrightAuthor.zones;
   const rawZone = rawZones.zone;
 
-  bpf.presentationParameters = getPresentationParameters(rawPresentationParameters);
-  bpf.metadata = getMetadata(rawMetadata);
+  bpf.presentationParameters = fixPresentationParameters(rawPresentationParameters);
+  bpf.metadata = fixMetadata(rawMetadata);
+  bpf.zones = fixZones(rawZones);
+
+  console.log(bpf);
+  debugger;
 
   return bpf;
 
@@ -38,7 +42,7 @@ function fixJsonBPF(rawBPF : any) : any {
   // return bpf;
 }
 
-function getPresentationParameters(rawPresentationParameters: any) : any {
+function fixPresentationParameters(rawPresentationParameters: any) : any {
 
   const presentationParametersSpec: any[] = [
     { name: 'BrightAuthorVersion', type: 'string'},
@@ -49,7 +53,7 @@ function getPresentationParameters(rawPresentationParameters: any) : any {
   return fixJson(presentationParametersSpec, rawPresentationParameters);
 }
 
-function getMetadata(rawMetadata: any) : any {
+function fixMetadata(rawMetadata: any) : any {
 
   let {
     DirectoryLocations, SerialPortConfiguration, backgroundScreenColor, beacons, htmlSites, liveDataFeeds,
@@ -132,13 +136,13 @@ function getMetadata(rawMetadata: any) : any {
   ];
 
   let metadata : any = fixJson(metadataSpec, rawMetadata);
-  metadata.backgroundScreenColor = convertBackgroundScreenColor(backgroundScreenColor);
-  metadata.SerialPortConfigurations = convertSerialPortConfiguration(SerialPortConfiguration);
+  metadata.backgroundScreenColor = fixBackgroundScreenColor(backgroundScreenColor);
+  metadata.SerialPortConfigurations = fixSerialPortConfiguration(SerialPortConfiguration);
 
   return metadata;
 }
 
-function convertSerialPortConfiguration(rawSerialPortConfigurations : any) : any {
+function fixSerialPortConfiguration(rawSerialPortConfigurations : any) : any {
 
   let serialPortConfigurations : any[] = [];
 
@@ -162,7 +166,7 @@ function convertSerialPortConfiguration(rawSerialPortConfigurations : any) : any
   return serialPortConfigurations;
 }
 
-function convertBackgroundScreenColor(rawBackgroundScreenColor : any) : any {
+function fixBackgroundScreenColor(rawBackgroundScreenColor : any) : any {
   const backgroundScreenColorSpec: any[] = [
     { name:'a', type: 'number'},
     { name:'r', type: 'number'},
@@ -171,6 +175,83 @@ function convertBackgroundScreenColor(rawBackgroundScreenColor : any) : any {
   ];
 
   return fixJson(backgroundScreenColorSpec, rawBackgroundScreenColor.$);
+}
+
+function fixZones(rawZones: any) : any {
+
+  // check to see if rawZones is an array - for now it's not
+  let zones : any = [];
+  zones.push(fixZone(rawZones.zone));
+
+  return zones;
+}
+
+function fixZone(rawZone : any) : any {
+
+  let zone : any = fixZoneParameters(rawZone);
+  zone.zoneSpecificParameters = fixZoneSpecificParameters(rawZone.zoneSpecificParameters);
+  zone.playlist = fixZonePlaylist(rawZone.playlist);
+
+  return zone;
+}
+
+function fixZoneParameters(rawZone : any) : any {
+
+  const zoneParametersSpec: any[] = [
+    { name: 'height', type: 'number'},
+    { name: 'horizontalOffset', type: 'number'},
+    { name: 'id', type: 'string'},
+    { name: 'name', type: 'string'},
+    { name: 'type', type: 'string'},
+    { name: 'verticalOffset', type: 'number'},
+    { name: 'width', type: 'number'},
+    { name: 'x', type: 'number'},
+    { name: 'y', type: 'number'},
+    { name: 'zoomValue', type: 'number'},
+  ];
+
+  return fixJson(zoneParametersSpec, rawZone);
+}
+
+function fixZoneSpecificParameters(rawZoneSpecificParameters : any) : any {
+
+  const zoneSpecificParametersSpec: any[] = [
+    { name: 'analogOutput', type: 'string'},
+    { name: 'analog2Output', type: 'string'},
+    { name: 'analog3Output', type: 'string'},
+    { name: 'audioMapping', type: 'string'},
+    { name: 'audioMixMode', type: 'string'},
+    { name: 'audioMode', type: 'string'},
+    { name: 'audioOutput', type: 'string'},
+    { name: 'audioVolume', type: 'number'},
+    { name: 'brightness', type: 'number'},
+    { name: 'contrast', type: 'number'},
+    { name: 'hdmiOutput', type: 'string'},
+    { name: 'hue', type: 'number'},
+    { name: 'imageMode', type: 'string'},
+    { name: 'liveVideoInput', type: 'string'},
+    { name: 'liveVideoStandard', type: 'string'},
+    { name: 'maxContentResolution', type: 'string'},
+    { name: 'maximumVolume', type: 'number'},
+    { name: 'minimumVolume', type: 'number'},
+    { name: 'mosaic', type: 'boolean'},
+    { name: 'saturation', type: 'number'},
+    { name: 'spdifOutput', type: 'string'},
+    { name: 'usbOutput', type: 'string'},
+    { name: 'usbOutputA', type: 'string'},
+    { name: 'usbOutputB', type: 'string'},
+    { name: 'usbOutputC', type: 'string'},
+    { name: 'usbOutputD', type: 'string'},
+    { name: 'videoVolume', type: 'number'},
+    { name: 'viewMode', type: 'string'},
+    { name: 'zOrderFront', type: 'boolean'},
+  ];
+
+  return fixJson(zoneSpecificParametersSpec, rawZoneSpecificParameters);
+}
+
+function fixZonePlaylist(rawZonePlaylist : any) : any {
+  return null;
 }
 
 function fixJson(parametersSpec: any[], parameters: any) : any {
