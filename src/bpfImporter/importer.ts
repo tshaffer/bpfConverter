@@ -1,5 +1,5 @@
 import fs = require('fs');
-// import path = require('path');
+import path = require('path');
 const xml2js = require('xml2js');
 
 import {
@@ -68,13 +68,32 @@ import { createSign } from './signBuilder';
 
 export function importBPF(bpfFilePath: string, dispatch: Function, getState: Function): Promise<any> {
 
-  return new Promise( (resolve) => {
+  return new Promise( (resolve, reject) => {
     readFile(bpfFilePath).then( (bpfBuf : any) => {
       return bpfToJson(bpfBuf);
     }).then((bpf : any) => {
       console.log(bpf);
-      const sign : any = createSign(bpf, dispatch, getState);
-      // resolve(bpf);
+      createSign(bpf, dispatch, getState);
+
+      // sign in bsdm has been created - write it to a file
+      let basename : string = path.basename(bpfFilePath);
+      let dirname : string = path.dirname(bpfFilePath);
+      let extname : string = path.extname(bpfFilePath);
+      let parsedPath : any = path.parse(bpfFilePath);
+
+      const bpfxPath = path.join(dirname, parsedPath.name + ".bpfx");
+
+      let signState: DmSignState = dmGetSignState(getState().bsdm);
+
+      const bpfStr = JSON.stringify(signState, null, '\t');
+      fs.writeFile(bpfxPath, bpfStr, (err) => {
+        if(err)
+          reject(err);
+        else
+          resolve(bpf);
+      });
+
+      resolve(bpf);
     });
   });
 }

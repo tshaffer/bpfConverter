@@ -36,15 +36,10 @@ import {
 
 
 export function createSign(bpf : any, dispatch: Function, getState: Function) : void {
-
   newSign(bpf, dispatch);
   setSignProperties(bpf, dispatch, getState);
   setSerialPortConfiguration(bpf, dispatch);
   addZones(bpf, dispatch, getState);
-
-  let state = getState();
-  console.log(state);
-  debugger;
 }
 
 function newSign(bpf : any, dispatch: Function) {
@@ -269,13 +264,6 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
     }
     const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[mediaStateIds.length - 1],
       mediaStateIds[0], transitionTypes[mediaStateIds.length - 1], transitionDurations[mediaStateIds.length - 1]));
-
-    // save bsdm to file?
-
-    state = getState();
-    console.log(state);
-    debugger;
-
   });
 
 
