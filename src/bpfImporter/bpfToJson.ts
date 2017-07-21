@@ -7,7 +7,6 @@ export function bpfToJson(xmlBPF : any) : any {
   return new Promise( (resolve, reject) => {
     stringToJson(xmlBPF).then( (jsonBPF: any) => {
       const bpf : any = fixJsonBPF(jsonBPF);
-      console.log(bpf);
       resolve(bpf);
     });
   });
@@ -30,16 +29,8 @@ function fixJsonBPF(rawBPF : any) : any {
   bpf.zones = fixZones(rawZones);
 
   console.log(bpf);
-  debugger;
 
   return bpf;
-
-  // const metaData : any = brightAuthor.meta[0];
-  // const zones : any = brightAuthor.zones;
-  //
-  // bpf.meta = convertRawBPFMetadata(metaData);
-  // bpf.zones = convertRawBPFZones(zones);
-  // return bpf;
 }
 
 function fixPresentationParameters(rawPresentationParameters: any) : any {
