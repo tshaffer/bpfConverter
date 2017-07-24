@@ -1,20 +1,38 @@
 import {
+  AudioMappingType,
+  AudioMixModeType,
+  AudioModeType,
+  AudioOutputSelectionType,
+  AudioOutputType,
   BsAssetItem,
   BsColor,
   BsRect,
   EventType,
+  ImageModeType,
+  LiveVideoInputType,
+  LiveVideoStandardType,
   MediaType,
+  MosaicMaxContentResolutionType,
   TransitionType,
+  ViewModeType,
+  ZoneType,
 } from '@brightsign/bscore';
 
 import {
   BsDmId,
   BsDmThunkAction,
+  DmAudioOutputAssignmentMap,
+  DmAudioZoneProperties,
+  DmAudioZonePropertyData,
+  DmImageZoneProperties,
+  DmImageZonePropertyData,
   DmMediaStateContainer,
   DmSerialPortList,
   DmSignMetadata,
   DmSignProperties,
   DmSignState,
+  DmVideoZoneProperties,
+  DmVideoZonePropertyData,
   EventParams,
   MediaStateAction,
   MediaStateParams,
@@ -22,6 +40,7 @@ import {
   SignAction,
   TransitionAction,
   ZoneAction,
+  VideoOrImagesZonePropertyParams,
   dmAddEvent,
   dmAddMediaState,
   dmAddTransition,
@@ -148,13 +167,110 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
       height,
       pct: false
     };
-    const zoneAction : ZoneAction = dispatch(dmAddZone(bpfZone.name, bpfZone.type, bpfZone.id, zoneRect));
+    const zoneAction : ZoneAction = dispatch(dmAddZone(bpfZone.name, bpfZone.type, bpfZone.id, zoneRect, true));
 
     const zoneId : BsDmId = zoneAction.payload.id;
+    const zoneType : ZoneType = zoneAction.payload.type;
 
     let state = getState();
     console.log(state);
 
+    // after adding states, set initialMediaStateId
+
+    switch (zoneType) {
+      case ZoneType.VideoOrImages: {
+
+        let imageZonePropertyData : DmImageZonePropertyData = {
+          imageMode : ImageModeType.CenterImage,
+        };
+        let imageZoneProperties : DmImageZoneProperties = imageZonePropertyData;
+
+        let audioOutputAssignmentMap : DmAudioOutputAssignmentMap = {};
+        audioOutputAssignmentMap['poo'] = AudioOutputType.Passthrough;
+
+        let audioZonePropertyData : DmAudioZonePropertyData = {
+          audioOutput : AudioOutputSelectionType.Analog,
+          audioMapping : AudioMappingType.AudioAll,
+          audioMixMode : AudioMixModeType.Stereo,
+          audioMode : AudioModeType.Stereo,
+          audioOutputAssignments : audioOutputAssignmentMap,
+          audioVolume : 0,
+          minimumVolume : 0,
+          maximumVolume : 0
+        };
+
+        let videoZonePropertyData : DmVideoZonePropertyData = {
+          viewMode : ViewModeType.FillAndCenter,
+          liveVideoInput : LiveVideoInputType.Composite,
+          liveVideoStandard : LiveVideoStandardType.NtscM,
+          videoVolume : 0,
+          brightness : 0,
+          contrast : 0,
+          saturation : 0,
+          hue : 0,
+          zOrderFront : true,
+          mosaic : false,
+          maxContentResolution : MosaicMaxContentResolutionType.FK,
+          mosaicDecoderName: ''
+        };
+
+        let videoZoneProperties : DmVideoZoneProperties =
+          Object.assign({}, videoZonePropertyData, audioZonePropertyData);
+
+        let zonePropertyParams : VideoOrImagesZonePropertyParams =
+          Object.assign({}, videoZoneProperties, imageZoneProperties);
+
+        // let videoZoneProperties : DmVideoZoneProperties = {
+        //   viewMode : ViewModeType.FillAndCenter,
+        //   liveVideoInput : LiveVideoInputType.Composite,
+        //   liveVideoStandard : LiveVideoStandardType.NtscM,
+        //   videoVolume : 0,
+        //   brightness : 0,
+        //   contrast : 0,
+        //   saturation : 0,
+        //   hue : 0,
+        //   zOrderFront : true,
+        //   mosaic : false,
+        //   maxContentResolution : MosaicMaxContentResolutionType.FK,
+        //   mosaicDecoderName: '',
+        //   audioOutput : AudioOutputSelectionType.Analog,
+        //   audioMapping : AudioMappingType.AudioAll,
+        //   audioMixMode : AudioMixModeType.Stereo,
+        //   audioMode : AudioModeType.Stereo,
+        //   audioOutputAssignments : audioOutputAssignmentMap,
+        //   audioVolume : 0,
+        //   minimumVolume : 0,
+        //   maximumVolume : 0,
+        // };
+
+        break;
+      }
+      case ZoneType.VideoOnly: {
+        break;
+      }
+      case ZoneType.Images: {
+        break;
+      }
+      case ZoneType.AudioOnly: {
+        break;
+      }
+      case ZoneType.EnhancedAudio: {
+        break;
+      }
+      case ZoneType.Ticker: {
+        break;
+      }
+      case ZoneType.Clock: {
+        break;
+      }
+      case ZoneType.BackgroundImage: {
+        break;
+      }
+      default: {
+        debugger;
+        break;
+      }
+    }
     /*
     export function dmUpdateZone(params: ZoneParams): BsDmThunkAction<ZoneParams | ZoneChangeParams>;
     export interface ZoneParams {
@@ -218,7 +334,7 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
       switch (state.type) {
         case 'imageItem': {
           const { file, fileIsLocal, slideDelayInterval, transitionDuration, videoPlayerRequired } = state;
-          // TODO - use other parameters
+          // TODO - specify additional parameters
           const bsAssetItem  : BsAssetItem = dmCreateAssetItemFromLocalFile(file.path, '', MediaType.Image);
           let addMediaStateThunkAction : BsDmThunkAction<MediaStateParams> = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
           let mediaStateAction : MediaStateAction = dispatch(addMediaStateThunkAction);
@@ -262,6 +378,7 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
       const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[i],
         mediaStateIds[i + 1], transitionTypes[i], transitionDurations[i]));
     }
+    // TODO - best way to do this when some of the transitions don't have transitionTypes / transitionDurations
     const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[mediaStateIds.length - 1],
       mediaStateIds[0], transitionTypes[mediaStateIds.length - 1], transitionDurations[mediaStateIds.length - 1]));
   });

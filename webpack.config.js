@@ -18,7 +18,8 @@ module.exports = {
 
   externals: {
     '@brightsign/videomodeconfiguration': 'commonjs @brightsign/videomodeconfiguration',
-    BSDeviceInfo : 'BSDeviceInfo'
+    BSDeviceInfo : 'BSDeviceInfo',
+    'core-js/fn/object/assign' : 'commonjs core-js/fn/object/assign',
   },
 
   module: {
