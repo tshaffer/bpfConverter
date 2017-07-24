@@ -40,6 +40,10 @@ import {
   SignAction,
   TransitionAction,
   ZoneAction,
+  ZoneParams,
+  ZoneChangeParams,
+  ZonePropertyUpdateAction,
+  ZonePropertyUpdateParams,
   VideoOrImagesZonePropertyParams,
   dmAddEvent,
   dmAddMediaState,
@@ -51,6 +55,8 @@ import {
   dmNewSign,
   dmUpdateSignProperties,
   dmUpdateSignSerialPorts,
+  dmUpdateZone,
+  dmUpdateZoneProperties,
 } from '@brightsign/bsdatamodel';
 
 
@@ -219,6 +225,14 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
 
         let zonePropertyParams : VideoOrImagesZonePropertyParams =
           Object.assign({}, videoZoneProperties, imageZoneProperties);
+
+        let zonePropertyUpdateParams : ZonePropertyUpdateParams = {
+          id: zoneId,
+          type: ZoneType.VideoOrImages,
+          properties : zonePropertyParams
+        }
+        let updateZonePropertyThunkAction : BsDmThunkAction<ZonePropertyUpdateParams> = dmUpdateZoneProperties(zonePropertyUpdateParams);
+        let updateZonePropertyAction : ZonePropertyUpdateAction = dispatch(updateZonePropertyThunkAction);
 
         // let videoZoneProperties : DmVideoZoneProperties = {
         //   viewMode : ViewModeType.FillAndCenter,
