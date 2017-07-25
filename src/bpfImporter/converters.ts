@@ -4,6 +4,7 @@ import {
   AudioMappingType,
   AudioMixModeType,
   TransitionType,
+  ViewModeType,
 } from '@brightsign/bscore';
 
 export function stringToBool(s : string) : boolean {
@@ -165,5 +166,70 @@ export function getTransitionType(bacTransition : string) : TransitionType {
       return TransitionType.NoEffect;
     default:
       return TransitionType.NoEffect;
+  }
+}
+
+export function getViewMode(bpfViewMode : string) : ViewModeType {
+
+  let viewMode: ViewModeType;
+  switch (bpfViewMode) {
+    case 'Fill Screen and Centered': {
+      viewMode = ViewModeType.FillAndCenter;
+      break;
+    }
+    case 'Scale to Fill': {
+      viewMode = ViewModeType.ScaleToFill;
+      break;
+    }
+    default: {
+      viewMode = ViewModeType.Letterboxed;
+      break;
+    }
+  }
+  return viewMode;
+}
+
+export function getAudioOutput(bpfAudioOutput : string) : AudioOutputSelectionType {
+  switch (bpfAudioOutput) {
+    case 'Analog Audio':
+    default:
+      return AudioOutputSelectionType.Analog;
+    case 'USB Audio':
+      return AudioOutputSelectionType.Usb;
+    case 'SPDIF Audio with Stereo PCM (HDMI Audio)':
+      return AudioOutputSelectionType.DigitalPcm;
+    case 'SPDIF Audio, Raw Multichannel':
+      return AudioOutputSelectionType.DigitalAc3;
+    case 'Analog Audio with Raw Multichannel on SPDIF':
+      return AudioOutputSelectionType.AnalogHdmiAc3;
+  }
+}
+
+export function getAudioMode(bpfAudioMode : string) : AudioModeType {
+  switch (bpfAudioMode) {
+    case 'Multichannel Surround':
+      return AudioModeType.Surround;
+    case 'Multichannel Mixed Down to Stereo':
+    default:
+      return AudioModeType.Stereo;
+    case 'No Audio':
+      return AudioModeType.NoAudio;
+    case 'Mono Left Mixdown':
+      return AudioModeType.Left;
+    case 'Mono Right Mixdown':
+      return AudioModeType.Right;
+  }
+}
+
+export function getAudioMapping(bpfAudioMapping : string) : AudioMappingType {
+  switch (bpfAudioMapping) {
+    case 'Audio-1':
+      return AudioMappingType.Audio1;
+    case 'Audio-2':
+      return AudioMappingType.Audio2;
+    case 'Audio-3':
+      return AudioMappingType.Audio3;
+    case 'Audio-all':
+      return AudioMappingType.AudioAll;
   }
 }
