@@ -19,6 +19,7 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  AudioSignPropertyMapParams,
   BsDmId,
   BsDmThunkAction,
   DmAudioOutputAssignmentMap,
@@ -55,6 +56,7 @@ import {
   dmGetZoneMediaStateContainer,
   dmGetSignState,
   dmNewSign,
+  dmUpdateSignAudioPropertyMap,
   dmUpdateSignProperties,
   dmUpdateSignSerialPorts,
   dmUpdateZone,
@@ -66,8 +68,9 @@ import * as Converters from './converters';
 export function createSign(bpf : any, dispatch: Function, getState: Function) : void {
   newSign(bpf, dispatch);
   setSignProperties(bpf, dispatch, getState);
+  setSignAudioProperties(bpf, dispatch);
   setSerialPortConfiguration(bpf, dispatch);
-  addZones(bpf, dispatch, getState);
+  addZones(bpf, dispatch);
 }
 
 function newSign(bpf : any, dispatch: Function) {
@@ -148,6 +151,50 @@ function setSignProperties(bpf : any, dispatch: Function, getState: Function) {
   ));
 }
 
+function setSignAudioProperties(bpf : any, dispatch : Function) {
+
+  const bpfAudioVolumeNames : Array<string> = [
+    'audio1',
+    'audio2',
+    'audio3',
+    'hdmi',
+    'spdif',
+    'usbA',
+    'usbB',
+    'usbC',
+    'usbD',
+  ];
+
+  const bpfxAudioOutputs: Array<string> = [
+    'analog1',
+    'analog2',
+    'analog3',
+    'hdmi',
+    'spdif',
+    'usbA',
+    'usbB',
+    'usbC',
+    'usbD',
+  ];
+
+  let audioSignPropertyMap : DmAudioSignPropertyMap = {};
+  let audioSignProperties : DmAudioSignProperties;
+
+  for (let i = 0; i < bpfAudioVolumeNames.length; i++) {
+    audioSignProperties = {
+      min: bpf.metadata[bpfAudioVolumeNames[i] + 'MinVolume'],
+      max: bpf.metadata[bpfAudioVolumeNames[i] + 'MaxVolume'],
+    };
+    audioSignPropertyMap[bpfxAudioOutputs[i]] = audioSignProperties;
+  }
+
+  const audioSignPropertyMapParams : AudioSignPropertyMapParams = {
+    params : audioSignPropertyMap
+  };
+
+  dispatch(dmUpdateSignAudioPropertyMap(audioSignPropertyMapParams));
+}
+
 function setSerialPortConfiguration(bpf : any, dispatch: Function) {
 
   let serialPortList : DmSerialPortList = [];
@@ -163,41 +210,7 @@ function setSerialPortConfiguration(bpf : any, dispatch: Function) {
   dispatch(dmUpdateSignSerialPorts(serialPortListParams));
 }
 
-function buildAudioOutputAssignmentMap(bpf : any, zoneSpecificParameters : any) : DmAudioOutputAssignmentMap {
-
-  // this is WRONG!
-
-  // export function dmUpdateSignAudioPropertyMap(params: AudioSignPropertyMapParams): AudioSignPropertyMapAction;
-  // export interface AudioSignPropertyMapParams {
-  //   params: DmAudioSignPropertyMap;
-  // }
-  // export interface DmAudioSignPropertyMap {
-  //   [audioName: string]: DmAudioSignProperties;
-  // }
-  // export interface DmAudioSignProperties {
-  //   min: number;
-  //   max: number;
-  // }
-
-  // export class AudioOutputType {
-  //   static Pcm: string;
-  //   static Passthrough: string;
-  //   static Multichannel: string;
-  //   static None: string;
-  // }
-  // export interface DmAudioOutputAssignmentMap {
-  //   [audioName: string]: AudioOutputType;
-  // }
-  // export interface DmAudioZonePropertyData {
-  //   audioOutput: AudioOutputSelectionType;
-  //   audioMode: AudioModeType;
-  //   audioMapping: AudioMappingType;
-  //   audioOutputAssignments: DmAudioOutputAssignmentMap;
-  //   audioMixMode: AudioMixModeType;
-  //   audioVolume: number;
-  //   minimumVolume: number;
-  //   maximumVolume: number;
-  // }
+function buildAudioOutputAssignmentMap(zoneSpecificParameters : any) : DmAudioOutputAssignmentMap {
 
   const bpfAudioOutputs : Array<string> = [
     'analogOutput',
@@ -210,18 +223,6 @@ function buildAudioOutputAssignmentMap(bpf : any, zoneSpecificParameters : any) 
     'usbOutputC',
     'usbOutputD',
   ];
-
-  // const bpfAudioVolumeNames : Array<string> = [
-  //   'audio1',
-  //   'audio2',
-  //   'audio3',
-  //   'hdmi',
-  //   'spdif',
-  //   'usbA',
-  //   'usbB',
-  //   'usbC',
-  //   'usbD',
-  // ];
 
   const bpfxAudioOutputs: Array<string> = [
     'analog1',
@@ -237,23 +238,14 @@ function buildAudioOutputAssignmentMap(bpf : any, zoneSpecificParameters : any) 
 
   let audioOutputAssignments: DmAudioOutputAssignmentMap = {};
 
-  // let audioSignPropertyMap : DmAudioSignPropertyMap = {};
-  // let audioSignProperties : DmAudioSignProperties;
-
   for (let i = 0; i < bpfAudioOutputs.length; i++) {
-
     audioOutputAssignments[bpfxAudioOutputs[i]] = zoneSpecificParameters[bpfAudioOutputs[i]];
-    // audioSignProperties = {
-    //   min: bpf.metadata[bpfAudioVolumeNames[i] + 'MinVolume'],
-    //   max: bpf.metadata[bpfAudioVolumeNames[i] + 'MaxVolume'],
-    // };
-    // audioSignPropertyMap[bpfxAudioOutputs[i]] = audioSignProperties;
   }
 
   return audioOutputAssignments;
 }
 
-function setZoneProperties(bpf : any, bpfZone : any, zoneId : BsDmId, zoneType : ZoneType, dispatch : Function) {
+function setZoneProperties(bpfZone : any, zoneId : BsDmId, zoneType : ZoneType, dispatch : Function) {
   switch (zoneType) {
     case ZoneType.VideoOrImages: {
 
@@ -264,7 +256,7 @@ function setZoneProperties(bpf : any, bpfZone : any, zoneId : BsDmId, zoneType :
       };
       let imageZoneProperties : DmImageZoneProperties = imageZonePropertyData;
 
-      let audioOutputAssignmentMap : DmAudioOutputAssignmentMap = buildAudioOutputAssignmentMap(bpf, zoneSpecificParameters);
+      let audioOutputAssignmentMap : DmAudioOutputAssignmentMap = buildAudioOutputAssignmentMap(zoneSpecificParameters);
 
       let audioZonePropertyData : DmAudioZonePropertyData = {
         audioOutput : Converters.getAudioOutput(zoneSpecificParameters.audioOutput),
@@ -405,7 +397,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId, dispatch : Function) 
 
 }
 
-function addZones(bpf : any, dispatch : Function, getState: Function) {
+function addZones(bpf : any, dispatch : Function) {
 
   bpf.zones.forEach( (bpfZone : any) => {
 
@@ -423,25 +415,7 @@ function addZones(bpf : any, dispatch : Function, getState: Function) {
     const zoneId : BsDmId = zoneAction.payload.id;
     const zoneType : ZoneType = zoneAction.payload.type;
 
-    let state = getState();
-    console.log(state);
-
-    // after adding states, set initialMediaStateId
-
-    setZoneProperties(bpf, bpfZone, zoneId, zoneType, dispatch);
-
-    /*
-    export function dmUpdateZone(params: ZoneParams): BsDmThunkAction<ZoneParams | ZoneChangeParams>;
-    export interface ZoneParams {
-      id: BsDmId;
-      name?: string;
-      type?: ZoneType;
-      tag?: string;
-      nonInteractive?: boolean;
-      initialMediaStateId?: BsDmId;
-      position?: BsRect;
-    }
-    */
+    setZoneProperties(bpfZone, zoneId, zoneType, dispatch);
 
     buildZonePlaylist(bpfZone, zoneId, dispatch);
   });
