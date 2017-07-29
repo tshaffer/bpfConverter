@@ -66,7 +66,7 @@ import * as Converters from './converters';
 import { bpfToJson } from './bpfToJson';
 import { createSign } from './signBuilder';
 
-export function importBPF(bpfFilePath: string, dispatch: Function, getState: Function): Promise<any> {
+export function importBPFPoo(bpfFilePath: string, dispatch: Function, getState: Function): Promise<any> {
 
   return new Promise( (resolve, reject) => {
     readFile(bpfFilePath).then( (bpfBuf : any) => {

@@ -24,6 +24,10 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  importBPF
+} from '@brightsign/bpfimporter';
+
+import {
   ArEventType,
   ArSyncSpec,
   ArSyncSpecDownload,
@@ -77,7 +81,7 @@ import {
   addDataFeed
 } from   '../store/dataFeeds';
 
-import { importBPF } from '../bpfImporter/importer';
+// import { importBPF } from '../bpfImporter/importer';
 
 let _singleton: BSP = null;
 
@@ -139,7 +143,8 @@ export class BSP {
 
 
     const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
-    importBPF(bpfFilePath, this.dispatch, this.getState).then( (bpf) => {
+    // importBPF(bpfFilePath, this.dispatch, this.getState).then( (bpf) => {
+    importBPF(bpfFilePath).then( (bpf) => {
       console.log(bpf);
       debugger;
     });
@@ -360,17 +365,17 @@ export class BSP {
 
     const liveDataFeed = dataFeed;
 
-    if (liveDataFeed.usage === DataFeedUsageType.Text) {
-      dataFeed.retrieveFeed(this);
-    } else {
-      // is the following correct? check with autorun classic
-      this.liveDataFeedsToDownload.push(liveDataFeed);
-
-      // launch download of first feed
-      if (this.liveDataFeedsToDownload.length === 1) {
-        dataFeed.retrieveFeed(this);
-      }
-    }
+    // if (liveDataFeed.usage === DataFeedUsageType.Text) {
+    //   dataFeed.retrieveFeed(this);
+    // } else {
+    //   // is the following correct? check with autorun classic
+    //   this.liveDataFeedsToDownload.push(liveDataFeed);
+    //
+    //   // launch download of first feed
+    //   if (this.liveDataFeedsToDownload.length === 1) {
+    //     dataFeed.retrieveFeed(this);
+    //   }
+    // }
   }
 
 }
