@@ -12,6 +12,7 @@ import ImageContainer from '../containers/imageContainer';
 import SlickContainer from '../containers/slickContainer';
 import VideoContainer from '../containers/videoContainer';
 import MrssDisplayItemContainer from '../containers/mrssDisplayItemContainer';
+import ComponentPluginContainer from '../containers/componentPluginContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 
@@ -26,6 +27,7 @@ import {
 } from '@brightsign/bscore';
 
 import {
+  DmHtmlComponentContentItem,
   DmSlickCarouselContentItem,
   BsDmId,
   DmDataFeedContentItem,
@@ -153,6 +155,22 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     );
   }
 
+  renderComponentPluginItem(componentPluginItem : DmHtmlComponentContentItem) {
+
+    const property = {
+      name: 'name',
+      value: 'value'
+    };
+
+    return (
+      <ComponentPluginContainer
+        name={'fred'}
+        componentPath={'fred'}
+        properties={[property]}
+      />
+    );
+  }
+
   getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
     const eventIds : BsDmId[] = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
@@ -195,6 +213,9 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       }
       case 'SlickCarousel': {
         return this.renderSlickItem(contentItem as DmSlickCarouselContentItem);
+      }
+      case 'HtmlComponent': {
+        return this.renderComponentPluginItem(contentItem as DmHtmlComponentContentItem);
       }
       default: {
         break;
