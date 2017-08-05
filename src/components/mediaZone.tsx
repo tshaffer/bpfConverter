@@ -157,16 +157,12 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
   renderComponentPluginItem(componentPluginItem : DmHtmlComponentContentItem) {
 
-    const property = {
-      name: 'name',
-      value: 'value'
-    };
-
+    let componentPath = path.join(componentPluginItem.reactComponent.path, componentPluginItem.reactComponent.name);
     return (
       <ComponentPluginContainer
-        name={'fred'}
-        componentPath={'fred'}
-        properties={[property]}
+        name={componentPluginItem.name}
+        componentPath={componentPath}
+        properties={componentPluginItem.properties}
       />
     );
   }

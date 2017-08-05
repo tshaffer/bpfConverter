@@ -1,38 +1,29 @@
 import * as React from 'react';
 
-interface ComponentPluginProperty {
-  name: string;
-  value: string;
-}
+import {
+  DmHtmlComponentProperty
+} from '@brightsign/bsdatamodel';
 
 export interface ComponentPluginProps {
   name: string;
   componentPath: string;
-  properties: ComponentPluginProperty[];
+  properties: DmHtmlComponentProperty[];
 }
 
 let ImportedComponent: any = null;
 
 export default class ComponentPlugin extends React.Component<ComponentPluginProps, object> {
 
-  constructor(props: ComponentPluginProps) {
-    super(props);
-
-    const pluginSource = '/Users/tedshaffer/Documents/Projects/importableComponent/dist/importablecomponent.js';
-    ImportedComponent = eval('require')(pluginSource);
+  componentDidMount() {
+    const plugInSource = this.props.componentPath;
+    ImportedComponent = eval('require')(plugInSource);
   }
 
   render() {
-    // var settings = {
-    //   dots: true,
-    //   infinite: true,
-    //   // speed: 500,
-    //   // slidesToShow: 2,
-    //   // slidesToScroll: 1,
-    //   autoplay : false,
-    //   autoplaySpeed : 2000,
-    //   fade : true,
-    // };
+    if (!ImportedComponent) {
+      return null;
+    }
+
     return (
       <div>
         <ImportedComponent/>
