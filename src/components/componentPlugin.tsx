@@ -14,19 +14,24 @@ let ImportedComponent: any = null;
 
 export default class ComponentPlugin extends React.Component<ComponentPluginProps, object> {
 
-  componentDidMount() {
-    const plugInSource = this.props.componentPath;
-    ImportedComponent = eval('require')(plugInSource);
-  }
+  // componentDidMount() {
+  //   const plugInSource = this.props.componentPath;
+  //   ImportedComponent = eval('require')(plugInSource);
+  // }
 
   render() {
+
     if (!ImportedComponent) {
-      return null;
+      const plugInSource = this.props.componentPath;
+      ImportedComponent = eval('require')(plugInSource);
     }
 
     return (
       <div>
-        <ImportedComponent/>
+        <ImportedComponent
+          label1={'myLabel1'}
+          label2={'myLabel2'}
+        />
       </div>
     );
   }
