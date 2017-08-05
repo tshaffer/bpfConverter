@@ -155,7 +155,11 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     );
   }
 
-  renderComponentPluginItem(componentPluginItem : DmHtmlComponentContentItem) {
+  renderComponentPluginItem(mediaState : DmMediaState, componentPluginItem : DmHtmlComponentContentItem, event : DmEvent) {
+
+    let duration : number = event.data.interval;
+
+    const self = this;
 
     let componentPath = path.join(componentPluginItem.reactComponent.path, componentPluginItem.reactComponent.name);
     return (
@@ -163,6 +167,8 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         name={componentPluginItem.name}
         componentPath={componentPath}
         properties={componentPluginItem.properties}
+        duration={duration * 1000}
+        onTimeout={self.postTimeoutEvent.bind(this)}
       />
     );
   }
@@ -211,7 +217,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         return this.renderSlickItem(contentItem as DmSlickCarouselContentItem);
       }
       case 'HtmlComponent': {
-        return this.renderComponentPluginItem(contentItem as DmHtmlComponentContentItem);
+        return this.renderComponentPluginItem(mediaState, contentItem as DmHtmlComponentContentItem, event);
       }
       default: {
         break;
