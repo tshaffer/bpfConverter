@@ -3,7 +3,8 @@ class DesktopPlatformService {
   // static srcDirectory = '/Users/tedshaffer/Desktop/aaa_bac';            // bac classic files - for import
   // static srcDirectory = '/Users/tedshaffer/Desktop/baconTestCard';   // bacon files - for non import
   // static srcDirectory = '/Users/tedshaffer/Desktop/baconSlick';   // bacon slick files - for import
-  static srcDirectory = '/Users/tedshaffer/Desktop/baconImportFromBac';   // bacon import from bac
+  // static srcDirectory = '/Users/tedshaffer/Desktop/baconImportFromBac';   // bacon import from bac
+  static srcDirectory = '/Users/tedshaffer/Desktop/ab';   // importable component for now
 
   static getRootDirectory(): string {
     return DesktopPlatformService.srcDirectory;

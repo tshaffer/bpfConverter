@@ -15,9 +15,18 @@ export interface SignProps {
     playbackState : string;
 }
 
+let ImportableComponent : any = null;
+
 export default class Sign extends React.Component<SignProps, object> {
 
-    getMediaZoneJSX(zone : DmcZone) : object {
+  constructor (props : any) {
+    super(props);
+
+    const pluginSource = '/Users/tedshaffer/Documents/Projects/importableComponent/dist/importablecomponent.js';
+    ImportableComponent = eval('require')(pluginSource);
+  }
+
+  getMediaZoneJSX(zone : DmcZone) : object {
 
         return (
             <div
@@ -87,17 +96,18 @@ export default class Sign extends React.Component<SignProps, object> {
         }
     }
 
+// {/*{*/}
+// {/*zoneIds.map( (zoneId) =>*/}
+// {/*this.getZoneJSX(zoneId),*/}
+// {/*)*/}
+// {/*}*/}
     render() {
 
         const zoneIds : string[] = dmGetZonesForSign(this.props.bsdm);
 
         return (
             <div>
-                {
-                    zoneIds.map( (zoneId) =>
-                        this.getZoneJSX(zoneId),
-                    )
-                }
+              <ImportableComponent/>
             </div>
         );
     }

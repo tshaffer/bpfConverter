@@ -142,12 +142,12 @@ export class BSP {
     this.hsmList = [];
 
 
-    const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
+    // const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
     // importBPF(bpfFilePath, this.dispatch, this.getState).then( (bpf) => {
-    importBPF(bpfFilePath).then( (bpf) => {
-      console.log(bpf);
-      debugger;
-    });
+    // importBPF(bpfFilePath).then( (bpf) => {
+    //   console.log(bpf);
+    //   debugger;
+    // });
 
 
 
@@ -157,7 +157,7 @@ export class BSP {
     const rootPath = PlatformService.default.getRootDirectory();
     const pathToPool = PlatformService.default.getPathToPool();
 
-    this.importPublishedFiles = true;
+    this.importPublishedFiles = false;
 
     if (this.importPublishedFiles) {
       this.parseImportedPublishedFiles(rootPath, pathToPool).then( () => {
