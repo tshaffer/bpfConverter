@@ -19,6 +19,7 @@ export default class ComponentPlugin extends React.Component<ComponentPluginProp
   //   ImportedComponent = eval('require')(plugInSource);
   // }
 
+
   render() {
 
     if (!ImportedComponent) {
@@ -26,13 +27,83 @@ export default class ComponentPlugin extends React.Component<ComponentPluginProp
       ImportedComponent = eval('require')(plugInSource);
     }
 
+    let foo : any = this.props.properties.map((property) => {
+      let propertyObj: any = {};
+      propertyObj[property.property] = property.value;
+      return (
+        propertyObj
+      );
+    });
+
+    const flibbet : any = this.props.properties.map( (property) => {
+      let propertyObj : any = {};
+      propertyObj[property.property] = property.value;
+      return (
+        propertyObj
+      );
+    });
+
+    console.log(flibbet);
+
+    let componentPluginProperties: any = {};
+    this.props.properties.forEach((property) => {
+      let propertyObj: any = {};
+      propertyObj[property.property] = property.value;
+      componentPluginProperties[property.property] = property.value;
+    });
+
     return (
-      <div>
-        <ImportedComponent
-          label1={'myLabel1'}
-          label2={'myLabel2'}
-        />
-      </div>
-    );
+      <ImportedComponent {...componentPluginProperties}/>
+    )
+
+    // return (<div>
+    //   {
+    //     this.props.properties.map((property) => {
+    //       let propertyObj: any = {};
+    //       propertyObj[property.property] = property.value;
+    //       return (
+    //         propertyObj
+    //       );
+    //     })
+    //   }
+    // </div>);
+
+    //
+  //
+  //   // label1={'myLabel1'}
+  //   // label2={'myLabel2'}
+  //
+  //   let componentPluginProperties : any[] = [];
+  //   this.props.properties.forEach( (property) => {
+  //
+  //     let propertyObj : any = {};
+  //     propertyObj[property.property] = property.value;
+  //
+  //     componentPluginProperties.push(
+  //       propertyObj
+  //     );
+  //   });
+  //
+  //   const flibbet : any = this.props.properties.map( (property) => {
+  //     let propertyObj : any = {};
+  //     propertyObj[property.property] = property.value;
+  //     return (
+  //       propertyObj
+  //     );
+  //   });
+  //
+  //
+  //   return (
+  //     <div>
+  //       <ImportedComponent
+  //         {
+  //           this.props.properties.map( (property) => {
+  //
+  //           });
+  //         }
+  //         {...componentPluginProperties}
+  //       />
+  //     </div>
+  //   );
   }
 }
