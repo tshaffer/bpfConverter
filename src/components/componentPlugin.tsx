@@ -36,9 +36,8 @@ export default class ComponentPlugin extends React.Component<ComponentPluginProp
       componentPluginProperties[property.property] = property.value;
     });
 
-    componentPluginProperties = {
-      data: [0, 10, 5, 22, 3.6, 11],
-    }
+    // react-trend example
+    componentPluginProperties['data'] = [0, 10, 5, 22, 3.6, 11];
 
     return (
       <ImportedComponent {...componentPluginProperties}/>
