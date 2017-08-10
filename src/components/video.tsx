@@ -15,13 +15,14 @@ export default class Video extends React.Component<VideoProps, object> {
 
     const self = this;
 
+    // type="video/mp4"
+
     return (
       <video
         src={this.props.src}
         autoPlay={true}
         width={this.props.width.toString()}
         height={this.props.height.toString()}
-        type="video/mp4"
         onEnded = {() => {
           console.log('**** - videoEnd');
           self.props.onVideoEnd();

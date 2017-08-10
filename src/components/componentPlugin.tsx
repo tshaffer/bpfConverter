@@ -56,7 +56,7 @@ export default class ComponentPlugin extends React.Component<ComponentPluginProp
       componentPluginProperties[property.property] = property.value;
     });
 
-    // react-trend example
+    // react-trend example - FAKE
     componentPluginProperties['data'] = [0, 10, 5, 22, 3.6, 11];
 
     if (this.timeout) {
