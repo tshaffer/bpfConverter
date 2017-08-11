@@ -97,6 +97,10 @@ export class BSP {
   liveDataFeedsToDownload: DataFeed[];
   importPublishedFiles : boolean;
 
+  version: string;
+  sysFlags : any;
+  sysInfo : any;
+
   constructor() {
     if (!_singleton) {
       console.log('bsp constructor invoked');
@@ -126,7 +130,7 @@ export class BSP {
         this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
           this.autoSchedule = autoSchedule;
           resolve();
-          this.launchHSM();
+          // this.launchHSM();
         });
       });
     });
@@ -134,13 +138,32 @@ export class BSP {
 
   initialize(reduxStore: Store<ArState>) {
 
+    this.importPublishedFiles = false;
+
     console.log('bsp initialization');
 
     this.store = reduxStore;
     this.dispatch = this.store.dispatch;
     this.getState = this.store.getState;
+
+    this.version = '0.0.1';
+
+    console.log(PlatformService);
+    const rootPath = PlatformService.default.getRootDirectory();
+    const pathToPool = PlatformService.default.getPathToPool();
+
     this.hsmList = [];
 
+    // get sync spec
+    // TODO - could be current-sync.json
+    this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
+      this.syncSpec = cardSyncSpec;
+      this.setDeviceInfo();
+
+      this.parseNativeFiles(rootPath, pathToPool).then( () => {
+        this.launchHSM();
+      });
+    });
 
     // const bpfFilePath = '/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/p-0.bpf';
     // importBPF(bpfFilePath, this.dispatch, this.getState).then( (bpf) => {
@@ -149,27 +172,88 @@ export class BSP {
     //   debugger;
     // });
 
-
-
-
-
-    console.log(PlatformService);
-    const rootPath = PlatformService.default.getRootDirectory();
-    const pathToPool = PlatformService.default.getPathToPool();
-
-    this.importPublishedFiles = false;
-
-    if (this.importPublishedFiles) {
-      this.parseImportedPublishedFiles(rootPath, pathToPool).then( () => {
-        this.launchHSM();
-      });
-    }
-    else {
-      this.parseNativeFiles(rootPath, pathToPool).then( () => {
-        this.launchHSM();
-      });
-    }
+    // if (this.importPublishedFiles) {
+    //   this.parseImportedPublishedFiles(rootPath, pathToPool).then( () => {
+    //     this.launchHSM();
+    //   });
+    // }
+    // else {
+    //   this.parseNativeFiles(rootPath, pathToPool).then( () => {
+    //     this.launchHSM();
+    //   });
+    // }
   }
+
+  setDeviceInfo() {
+
+    const debugParams : any = this.enableDebugging();
+    this.sysFlags = {};
+    this.sysFlags.debugOn = debugParams.serialDebugOn;
+    this.sysFlags.systemLogDebugOn = debugParams.systemLogDebugOn;
+
+    const modelObject = PlatformService.default.getDeviceInfo();
+
+    // TODO - better way to do this using ES6 features?
+    this.sysInfo = {};
+    this.sysInfo.autorunVersion = this.version;
+    this.sysInfo.customAutorunVersion = this.version;   // TODO
+    this.sysInfo.deviceUniqueId = modelObject.deviceUniqueId;
+    this.sysInfo.deviceFWVersion = modelObject.deviceFWVersion;
+    this.sysInfo.deviceFWVersionNumber = modelObject.deviceFWVersionNumber;
+    this.sysInfo.deviceModel = modelObject.deviceModel;
+    this.sysInfo.deviceFamily = modelObject.deviceFamily;
+    this.sysInfo.enableLogDeletion = true;
+
+    // bug 27663
+    
+    /*
+     sysInfo.ipAddressWired$ = "Invalid"
+     nc = CreateObject("roNetworkConfiguration", 0)
+     if type(nc) = "roNetworkConfiguration" then
+     currentConfig = nc.GetCurrentConfig()
+     if type(currentConfig) = "roAssociativeArray" then
+     if currentConfig.ip4_address <> "" then
+     sysInfo.ipAddressWired$ = currentConfig.ip4_address
+     endif
+     endif
+     endif
+     nc = invalid
+
+     sysInfo.modelSupportsWifi = false
+     sysInfo.ipAddressWireless$ = "Invalid"
+     nc = CreateObject("roNetworkConfiguration", 1)
+     if type(nc) = "roNetworkConfiguration" then
+     currentConfig = nc.GetCurrentConfig()
+     if type(currentConfig) = "roAssociativeArray" then
+     sysInfo.modelSupportsWifi = true
+     if currentConfig.ip4_address <> "" then
+     sysInfo.ipAddressWireless$ = currentConfig.ip4_address
+     endif
+     endif
+     endif
+     nc = invalid
+
+
+     */
+    // get edid info
+
+    // bug 27980 - Javascript store object
+    //   du = CreateObject("roStorageInfo", "./")
+    //   if du.IsReadOnly() then
+    //   sysInfo.storageIsWriteProtected = true
+    // else
+    //   sysInfo.storageIsWriteProtected = false
+    //   endif
+    //
+  }
+
+  enableDebugging() : any {
+    return {
+      serialDebugOn: this.syncSpec.meta.client.enableSerialDebugging,
+      systemLogDebugOn: this.syncSpec.meta.client.enableSystemLogDebugging
+    };
+  }
+
 
   launchHSM() {
 

@@ -36,6 +36,16 @@ class DesktopPlatformService {
     return false;
     // return true;
   }
+
+  static getDeviceInfo() : any {
+    return {
+      deviceUniqueId: 'SerialNumber69',
+      deviceFWVersion: '7.0.0',
+      deviceFWVersionNumber : 77000,
+      deviceModel: 'XT1143',
+      deviceFamily: 'Impala'
+    };
+  }
 }
 
 export default DesktopPlatformService;
