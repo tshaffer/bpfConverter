@@ -1,5 +1,10 @@
 import APlatformService from '../APlatformService';
 
+import {
+  BsDeviceInfo,
+  BSNetworkInterfaceConfig,
+} from '../../brightSignInterfaces';
+
 class BrightSignPlatformService extends APlatformService {
 
   static getRootDirectory() {
@@ -21,27 +26,23 @@ class BrightSignPlatformService extends APlatformService {
   }
 
   // http://docs.brightsign.biz/display/DOC/BSDeviceInfo
-  static getDeviceInfo() : any {
-
-    const deviceInfo = new BSDeviceInfo();
-
-    return {
-      deviceUniqueId: deviceInfo.deviceUniqueId,
-      deviceFWVersion: deviceInfo.version,
-      deviceFWVersionNumber : 0,
-      deviceModel: deviceInfo.model,
-      deviceFamily: deviceInfo.family
-    };
+  static getDeviceInfo() : BsDeviceInfo {
+    return new BSDeviceInfo();
   }
 
   // Bug 28248 - Document @brightsign/networkconfiguration Javascript object
-  static getNetworkConfiguration(networkInterface : string) : any {
+  static getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkInterfaceConfig> {
     return new Promise( (resolve, reject) => {
       const NetworkInterface = require("@brightsign/networkconfiguration");
       const nc = new NetworkInterface(networkInterface);
-      nc.getConfig().then((networkConfig : any) => {
-        console.log('received networkConfig');
-        resolve(networkConfig);
+      nc.getConfig().then((networkConfig : BSNetworkInterfaceConfig) => {
+        if (networkConfig && networkConfig.domain === 'brightsign') {
+          console.log('received networkConfig');
+          resolve(networkConfig);
+        }
+        else {
+          reject();
+        }
       });
     });
   }
