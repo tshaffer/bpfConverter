@@ -92,6 +92,10 @@ class BrightSignPlatformService extends APlatformService {
       resolve(controlPort);
     });
   }
+
+  static deviceHasGpioConnector(deviceInfo : any) : boolean {
+    return (deviceInfo.HasFeature('GPIO Connector'));
+  }
 }
 
 export default BrightSignPlatformService;

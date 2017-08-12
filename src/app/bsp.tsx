@@ -113,8 +113,15 @@ export class BSP {
   edid : any;
   registry : BsRegistry;
   systemTime : any;
-  brightSignControlPort : any;
+  controlPort : any;
+  svcPort : any;
   expanderControlPort : any;
+  lightController0ControlPort : any;
+  lightController1ControlPort : any;
+  lightController2ControlPort : any;
+  lightController0DiagnosticsPort : any;
+  lightController1DiagnosticsPort : any;
+  lightController2DiagnosticsPort : any;
 
   constructor() {
     if (!_singleton) {
@@ -221,22 +228,20 @@ export class BSP {
       let getEdidPromise : Promise<any> = this.getEdid();
       let getBrightSignControlPortPromise : Promise<any> = PlatformService.default.getControlPort('BrightSign');
       let getExpanderControlPortPromise : Promise<any> = PlatformService.default.getControlPort('Expander-0-GPIO');
-
+      let getLightController0ControlPortPromise : Promise<any> = 
+        PlatformService.default.getControlPort('LightController-0-CONTROL');
+      let getLightController1ControlPortPromise : Promise<any> =
+        PlatformService.default.getControlPort('LightController-1-CONTROL');
+      let getLightController2ControlPortPromise : Promise<any> =
+        PlatformService.default.getControlPort('LightController-2-CONTROL');
+      let getLightController0DiagnosticsPortPromise : Promise<any> =
+        PlatformService.default.getControlPort('LightController-0-DIAGNOSTICS');
+      let getLightController1DiagnosticsPortPromise : Promise<any> =
+        PlatformService.default.getControlPort('LightController-1-DIAGNOSTICS');
+      let getLightController2DiagnosticsPortPromise : Promise<any> =
+        PlatformService.default.getControlPort('LightController-2-DIAGNOSTICS');
+      
       // roStorageInfo
-
-      // roControlPort
-      //    BrightSign
-      //    Expander-0-GPIO
-      //    LightController-0-CONTROL
-      //    LightController-1-CONTROL
-      //    LightController-2-CONTROL
-      //    LightController-0-DIAGNOSTICS
-      //    LightController-1-DIAGNOSTICS
-      //    LightController-2-DIAGNOSTICS
-      //    TouchBoard-0-GPIO
-      //    TouchBoard-1-GPIO
-      //    TouchBoard-2-GPIO
-      //    TouchBoard-3-GPIO
 
       // roStorageHotplug
 
@@ -256,14 +261,34 @@ export class BSP {
       promises.push(getEdidPromise);
       promises.push(getBrightSignControlPortPromise);
       promises.push(getExpanderControlPortPromise);
+      promises.push(getLightController0ControlPortPromise);
+      promises.push(getLightController1ControlPortPromise);
+      promises.push(getLightController2ControlPortPromise);
+      promises.push(getLightController0DiagnosticsPortPromise);
+      promises.push(getLightController1DiagnosticsPortPromise);
+      promises.push(getLightController2DiagnosticsPortPromise);
 
       Promise.all(promises).then( (results : any[]) => {
 
         this.eth0Configuration = results[0];
         this.eth1Configuration = results[1];
         this.edid = results[2];
-        this.brightSignControlPort = results[3];
+        this.svcPort = results[3];
         this.expanderControlPort = results[4];
+        this.lightController0ControlPort = results[5];
+        this.lightController1ControlPort = results[6];
+        this.lightController2ControlPort = results[7];
+        this.lightController0DiagnosticsPort = results[8];
+        this.lightController1DiagnosticsPort = results[9];
+        this.lightController2DiagnosticsPort = results[10];
+
+        const deviceHasGpioConnector : boolean = PlatformService.default.deviceHasGpioConnector(this.deviceInfo);
+        if (deviceHasGpioConnector) {
+          this.controlPort = this.svcPort;
+        }
+        else {
+          this.controlPort = this.expanderControlPort;
+        }
 
         resolve();
       })
