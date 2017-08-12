@@ -4,6 +4,9 @@ import {
   BsDeviceInfo,
   BSNetworkInterfaceConfig,
   BsRegistry,
+  BsScreenshot,
+  BsScreenshotParams,
+  BsSize,
 } from '../../brightSignInterfaces';
 
 class BrightSignPlatformService extends APlatformService {
@@ -61,11 +64,18 @@ class BrightSignPlatformService extends APlatformService {
   }
 
   // Bug 28332 - Document @brightsign/videooutput Javascript object
-  static getEdid() : any {
+  static getVideoOutput(videoConnector : string) : any {
+    const VideoOutput = require('@brightsign/videooutput');
+    return new VideoOutput(videoConnector);
+  }
+
+  static getGraphicsResolution(videoOutputObj : any) : Promise<BsSize> {
+    return videoOutputObj.getGraphicsResolution();
+  }
+
+  static getEdid(videoOutputObj : any) : any {
     return new Promise( (resolve, reject) => {
-      const VideoOutput = require('@brightsign/videooutput');
-      const voc = new VideoOutput('hdmi'); // TODO - vga?
-      voc.getEdidIdentity().then( (edidIdentity: any) => {
+      videoOutputObj.getEdidIdentity().then( (edidIdentity: any) => {
         console.log(edidIdentity);
         resolve(edidIdentity);
 
@@ -96,6 +106,58 @@ class BrightSignPlatformService extends APlatformService {
   static deviceHasGpioConnector(deviceInfo : any) : boolean {
     return (deviceInfo.HasFeature('GPIO Connector'));
   }
+
+  // Bug 28625 - Document @brightsign/screenshot Javascript object
+  static getScreenshot() : any {
+    const ScreenShot = require('@brightsign/screenshot');
+    return new ScreenShot();
+  }
+
+  static takeScreenshot(screenshot : BsScreenshot, videoOutput : any, presentationName : string, width : number,
+                        height : number, quality : number, rotation : number) : Promise<any> {
+
+    return new Promise( (resolve, reject) => {
+
+      // TODO is this local time?
+      // create a file name based on the current date/time
+      const isoDateTime = BrightSignPlatformService.getIsoDateTime();
+
+      BrightSignPlatformService.getGraphicsResolution(videoOutput).then( (graphicsResolution : BsSize) => {
+
+        const screenshotParams : BsScreenshotParams = {
+          fileName : '/storage/sd/snapshots/' + isoDateTime + ".jpg",
+          fileType : 'JPEG',
+          description : presentationName,
+          width : graphicsResolution.width,
+          height : graphicsResolution.height,
+          quality,
+          rotation,
+        };
+
+        screenshot.asyncCapture(screenshotParams).then( () => {
+          resolve();
+        }).catch( (err) => {
+          console.log('asyncCapture failure:');
+          console.log(err);
+          reject(err);
+        })
+      });
+    });
+  }
+
+  static getIsoDateTime() : string {
+    const currentTime = new Date();
+    let isoDateTime = currentTime.toISOString();
+    isoDateTime = BrightSignPlatformService.replaceAll(isoDateTime, '-', '');
+    isoDateTime = BrightSignPlatformService.replaceAll(isoDateTime, ':', '');
+    const lastIndexOfDot : number = isoDateTime.lastIndexOf('.');
+    isoDateTime = isoDateTime.substr(0, lastIndexOfDot);
+    return isoDateTime;
+  }
+
+  static replaceAll(inputValue : string, search : string, replacement : string) {
+    return inputValue.replace(new RegExp(search, 'g'), replacement);
+  };
 
   static readRegistryValue(registry : BsRegistry, registrySection : string, key : string) : Promise<string> {
     return new Promise( (resolve, reject) => {

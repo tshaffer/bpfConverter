@@ -26,3 +26,22 @@ export interface BsRegistry {
   read(sectionName : string, key? : string) : Promise<string>;
   write(sectionName : string, key : string, value : string) : Promise<any>;
 }
+
+export interface BsScreenshotParams {
+  fileName : string;
+  fileType? : string;
+  description? : string;
+  width? : number;
+  height? : number;
+  quality? : number;
+  rotation? : number;
+}
+
+export interface BsScreenshot {
+  asyncCapture(params : BsScreenshotParams) : Promise<any>;
+}
+
+export interface BsSize {
+  width : number;
+  height : number;
+};

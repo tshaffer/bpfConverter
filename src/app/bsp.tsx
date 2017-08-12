@@ -10,6 +10,8 @@ import {
   BsDeviceInfo,
   BSNetworkInterfaceConfig,
   BsRegistry,
+  BsScreenshot,
+  BsSize,
 } from '../brightSignInterfaces';
 
 import {
@@ -43,7 +45,7 @@ import {
 
 import PlatformService from '../platform';
 
-import { getBrightSignObjects} from '../brightSignObjects';
+import {getBrightSignObjects} from '../brightSignObjects';
 
 import {
   importPublishedFiles,
@@ -99,38 +101,46 @@ export class BSP {
   dispatch: Function;
   getState: Function;
   syncSpec: ArSyncSpec;
-  autoSchedule : any;
+  autoSchedule: any;
   hsmList: HSM[];
   playerHSM: PlayerHSM;
   liveDataFeedsToDownload: DataFeed[];
-  importPublishedFiles : boolean;
+  importPublishedFiles: boolean;
 
   version: string;
-  sysFlags : any;
-  sysInfo : any;
+  sysFlags: any;
+  sysInfo: any;
 
   deviceInfo: BsDeviceInfo;
   eth0Configuration: BSNetworkInterfaceConfig;
   eth1Configuration: BSNetworkInterfaceConfig;
-  edid : any;
-  registry : BsRegistry;
-  systemTime : any;
-  controlPort : any;
-  svcPort : any;
-  expanderControlPort : any;
-  lightController0ControlPort : any;
-  lightController1ControlPort : any;
-  lightController2ControlPort : any;
-  lightController0DiagnosticsPort : any;
-  lightController1DiagnosticsPort : any;
-  lightController2DiagnosticsPort : any;
-  enableRemoteSnapshot : boolean;
-  remoteSnapshotInterval : number;
-  remoteSnapshotMaxImages : number;
+  edid: any;
+  registry: BsRegistry;
+  systemTime: any;
+  controlPort: any;
+  svcPort: any;
+  expanderControlPort: any;
+  lightController0ControlPort: any;
+  lightController1ControlPort: any;
+  lightController2ControlPort: any;
+  lightController0DiagnosticsPort: any;
+  lightController1DiagnosticsPort: any;
+  lightController2DiagnosticsPort: any;
+  screenShot: any;
+  enableRemoteSnapshot: boolean;
+  remoteSnapshotInterval: number;
+  remoteSnapshotMaxImages: number;
   remoteSnapshotJpegQualityLevel: number;
   remoteSnapshotDisplayPortrait: boolean;
-  snapshotFiles : string[];
-  networkingRegistrySettings : any;
+  snapshotFiles: string[];
+  networkingRegistrySettings: any;
+  remoteSnapshotTimerId: any;
+  activePresentation: string;
+
+  screenshot : BsScreenshot;
+  videoOutput : any;
+  graphicsResolution : BsSize;
+
 
   constructor() {
     if (!_singleton) {
@@ -139,9 +149,9 @@ export class BSP {
     }
   }
 
-  parseImportedPublishedFiles(rootPath : string, pathToPool : string): Promise<any> {
-    return new Promise( (resolve, reject) => {
-      importPublishedFiles(rootPath, this.dispatch, this.getState).then( (convertedPackage : any) => {
+  parseImportedPublishedFiles(rootPath: string, pathToPool: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      importPublishedFiles(rootPath, this.dispatch, this.getState).then((convertedPackage: any) => {
         // autoplay results have been written to redux store.
         this.syncSpec = convertedPackage.syncSpec;
         this.autoSchedule = convertedPackage.autoSchedule;
@@ -152,8 +162,8 @@ export class BSP {
     });
   }
 
-  parseNativeFiles(rootPath : string, pathToPool : string) : Promise<any> {
-    return new Promise( (resolve, reject) => {
+  parseNativeFiles(rootPath: string, pathToPool: string): Promise<any> {
+    return new Promise((resolve, reject) => {
       this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
         this.syncSpec = cardSyncSpec;
         const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
@@ -188,18 +198,18 @@ export class BSP {
     // TODO - could be current-sync.json
     this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
       this.syncSpec = cardSyncSpec;
-      getBrightSignObjects().then( (bsObjects : any) => {
+      getBrightSignObjects().then((bsObjects: any) => {
 
         Object.assign(this, bsObjects);
 
-        PlatformService.default.readRegistrySection(this.registry, 'networking').then( (networkingRegistrySettings : any[]) => {
+        PlatformService.default.readRegistrySection(this.registry, 'networking').then((networkingRegistrySettings: any[]) => {
 
           this.networkingRegistrySettings = networkingRegistrySettings;
 
           this.setSystemInfo();
 
-          this.initRemoteSnapshots().then( () => {
-            this.parseNativeFiles(rootPath, pathToPool).then( () => {
+          this.initRemoteSnapshots().then(() => {
+            this.parseNativeFiles(rootPath, pathToPool).then(() => {
               this.launchHSM();
             });
           });
@@ -210,11 +220,11 @@ export class BSP {
 
   setSystemInfo() {
 
-    const debugParams : any = this.enableDebugging();
+    const debugParams: any = this.enableDebugging();
     this.sysFlags = {};
     this.sysFlags.debugOn = debugParams.serialDebugOn;
     this.sysFlags.systemLogDebugOn = debugParams.systemLogDebugOn;
-    
+
     // TODO - better way to do this using ES6 features?
     this.sysInfo = {};
     this.sysInfo.autorunVersion = this.version;
@@ -241,13 +251,13 @@ export class BSP {
     // determine whether or not storage is writable
   }
 
-  initRemoteSnapshots() : Promise<any> {
+  initRemoteSnapshots(): Promise<any> {
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // setup snapshot capability as early as possible
       this.enableRemoteSnapshot = false;
       PlatformService.default.readRegistryValue(this.registry, 'networking', 'enableRemoteSnapshot')
-        .then( (enableRemoteSnapshot : string) => {
+        .then((enableRemoteSnapshot: string) => {
           if (enableRemoteSnapshot.toLowerCase() === 'yes') {
 
             // if sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
@@ -258,7 +268,7 @@ export class BSP {
             this.remoteSnapshotJpegQualityLevel = Number(this.networkingRegistrySettings['remotesnapshotjpegqualitylevel']);
             this.remoteSnapshotDisplayPortrait = (this.networkingRegistrySettings['remotesnapshotdisplayportrait'].toLowerCase() === 'true');
 
-            const snapshotDir : string = '/storage/sd/snapshots';
+            const snapshotDir: string = '/storage/sd/snapshots';
             this.snapshotFiles = [];
 
             let snapshotDirectoryCreated = false;
@@ -272,16 +282,16 @@ export class BSP {
             }
 
             if (!snapshotDirectoryCreated) {
-              this.readDir(snapshotDir).then( (filesInSnapshotDir : string[]) => {
+              this.readDir(snapshotDir).then((filesInSnapshotDir: string[]) => {
                 // snapshot files end with .jpg
-                filesInSnapshotDir.forEach( (snapshotFile) => {
+                filesInSnapshotDir.forEach((snapshotFile) => {
                   if (snapshotFile.endsWith('.jpg')) {
                     this.snapshotFiles.push(snapshotFile);
                   }
                 });
                 this.snapshotFiles.sort();
                 resolve();
-              }).catch( (err) => {
+              }).catch((err) => {
                 reject(err);
               });
             }
@@ -293,9 +303,44 @@ export class BSP {
     });
   }
 
-  readDir(dirname : string) : Promise<string[]> {
-    return new Promise( (resolve, reject) => {
-      fs.readdir(dirname, function(err, files) {
+  takeSnapshot(presentationName : string) : any {
+
+    // before taking snapshot, delete the oldest if necessary
+    // DeleteExcessSnapshots(globalAA)
+
+    // remoteSnapshotDisplayPortrait: boolean;
+
+    PlatformService.default.takeScreenshot(this.screenshot, this.videoOutput, presentationName,
+      this.graphicsResolution.width, this.graphicsResolution.height, this.remoteSnapshotJpegQualityLevel,
+      0).then( () => {
+      console.log('return from takeSnapshot');
+    }).catch( (err : any) => {
+      console.log('takeSnapshot failure');
+      console.log(err);
+    });
+  }
+
+  initiateRemoteSnapshotTimer(): any {
+
+    const updateInterval = this.remoteSnapshotInterval * 1000;
+
+    this.remoteSnapshotTimerId = setInterval(() => {
+      console.log('remoteSnapshotTimer: timeout occurred');
+
+      let presentationName = '';
+      if (this.activePresentation) {
+        presentationName = this.activePresentation;
+      }
+      this.takeSnapshot(presentationName);
+    }
+      , updateInterval,
+    );
+
+  }
+
+  readDir(dirname: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      fs.readdir(dirname, function (err, files) {
         if (err) {
           reject(err);
         }
@@ -304,7 +349,7 @@ export class BSP {
     })
   }
 
-  enableDebugging() : any {
+  enableDebugging(): any {
     return {
       serialDebugOn: this.syncSpec.meta.client.enableSerialDebugging,
       systemLogDebugOn: this.syncSpec.meta.client.enableSystemLogDebugging
@@ -364,28 +409,28 @@ export class BSP {
 
     return new Promise<void>((resolve: Function) => {
 
-        // TODO - only a single scheduled item is currently supported
-        const scheduledPresentation = this.autoSchedule.scheduledPresentations[0];
-        const presentationToSchedule = scheduledPresentation.presentationToSchedule;
-        const presentationName = presentationToSchedule.name;
+      // TODO - only a single scheduled item is currently supported
+      const scheduledPresentation = this.autoSchedule.scheduledPresentations[0];
+      const presentationToSchedule = scheduledPresentation.presentationToSchedule;
+      const presentationName = presentationToSchedule.name;
 
-        if (!this.importPublishedFiles) {
-          const autoplayFileName = presentationName + '.bml';
-          this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
-            console.log(autoPlay);
-            const signState = autoPlay as DmSignState;
-            this.dispatch(dmOpenSign(signState));
-            this.getDataFeeds();
-            resolve();
-          });
-
-        }
-        else {
-          const signState : DmSignState = dmGetSignState(this.getState().bsdm);
+      if (!this.importPublishedFiles) {
+        const autoplayFileName = presentationName + '.bml';
+        this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
+          console.log(autoPlay);
+          const signState = autoPlay as DmSignState;
           this.dispatch(dmOpenSign(signState));
           this.getDataFeeds();
           resolve();
-        }
+        });
+
+      }
+      else {
+        const signState: DmSignState = dmGetSignState(this.getState().bsdm);
+        this.dispatch(dmOpenSign(signState));
+        this.getDataFeeds();
+        resolve();
+      }
     });
   }
 
