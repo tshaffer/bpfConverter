@@ -79,15 +79,19 @@ class BrightSignPlatformService extends APlatformService {
     });
   }
 
-  // bug 27980 - Javascript store object
-  //   du = CreateObject("roStorageInfo", "./")
-  //   if du.IsReadOnly() then
-  //   sysInfo.storageIsWriteProtected = true
-  // else
-  //   sysInfo.storageIsWriteProtected = false
-  //   endif
-  //
-
+  static getControlPort(portName : string) : any {
+    return new Promise( (resolve : any) => {
+      let controlPort = null;
+      try {
+        controlPort = new BSControlPort(portName);
+      }
+      catch (e) {
+        console.log('failed to create controlPort: ');
+        console.log(portName);
+      }
+      resolve(controlPort);
+    });
+  }
 }
 
 export default BrightSignPlatformService;

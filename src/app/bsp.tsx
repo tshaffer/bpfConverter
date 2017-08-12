@@ -113,6 +113,8 @@ export class BSP {
   edid : any;
   registry : BsRegistry;
   systemTime : any;
+  brightSignControlPort : any;
+  expanderControlPort : any;
 
   constructor() {
     if (!_singleton) {
@@ -217,6 +219,8 @@ export class BSP {
       let getEth0Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth0');
       let getEth1Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth1');
       let getEdidPromise : Promise<any> = this.getEdid();
+      let getBrightSignControlPortPromise : Promise<any> = PlatformService.default.getControlPort('BrightSign');
+      let getExpanderControlPortPromise : Promise<any> = PlatformService.default.getControlPort('Expander-0-GPIO');
 
       // roStorageInfo
 
@@ -250,11 +254,16 @@ export class BSP {
       promises.push(getEth0Promise);
       promises.push(getEth1Promise);
       promises.push(getEdidPromise);
+      promises.push(getBrightSignControlPortPromise);
+      promises.push(getExpanderControlPortPromise);
+
       Promise.all(promises).then( (results : any[]) => {
 
         this.eth0Configuration = results[0];
         this.eth1Configuration = results[1];
         this.edid = results[2];
+        this.brightSignControlPort = results[3];
+        this.expanderControlPort = results[4];
 
         resolve();
       })
