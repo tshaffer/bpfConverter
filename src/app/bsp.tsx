@@ -124,6 +124,12 @@ export class BSP {
   lightController0DiagnosticsPort : any;
   lightController1DiagnosticsPort : any;
   lightController2DiagnosticsPort : any;
+  enableRemoteSnapshot : boolean;
+  remoteSnapshotInterval : number;
+  remoteSnapshotMaxImages : number;
+  remoteSnapshotJpegQualityLevel: number;
+  remoteSnapshotDisplayPortrait: boolean;
+  snapshotFiles : string[];
 
   constructor() {
     if (!_singleton) {
@@ -187,6 +193,8 @@ export class BSP {
 
         this.setSystemInfo();
 
+        this.initRemoteSnapshots();
+
         this.parseNativeFiles(rootPath, pathToPool).then( () => {
           this.launchHSM();
         });
@@ -229,6 +237,65 @@ export class BSP {
 
     // test systemTime
     // ??
+  }
+
+  initRemoteSnapshots() : Promise<any> {
+
+    return new Promise( (resolve, reject) => {
+      fs.mkdirSync('snapshots');
+
+      // setup snapshot capability as early as possible
+      this.enableRemoteSnapshot = false;
+      PlatformService.default.readRegistryValue(this.registry, 'networking', 'enableRemoteSnapshot')
+        .then( (enableRemoteSnapshot : string) => {
+          if (enableRemoteSnapshot.toLowerCase() === 'yes') {
+
+            // if sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
+
+            this.enableRemoteSnapshot = true;
+
+            let promises : any[] = [];
+            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotInterval'));
+            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotMaxImages'));
+            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotJpegQualityLevel'));
+            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotDisplayPortrait'));
+            promises.push(this.readDir('/snapshots'));
+
+            Promise.all(promises).then( (results : any[]) => {
+              this.remoteSnapshotInterval = Number(results[0]);
+              this.remoteSnapshotMaxImages = Number(results[1]);
+              this.remoteSnapshotJpegQualityLevel = Number(results[2]);
+              this.remoteSnapshotDisplayPortrait = (results[3].toLowerCase() === 'true');
+              let filesInSnapshotDir : string[] = results[4];
+
+              // snapshot files end with .jpg
+              this.snapshotFiles = [];
+              filesInSnapshotDir.forEach( (snapshotFile) => {
+                if (snapshotFile.endsWith('.jpg')) {
+                  this.snapshotFiles.push(snapshotFile);
+                }
+              });
+              this.snapshotFiles.sort();
+
+              resolve();
+            }).catch( (err) => {
+              console.log('registry read failure');
+              debugger;
+            });
+          }
+        });
+    });
+  }
+
+  readDir(dirname : string) : Promise<string[]> {
+    return new Promise( (resolve, reject) => {
+      fs.readdir('/snapshots', function(err, files) {
+        if (err) {
+          reject(err);
+        }
+        resolve(files);
+      });
+    })
   }
 
   enableDebugging() : any {

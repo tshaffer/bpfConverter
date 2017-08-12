@@ -96,6 +96,16 @@ class BrightSignPlatformService extends APlatformService {
   static deviceHasGpioConnector(deviceInfo : any) : boolean {
     return (deviceInfo.HasFeature('GPIO Connector'));
   }
+
+  static readRegistryValue(registry : BsRegistry, registrySection : string, key : string) : Promise<string> {
+    return new Promise( (resolve, reject) => {
+      registry.read(registrySection, key).then( (keyValue : string) => {
+        resolve(keyValue);
+      }).catch (( err : any) => {
+        reject(err);
+      });
+    })
+  }
 }
 
 export default BrightSignPlatformService;
