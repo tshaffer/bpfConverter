@@ -43,6 +43,8 @@ import {
 
 import PlatformService from '../platform';
 
+import { getBrightSignObjects} from '../brightSignObjects';
+
 import {
   importPublishedFiles,
 } from '../ba-importer/importer';
@@ -179,121 +181,15 @@ export class BSP {
     // TODO - could be current-sync.json
     this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
       this.syncSpec = cardSyncSpec;
-      this.getBrightSignObjects().then( () => {
+      getBrightSignObjects().then( (bsObjects : any) => {
+
+        Object.assign(this, bsObjects);
 
         this.setSystemInfo();
 
         this.parseNativeFiles(rootPath, pathToPool).then( () => {
           this.launchHSM();
         });
-      });
-    });
-  }
-
-  getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkInterfaceConfig> {
-    return new Promise( (resolve) => {
-      PlatformService.default.getNetworkConfiguration(networkInterface)
-        .then( (networkConfiguration : BSNetworkInterfaceConfig) => {
-          resolve(networkConfiguration);
-        })
-        .catch((err : any) => {
-          resolve(null);
-        });
-    })
-  }
-
-  getEdid() : Promise<any> {
-    return new Promise( (resolve) => {
-      PlatformService.default.getEdid().then( (edid : any) => {
-        resolve(edid);
-      })
-      .catch( (err : any) => {
-        resolve(null);
-      })
-    });
-  }
-
-  getBrightSignObjects() : Promise<any> {
-
-    return new Promise( (resolve, reject) => {
-
-      this.deviceInfo = PlatformService.default.getDeviceInfo();
-      this.registry = PlatformService.default.getRegistry();
-      this.systemTime = PlatformService.default.getSystemTime();
-
-      let promises : Promise<any>[] = [];
-
-      let getEth0Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth0');
-      let getEth1Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth1');
-      let getEdidPromise : Promise<any> = this.getEdid();
-      let getBrightSignControlPortPromise : Promise<any> = PlatformService.default.getControlPort('BrightSign');
-      let getExpanderControlPortPromise : Promise<any> = PlatformService.default.getControlPort('Expander-0-GPIO');
-      let getLightController0ControlPortPromise : Promise<any> = 
-        PlatformService.default.getControlPort('LightController-0-CONTROL');
-      let getLightController1ControlPortPromise : Promise<any> =
-        PlatformService.default.getControlPort('LightController-1-CONTROL');
-      let getLightController2ControlPortPromise : Promise<any> =
-        PlatformService.default.getControlPort('LightController-2-CONTROL');
-      let getLightController0DiagnosticsPortPromise : Promise<any> =
-        PlatformService.default.getControlPort('LightController-0-DIAGNOSTICS');
-      let getLightController1DiagnosticsPortPromise : Promise<any> =
-        PlatformService.default.getControlPort('LightController-1-DIAGNOSTICS');
-      let getLightController2DiagnosticsPortPromise : Promise<any> =
-        PlatformService.default.getControlPort('LightController-2-DIAGNOSTICS');
-      
-      // roStorageInfo
-
-      // roStorageHotplug
-
-      // roNetworkHotplug
-
-      // roDiskMonitor
-
-      // roHttpServer??
-
-      // roNetworkAdvertisement
-
-      // roAssetPool - maybe not here
-      // roAssetPoolFiles - maybe not here
-
-      promises.push(getEth0Promise);
-      promises.push(getEth1Promise);
-      promises.push(getEdidPromise);
-      promises.push(getBrightSignControlPortPromise);
-      promises.push(getExpanderControlPortPromise);
-      promises.push(getLightController0ControlPortPromise);
-      promises.push(getLightController1ControlPortPromise);
-      promises.push(getLightController2ControlPortPromise);
-      promises.push(getLightController0DiagnosticsPortPromise);
-      promises.push(getLightController1DiagnosticsPortPromise);
-      promises.push(getLightController2DiagnosticsPortPromise);
-
-      Promise.all(promises).then( (results : any[]) => {
-
-        this.eth0Configuration = results[0];
-        this.eth1Configuration = results[1];
-        this.edid = results[2];
-        this.svcPort = results[3];
-        this.expanderControlPort = results[4];
-        this.lightController0ControlPort = results[5];
-        this.lightController1ControlPort = results[6];
-        this.lightController2ControlPort = results[7];
-        this.lightController0DiagnosticsPort = results[8];
-        this.lightController1DiagnosticsPort = results[9];
-        this.lightController2DiagnosticsPort = results[10];
-
-        const deviceHasGpioConnector : boolean = PlatformService.default.deviceHasGpioConnector(this.deviceInfo);
-        if (deviceHasGpioConnector) {
-          this.controlPort = this.svcPort;
-        }
-        else {
-          this.controlPort = this.expanderControlPort;
-        }
-
-        resolve();
-      })
-      .catch(() => {
-        reject();
       });
     });
   }
