@@ -24,12 +24,12 @@ module.exports = {
     '@brightsign/videooutput': 'commonjs @brightsign/videooutput',
 
     '@brightsign/videomodeconfiguration': 'commonjs @brightsign/videomodeconfiguration',
-    '@brightsign/networkhost': 'commonjs @brightsign/networkhost',
-    '@brightsign/utils': 'commonjs @brightsign/utils',
-    '@brightsign/dws': 'commonjs @brightsign/dws',
+    '@brightsign/videoinput': 'commonjs @brightsign/videoinput',
+    '@brightsign/screenshot': 'commonjs @brightsign/screenshot',
+    '@brightsign/system': 'commonjs @brightsign/system',
+
+    '@brightsign/hostconfiguration': 'commonjs @brightsign/hostconfiguration',
     '@brightsign/networkdiagnostics': 'commonjs @brightsign/networkdiagnostics',
-    '@brightsign/touchscreen': 'commonjs @brightsign/touchscreen',
-    '@brightsign/videoinputconfiguration': 'commonjs @brightsign/videoinputconfiguration',
     'core-js/fn/object/assign' : 'commonjs core-js/fn/object/assign',
   },
 

@@ -130,6 +130,7 @@ export class BSP {
   remoteSnapshotJpegQualityLevel: number;
   remoteSnapshotDisplayPortrait: boolean;
   snapshotFiles : string[];
+  networkingRegistrySettings : any;
 
   constructor() {
     if (!_singleton) {
@@ -191,12 +192,17 @@ export class BSP {
 
         Object.assign(this, bsObjects);
 
-        this.setSystemInfo();
+        PlatformService.default.readRegistrySection(this.registry, 'networking').then( (networkingRegistrySettings : any[]) => {
 
-        this.initRemoteSnapshots();
+          this.networkingRegistrySettings = networkingRegistrySettings;
 
-        this.parseNativeFiles(rootPath, pathToPool).then( () => {
-          this.launchHSM();
+          this.setSystemInfo();
+
+          this.initRemoteSnapshots().then( () => {
+            this.parseNativeFiles(rootPath, pathToPool).then( () => {
+              this.launchHSM();
+            });
+          });
         });
       });
     });
@@ -220,24 +226,24 @@ export class BSP {
     this.sysInfo.deviceFamily = this.deviceInfo.family;
     this.sysInfo.enableLogDeletion = true;
 
-    this.sysInfo.modelSupportsWifi = false;
     this.sysInfo.ipAddressWired = 'Invalid';
-    this.sysInfo.ipAddressWireless = 'Invalid';
+    if (this.eth0Configuration) {
+      // TODO - not working at home. value below is object with member 'family'
+      this.sysInfo.ipAddressWired = this.eth0Configuration.ipAddressList[0];
+    }
 
+    this.sysInfo.modelSupportsWifi = false;
+    this.sysInfo.ipAddressWireless = 'Invalid';
+    if (this.eth1Configuration) {
+      this.sysInfo.modelSupportsWifi = true;
+      this.sysInfo.ipAddressWireless = this.eth1Configuration.ipAddressList[0];
+    }
     // determine whether or not storage is writable
   }
 
   initRemoteSnapshots() : Promise<any> {
 
     return new Promise( (resolve, reject) => {
-      try {
-        fs.mkdirSync('/storage/sd/snapshots');
-      }
-      catch (err) {
-        console.log('mkdirSync error:');
-        console.log(err);
-      }
-
       // setup snapshot capability as early as possible
       this.enableRemoteSnapshot = false;
       PlatformService.default.readRegistryValue(this.registry, 'networking', 'enableRemoteSnapshot')
@@ -247,37 +253,41 @@ export class BSP {
             // if sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
 
             this.enableRemoteSnapshot = true;
+            this.remoteSnapshotInterval = Number(this.networkingRegistrySettings['remotesnapshotinterval']);
+            this.remoteSnapshotMaxImages = Number(this.networkingRegistrySettings['remotesnapshotmaximages']);
+            this.remoteSnapshotJpegQualityLevel = Number(this.networkingRegistrySettings['remotesnapshotjpegqualitylevel']);
+            this.remoteSnapshotDisplayPortrait = (this.networkingRegistrySettings['remotesnapshotdisplayportrait'].toLowerCase() === 'true');
 
-            let promises : any[] = [];
-            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotInterval'));
-            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotMaxImages'));
-            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotJpegQualityLevel'));
-            promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotDisplayPortrait'));
-            promises.push(this.readDir('/storage/sd/snapshots'));
-            promises.push(PlatformService.default.readRegistrySection(this.registry, 'networking'));
+            const snapshotDir : string = '/storage/sd/snapshots';
+            this.snapshotFiles = [];
 
-            Promise.all(promises).then( (results : any[]) => {
-              this.remoteSnapshotInterval = Number(results[0]);
-              this.remoteSnapshotMaxImages = Number(results[1]);
-              this.remoteSnapshotJpegQualityLevel = Number(results[2]);
-              this.remoteSnapshotDisplayPortrait = (results[3].toLowerCase() === 'true');
-              let filesInSnapshotDir : string[] = results[4];
-              let networkingRegistrySettings : any = results[5];
+            let snapshotDirectoryCreated = false;
+            try {
+              fs.mkdirSync(snapshotDir);
+              snapshotDirectoryCreated = true;
+            }
+            catch (err) {
+              console.log('mkdirSync error:');
+              console.log(err);
+            }
 
-              // snapshot files end with .jpg
-              this.snapshotFiles = [];
-              filesInSnapshotDir.forEach( (snapshotFile) => {
-                if (snapshotFile.endsWith('.jpg')) {
-                  this.snapshotFiles.push(snapshotFile);
-                }
+            if (!snapshotDirectoryCreated) {
+              this.readDir(snapshotDir).then( (filesInSnapshotDir : string[]) => {
+                // snapshot files end with .jpg
+                filesInSnapshotDir.forEach( (snapshotFile) => {
+                  if (snapshotFile.endsWith('.jpg')) {
+                    this.snapshotFiles.push(snapshotFile);
+                  }
+                });
+                this.snapshotFiles.sort();
+                resolve();
+              }).catch( (err) => {
+                reject(err);
               });
-              this.snapshotFiles.sort();
-
+            }
+            else {
               resolve();
-            }).catch( (err) => {
-              console.log('registry read failure');
-              debugger;
-            });
+            }
           }
         });
     });
