@@ -225,24 +225,18 @@ export class BSP {
     this.sysInfo.ipAddressWireless = 'Invalid';
 
     // determine whether or not storage is writable
-
-    // test registry
-    this.registry.read('networking', 'ub').then( (keyValue : string) => {
-      console.log('networking.ub=');
-      console.log(keyValue);
-    });
-    this.registry.write('networking', 'pizza', 'sausage').then( () => {
-      console.log('registry write successful');
-    })
-
-    // test systemTime
-    // ??
   }
 
   initRemoteSnapshots() : Promise<any> {
 
     return new Promise( (resolve, reject) => {
-      fs.mkdirSync('snapshots');
+      try {
+        fs.mkdirSync('/storage/sd/snapshots');
+      }
+      catch (err) {
+        console.log('mkdirSync error:');
+        console.log(err);
+      }
 
       // setup snapshot capability as early as possible
       this.enableRemoteSnapshot = false;
@@ -259,7 +253,8 @@ export class BSP {
             promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotMaxImages'));
             promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotJpegQualityLevel'));
             promises.push(PlatformService.default.readRegistryValue(this.registry, 'networking', 'remoteSnapshotDisplayPortrait'));
-            promises.push(this.readDir('/snapshots'));
+            promises.push(this.readDir('/storage/sd/snapshots'));
+            promises.push(PlatformService.default.readRegistrySection(this.registry, 'networking'));
 
             Promise.all(promises).then( (results : any[]) => {
               this.remoteSnapshotInterval = Number(results[0]);
@@ -267,6 +262,7 @@ export class BSP {
               this.remoteSnapshotJpegQualityLevel = Number(results[2]);
               this.remoteSnapshotDisplayPortrait = (results[3].toLowerCase() === 'true');
               let filesInSnapshotDir : string[] = results[4];
+              let networkingRegistrySettings : any = results[5];
 
               // snapshot files end with .jpg
               this.snapshotFiles = [];
@@ -289,7 +285,7 @@ export class BSP {
 
   readDir(dirname : string) : Promise<string[]> {
     return new Promise( (resolve, reject) => {
-      fs.readdir('/snapshots', function(err, files) {
+      fs.readdir(dirname, function(err, files) {
         if (err) {
           reject(err);
         }

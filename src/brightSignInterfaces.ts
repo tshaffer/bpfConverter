@@ -23,6 +23,6 @@ export interface BSNetworkInterfaceConfig {
 }
 
 export interface BsRegistry {
-  read(sectionName : string, key : string) : Promise<string>;
+  read(sectionName : string, key? : string) : Promise<string>;
   write(sectionName : string, key : string, value : string) : Promise<any>;
 }

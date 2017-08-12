@@ -106,6 +106,16 @@ class BrightSignPlatformService extends APlatformService {
       });
     })
   }
+
+  static readRegistrySection(registry : BsRegistry, registrySection : string) : Promise<string> {
+    return new Promise( (resolve, reject) => {
+      registry.read(registrySection).then( (keyValue : string) => {
+        resolve(keyValue);
+      }).catch (( err : any) => {
+        reject(err);
+      });
+    })
+  }
 }
 
 export default BrightSignPlatformService;
