@@ -56,7 +56,9 @@ class BrightSignPlatformService extends APlatformService {
         console.log(edidIdentity);
         resolve(edidIdentity);
 
-      })
+      }).catch( (err : any) => {
+        reject(err);
+      });
       // voc.getEdid().then((monitorEdid: any) => {
       //   console.log('received edid');
       //   resolve(monitorEdid);

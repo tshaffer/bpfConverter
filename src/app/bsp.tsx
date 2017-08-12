@@ -109,6 +109,7 @@ export class BSP {
   deviceInfo: BsDeviceInfo;
   eth0Configuration: BSNetworkInterfaceConfig;
   eth1Configuration: BSNetworkInterfaceConfig;
+  edid : any;
 
   constructor() {
     if (!_singleton) {
@@ -163,43 +164,69 @@ export class BSP {
 
     this.hsmList = [];
 
-    // get sync spec
     // TODO - could be current-sync.json
     this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
       this.syncSpec = cardSyncSpec;
-      this.openBrightSignObjects();
-      this.setDeviceInfo();
+      this.getBrightSignObjects().then( () => {
 
-      this.parseNativeFiles(rootPath, pathToPool).then( () => {
-        this.launchHSM();
+        this.setDeviceInfo();
+
+        this.parseNativeFiles(rootPath, pathToPool).then( () => {
+          this.launchHSM();
+        });
       });
     });
   }
 
-  openBrightSignObjects() {
-
-    this.deviceInfo = PlatformService.default.getDeviceInfo();
-
-    PlatformService.default.getNetworkConfiguration('eth0').then( (eth0Configuration : BSNetworkInterfaceConfig) => {
-      if (eth0Configuration) {
-        this.eth0Configuration = eth0Configuration;
-        // this.sysInfo.ipAddressWired = eth0Configuration.ipAddressList[0].family; // TODO
-      }
+  getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkInterfaceConfig> {
+    return new Promise( (resolve) => {
+      PlatformService.default.getNetworkConfiguration(networkInterface)
+        .then( (networkConfiguration : BSNetworkInterfaceConfig) => {
+          resolve(networkConfiguration);
+        })
+        .catch((err : any) => {
+          resolve(null);
+        });
     })
-    .catch( (err : any) => {
-      console.log('eth0: not connected');
-    });
+  }
 
-    PlatformService.default.getNetworkConfiguration('eth1').then( (eth1Configuration : any) => {
-      if (eth1Configuration) {
-        this.sysInfo.modelSupportsWifi = true;
-        this.eth1Configuration = eth1Configuration;
-        // this.sysInfo.ipAddressWireless = eth1Configuration.ipAddressList[0].family; // TODO
-      }
-    })
+  getEdid() : Promise<any> {
+    return new Promise( (resolve) => {
+      PlatformService.default.getEdid().then( (edid : any) => {
+        resolve(edid);
+      })
       .catch( (err : any) => {
-        console.log('eth1: not connected');
+        resolve(null);
+      })
+    });
+  }
+
+  getBrightSignObjects() : Promise<any> {
+
+    return new Promise( (resolve, reject) => {
+      this.deviceInfo = PlatformService.default.getDeviceInfo();
+
+      let promises : Promise<any>[] = [];
+
+      let getEth0Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth0');
+      let getEth1Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth1');
+      let getEdidPromise : Promise<any> = this.getEdid();
+
+      promises.push(getEth0Promise);
+      promises.push(getEth1Promise);
+      promises.push(getEdidPromise);
+      Promise.all(promises).then( (results : any[]) => {
+
+        this.eth0Configuration = results[0];
+        this.eth1Configuration = results[1];
+        this.edid = results[2];
+
+        resolve();
+      })
+      .catch(() => {
+        reject();
       });
+    });
   }
 
   setDeviceInfo() {
@@ -213,21 +240,16 @@ export class BSP {
     this.sysInfo = {};
     this.sysInfo.autorunVersion = this.version;
     this.sysInfo.customAutorunVersion = this.version;   // TODO
-    // this.sysInfo.deviceUniqueId = this.deviceInfo.deviceUniqueId;
-    // this.sysInfo.deviceFWVersion = this.deviceInfo.version;
+    this.sysInfo.deviceUniqueId = this.deviceInfo.deviceUniqueId;
+    this.sysInfo.deviceFWVersion = this.deviceInfo.version;
     this.sysInfo.deviceFWVersionNumber = 0; // TODO - calculate me
-    // this.sysInfo.deviceModel = this.deviceInfo.model;
-    // this.sysInfo.deviceFamily = this.deviceInfo.family;
+    this.sysInfo.deviceModel = this.deviceInfo.model;
+    this.sysInfo.deviceFamily = this.deviceInfo.family;
     this.sysInfo.enableLogDeletion = true;
 
     this.sysInfo.modelSupportsWifi = false;
     this.sysInfo.ipAddressWired = 'Invalid';
     this.sysInfo.ipAddressWireless = 'Invalid';
-
-    PlatformService.default.getEdid().then( (edid : any) => {
-      console.log(edid);
-      // UpdateEdidValues(edid, sysInfo)
-    })
 
     // determine whether or not storage is writable
   }
