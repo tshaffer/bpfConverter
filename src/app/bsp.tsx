@@ -9,6 +9,7 @@ import {Store} from 'redux';
 import {
   BsDeviceInfo,
   BSNetworkInterfaceConfig,
+  BsRegistry,
 } from '../brightSignInterfaces';
 
 import {
@@ -110,6 +111,8 @@ export class BSP {
   eth0Configuration: BSNetworkInterfaceConfig;
   eth1Configuration: BSNetworkInterfaceConfig;
   edid : any;
+  registry : BsRegistry;
+  systemTime : any;
 
   constructor() {
     if (!_singleton) {
@@ -169,7 +172,7 @@ export class BSP {
       this.syncSpec = cardSyncSpec;
       this.getBrightSignObjects().then( () => {
 
-        this.setDeviceInfo();
+        this.setSystemInfo();
 
         this.parseNativeFiles(rootPath, pathToPool).then( () => {
           this.launchHSM();
@@ -204,13 +207,45 @@ export class BSP {
   getBrightSignObjects() : Promise<any> {
 
     return new Promise( (resolve, reject) => {
+
       this.deviceInfo = PlatformService.default.getDeviceInfo();
+      this.registry = PlatformService.default.getRegistry();
+      this.systemTime = PlatformService.default.getSystemTime();
 
       let promises : Promise<any>[] = [];
 
       let getEth0Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth0');
       let getEth1Promise : Promise<BSNetworkInterfaceConfig> = this.getNetworkConfiguration('eth1');
       let getEdidPromise : Promise<any> = this.getEdid();
+
+      // roStorageInfo
+
+      // roControlPort
+      //    BrightSign
+      //    Expander-0-GPIO
+      //    LightController-0-CONTROL
+      //    LightController-1-CONTROL
+      //    LightController-2-CONTROL
+      //    LightController-0-DIAGNOSTICS
+      //    LightController-1-DIAGNOSTICS
+      //    LightController-2-DIAGNOSTICS
+      //    TouchBoard-0-GPIO
+      //    TouchBoard-1-GPIO
+      //    TouchBoard-2-GPIO
+      //    TouchBoard-3-GPIO
+
+      // roStorageHotplug
+
+      // roNetworkHotplug
+
+      // roDiskMonitor
+
+      // roHttpServer??
+
+      // roNetworkAdvertisement
+
+      // roAssetPool - maybe not here
+      // roAssetPoolFiles - maybe not here
 
       promises.push(getEth0Promise);
       promises.push(getEth1Promise);
@@ -229,7 +264,7 @@ export class BSP {
     });
   }
 
-  setDeviceInfo() {
+  setSystemInfo() {
 
     const debugParams : any = this.enableDebugging();
     this.sysFlags = {};
@@ -252,6 +287,18 @@ export class BSP {
     this.sysInfo.ipAddressWireless = 'Invalid';
 
     // determine whether or not storage is writable
+
+    // test registry
+    this.registry.read('networking', 'ub').then( (keyValue : string) => {
+      console.log('networking.ub=');
+      console.log(keyValue);
+    });
+    this.registry.write('networking', 'pizza', 'sausage').then( () => {
+      console.log('registry write successful');
+    })
+
+    // test systemTime
+    // ??
   }
 
   enableDebugging() : any {

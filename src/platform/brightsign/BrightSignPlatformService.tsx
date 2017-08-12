@@ -3,6 +3,7 @@ import APlatformService from '../APlatformService';
 import {
   BsDeviceInfo,
   BSNetworkInterfaceConfig,
+  BsRegistry,
 } from '../../brightSignInterfaces';
 
 class BrightSignPlatformService extends APlatformService {
@@ -28,6 +29,18 @@ class BrightSignPlatformService extends APlatformService {
   // http://docs.brightsign.biz/display/DOC/BSDeviceInfo
   static getDeviceInfo() : BsDeviceInfo {
     return new BSDeviceInfo();
+  }
+
+  // Bug 28331 - Document @brightsign/registry Javascript object
+  static getRegistry() : BsRegistry {
+    const RegistryClass = require("@brightsign/registry");
+    return new RegistryClass();
+  }
+
+  // Bug 28253 - Document @brightsign/systemtime Javascript object roSystemTime
+  static getSystemTime() : any {
+    const SystemTimeClass = require("@brightsign/systemtime");
+    return new SystemTimeClass();
   }
 
   // Bug 28248 - Document @brightsign/networkconfiguration Javascript object
