@@ -46,6 +46,14 @@ class DesktopPlatformService {
       deviceFamily: 'Impala'
     };
   }
+
+  static getNetworkConfiguration() : any {
+  }
+
+  static getEdid() : any {
+
+  }
+
 }
 
 export default DesktopPlatformService;

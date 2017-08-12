@@ -204,47 +204,28 @@ export class BSP {
     this.sysInfo.deviceFamily = modelObject.deviceFamily;
     this.sysInfo.enableLogDeletion = true;
 
-    // bug 27663
-    
-    /*
-     sysInfo.ipAddressWired$ = "Invalid"
-     nc = CreateObject("roNetworkConfiguration", 0)
-     if type(nc) = "roNetworkConfiguration" then
-     currentConfig = nc.GetCurrentConfig()
-     if type(currentConfig) = "roAssociativeArray" then
-     if currentConfig.ip4_address <> "" then
-     sysInfo.ipAddressWired$ = currentConfig.ip4_address
-     endif
-     endif
-     endif
-     nc = invalid
+    this.sysInfo.ipAddressWired = 'Invalid';
+    PlatformService.default.getNetworkConfiguration('eth0').then( (networkConfiguration : any) => {
+      if (networkConfiguration) {
+        this.sysInfo.ipAddressWired = networkConfiguration.ipAddressList[0].family; // TODO
+      }
+    });
 
-     sysInfo.modelSupportsWifi = false
-     sysInfo.ipAddressWireless$ = "Invalid"
-     nc = CreateObject("roNetworkConfiguration", 1)
-     if type(nc) = "roNetworkConfiguration" then
-     currentConfig = nc.GetCurrentConfig()
-     if type(currentConfig) = "roAssociativeArray" then
-     sysInfo.modelSupportsWifi = true
-     if currentConfig.ip4_address <> "" then
-     sysInfo.ipAddressWireless$ = currentConfig.ip4_address
-     endif
-     endif
-     endif
-     nc = invalid
+    this.sysInfo.modelSupportsWifi = false;
+    this.sysInfo.ipAddressWireless = 'Invalid';
+    PlatformService.default.getNetworkConfiguration('eth1').then( (networkConfiguration : any) => {
+      if (networkConfiguration) {
+        this.sysInfo.modelSupportsWifi = true;
+        this.sysInfo.ipAddressWireless = networkConfiguration.ipAddressList[0].family; // TODO
+      }
+    });
 
+    PlatformService.default.getEdid().then( (edid : any) => {
+      console.log(edid);
+      // UpdateEdidValues(edid, sysInfo)
+    })
 
-     */
-    // get edid info
-
-    // bug 27980 - Javascript store object
-    //   du = CreateObject("roStorageInfo", "./")
-    //   if du.IsReadOnly() then
-    //   sysInfo.storageIsWriteProtected = true
-    // else
-    //   sysInfo.storageIsWriteProtected = false
-    //   endif
-    //
+    // determine whether or not storage is writable
   }
 
   enableDebugging() : any {

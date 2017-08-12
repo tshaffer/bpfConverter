@@ -18,6 +18,16 @@ module.exports = {
 
   externals: {
     '@brightsign/videomodeconfiguration': 'commonjs @brightsign/videomodeconfiguration',
+    '@brightsign/networkconfiguration': 'commonjs @brightsign/networkconfiguration',
+    '@brightsign/systemtime': 'commonjs @brightsign/systemtime',
+    '@brightsign/networkhost': 'commonjs @brightsign/networkhost',
+    '@brightsign/utils': 'commonjs @brightsign/utils',
+    '@brightsign/dws': 'commonjs @brightsign/dws',
+    '@brightsign/networkdiagnostics': 'commonjs @brightsign/networkdiagnostics',
+    '@brightsign/touchscreen': 'commonjs @brightsign/touchscreen',
+    '@brightsign/videoinputconfiguration': 'commonjs @brightsign/videoinputconfiguration',
+    '@brightsign/registry': 'commonjs @brightsign/registry',
+    '@brightsign/videooutput': 'commonjs @brightsign/videooutput',
     BSDeviceInfo : 'BSDeviceInfo',
     'core-js/fn/object/assign' : 'commonjs core-js/fn/object/assign',
   },
