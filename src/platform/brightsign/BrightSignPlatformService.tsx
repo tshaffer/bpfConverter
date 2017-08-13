@@ -1,3 +1,19 @@
+declare class BSControlPort {
+  constructor(portName : string);
+}
+declare class BSDeviceInfo {
+  // new(): BSDeviceInfo;
+  constructor();
+  model: string;
+  version : string;
+  deviceUptime : number;
+  deviceLifetime : number;
+  deviceBootCount : number;
+  bootVersion : string;
+  deviceUniqueId : string;
+  family : string;
+}
+
 import APlatformService from '../APlatformService';
 
 import {
@@ -75,23 +91,32 @@ class BrightSignPlatformService extends APlatformService {
 
   static getEdid(videoOutputObj : any) : any {
     return new Promise( (resolve, reject) => {
-      videoOutputObj.getEdidIdentity().then( (edidIdentity: any) => {
-        console.log(edidIdentity);
-        resolve(edidIdentity);
 
-      }).catch( (err : any) => {
-        reject(err);
-      });
+      // videoOutputObj.getEdidIdentity().then( (edidIdentity: any) => {
+      //   console.log(edidIdentity);
+      //   resolve(edidIdentity);
+      //
+      // }).catch( (err : any) => {
+      //   reject(err);
+      // });
+
+
       // voc.getEdid().then((monitorEdid: any) => {
       //   console.log('received edid');
       //   resolve(monitorEdid);
       // });
+
+
+      resolve('');
+
     });
+
+
   }
 
   static getControlPort(portName : string) : any {
     return new Promise( (resolve : any) => {
-      let controlPort = null;
+      let controlPort : any = null;
       try {
         controlPort = new BSControlPort(portName);
       }
