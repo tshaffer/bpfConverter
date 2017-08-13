@@ -178,6 +178,11 @@ class BrightSignPlatformService extends APlatformService {
       });
     })
   }
+
+  static getRegistryValue(registrySection : any, key : string) : string {
+    return registrySection[key.toLowerCase()];
+  }
+
 }
 
 export default BrightSignPlatformService;

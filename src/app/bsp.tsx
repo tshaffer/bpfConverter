@@ -209,6 +209,7 @@ export class BSP {
           this.setSystemInfo();
 
           this.initRemoteSnapshots().then(() => {
+            this.continueInit();
             this.parseNativeFiles(rootPath, pathToPool).then(() => {
               this.launchHSM();
             });
@@ -251,55 +252,95 @@ export class BSP {
     // determine whether or not storage is writable
   }
 
+  continueInit() {
+
+    let lwsConfig = PlatformService.default.getRegistryValue(this.networkingRegistrySettings, 'nlws');
+
+    // if the device is configured for local file networking with content transfers, require that the storage is writable
+    // if BSP.registrySettings.lwsConfig$ = "c" and BSP.sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
+
+    let lwsEnabled = false
+    if (lwsConfig === 'c' || lwsConfig === 's') {
+      lwsEnabled = true;
+    }
+
+
+
+  //   if lwsEnabled then
+  //
+  //   BSP.localServer = CreateObject("roHttpServer", { port: 8080 })
+  //   BSP.localServer.SetPort(msgPort)
+  //
+  //   if lwsEnabled then
+  //
+  //   lwsUserName$ = BSP.registrySettings.lwsUserName$
+  //   lwsPassword$ = BSP.registrySettings.lwsPassword$
+  //
+  //   if (len(lwsUserName$) + len(lwsPassword$)) > 0 then
+  //   lwsCredentials = CreateObject("roAssociativeArray")
+  //   lwsCredentials.AddReplace(lwsUserName$, lwsPassword$)
+  // else
+  //   lwsCredentials = invalid
+  //   end if
+  //
+  //     endif
+
+  }
+
   initRemoteSnapshots(): Promise<any> {
 
     return new Promise((resolve, reject) => {
       // setup snapshot capability as early as possible
       this.enableRemoteSnapshot = false;
-      PlatformService.default.readRegistryValue(this.registry, 'networking', 'enableRemoteSnapshot')
-        .then((enableRemoteSnapshot: string) => {
-          if (enableRemoteSnapshot.toLowerCase() === 'yes') {
 
-            // if sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
+      let enableRemoteSnapshot = PlatformService.default.getRegistryValue(this.networkingRegistrySettings,
+        'enableRemoteSnapshot');
 
-            this.enableRemoteSnapshot = true;
-            this.remoteSnapshotInterval = Number(this.networkingRegistrySettings['remotesnapshotinterval']);
-            this.remoteSnapshotMaxImages = Number(this.networkingRegistrySettings['remotesnapshotmaximages']);
-            this.remoteSnapshotJpegQualityLevel = Number(this.networkingRegistrySettings['remotesnapshotjpegqualitylevel']);
-            this.remoteSnapshotDisplayPortrait = (this.networkingRegistrySettings['remotesnapshotdisplayportrait'].toLowerCase() === 'true');
+      if (enableRemoteSnapshot.toLowerCase() === 'yes') {
 
-            const snapshotDir: string = '/storage/sd/snapshots';
-            this.snapshotFiles = [];
+        // if sysInfo.storageIsWriteProtected then DisplayStorageDeviceLockedMessage()
 
-            let snapshotDirectoryCreated = false;
-            try {
-              fs.mkdirSync(snapshotDir);
-              snapshotDirectoryCreated = true;
-            }
-            catch (err) {
-              console.log('mkdirSync error:');
-              console.log(err);
-            }
+        this.enableRemoteSnapshot = true;
+        this.remoteSnapshotInterval = Number(PlatformService.default.getRegistryValue(
+          this.networkingRegistrySettings, 'remotesnapshotinterval'));
+        this.remoteSnapshotMaxImages = Number(PlatformService.default.getRegistryValue(
+          this.networkingRegistrySettings, 'remotesnapshotmaximages'));
+        this.remoteSnapshotJpegQualityLevel = Number(PlatformService.default.getRegistryValue(
+          this.networkingRegistrySettings, 'remotesnapshotjpegqualitylevel'));
+        this.remoteSnapshotDisplayPortrait = PlatformService.default.getRegistryValue(
+            this.networkingRegistrySettings, 'remotesnapshotdisplayportrait').toLowerCase() === 'true';
 
-            if (!snapshotDirectoryCreated) {
-              this.readDir(snapshotDir).then((filesInSnapshotDir: string[]) => {
-                // snapshot files end with .jpg
-                filesInSnapshotDir.forEach((snapshotFile) => {
-                  if (snapshotFile.endsWith('.jpg')) {
-                    this.snapshotFiles.push(snapshotFile);
-                  }
-                });
-                this.snapshotFiles.sort();
-                resolve();
-              }).catch((err) => {
-                reject(err);
-              });
-            }
-            else {
-              resolve();
-            }
-          }
-        });
+        const snapshotDir: string = '/storage/sd/snapshots';
+        this.snapshotFiles = [];
+
+        let snapshotDirectoryCreated = false;
+        try {
+          fs.mkdirSync(snapshotDir);
+          snapshotDirectoryCreated = true;
+        }
+        catch (err) {
+          console.log('mkdirSync error:');
+          console.log(err);
+        }
+
+        if (!snapshotDirectoryCreated) {
+          this.readDir(snapshotDir).then((filesInSnapshotDir: string[]) => {
+            // snapshot files end with .jpg
+            filesInSnapshotDir.forEach((snapshotFile) => {
+              if (snapshotFile.endsWith('.jpg')) {
+                this.snapshotFiles.push(snapshotFile);
+              }
+            });
+            this.snapshotFiles.sort();
+            resolve();
+          }).catch((err) => {
+            reject(err);
+          });
+        }
+        else {
+          resolve();
+        }
+      }
     });
   }
 
