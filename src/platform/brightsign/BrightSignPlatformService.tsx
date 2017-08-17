@@ -149,8 +149,9 @@ class BrightSignPlatformService extends APlatformService {
 
       BrightSignPlatformService.getGraphicsResolution(videoOutput).then( (graphicsResolution : BsSize) => {
 
+        // TODO - won't always be 'sd'
         const screenshotParams : BsScreenshotParams = {
-          fileName : '/storage/sd/snapshots/' + isoDateTime + ".jpg",
+          fileName : 'sd:/snapshots/' + isoDateTime + '.jpg',
           fileType : 'JPEG',
           description : presentationName,
           width : graphicsResolution.width,
