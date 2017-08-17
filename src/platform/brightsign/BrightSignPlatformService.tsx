@@ -81,6 +81,28 @@ class BrightSignPlatformService extends APlatformService {
    domain : string;
    }
   */
+
+  // TODO - integrate properly
+  static getHostConfiguration() {
+    return new Promise( (resolve, reject) => {
+
+      const HostConfiguration = require("@brightsign/hostconfiguration");
+      const hc = new HostConfiguration();
+
+      hc.getConfig().then((hostConfig : any) => {
+        console.log('hostConfig configuration: ');
+        console.log(hostConfig);
+        resolve();
+      }).catch( (err : any) => {
+        console.log('hostConfig err: ');
+        console.log(err);
+        reject(err);
+      })
+    });
+  }
+
+
+
   static getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkInterfaceConfig> {
 
     let networkInterfaceInfo : any = {};
@@ -103,17 +125,6 @@ class BrightSignPlatformService extends APlatformService {
         });
       }
 
-      // const HostConfiguration = require("@brightsign/hostconfiguration");
-      // const hc = new HostConfiguration();
-      //
-      // hc.getConfig.then((hostConfig : any) => {
-      //   console.log('hostConfig configuration: ');
-      //   console.log(hostConfig);
-      // }).catch( (err : any) => {
-      //   console.log('hostConfig err: ');
-      //   console.log(err);
-      // })
-      //
       const NetworkInterface = require("@brightsign/networkconfiguration");
       const nc = new NetworkInterface(networkInterface);
       nc.getConfig().then((networkConfig : BSNetworkInterfaceConfig) => {
