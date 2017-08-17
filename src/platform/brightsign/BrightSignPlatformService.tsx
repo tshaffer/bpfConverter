@@ -1,3 +1,6 @@
+// const os = require('os');
+import os = require('os');
+
 declare class BSControlPort {
   constructor(portName : string);
 }
@@ -63,14 +66,62 @@ class BrightSignPlatformService extends APlatformService {
   }
 
   // Bug 28248 - Document @brightsign/networkconfiguration Javascript object
+  // current getCurrentConfig() function returns what is documented at
+  //    http://docs.brightsign.biz/display/DOC/roNetworkConfiguration#roNetworkConfiguration-GetCurrentConfig()AsObject
+  /*
+   export interface BSNetworkInterfaceConfig {
+   metric : number;
+   dhcpServerConfig : any;
+   dnsServerList : string[];
+   ipAddressList : any[];
+   inboundShaperRate : number;
+   mut: number;
+   vlanIdList : number[];
+   clientIdentifier : string;
+   domain : string;
+   }
+  */
   static getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkInterfaceConfig> {
+
+    let networkInterfaceInfo : any = {};
+
     return new Promise( (resolve, reject) => {
+
+      // retrieve network interfaces from node
+      const networkInterfaces : any = os.networkInterfaces();
+
+      if (networkInterfaces[networkInterface]) {
+        const selectedNetworkInterfaces : any = networkInterfaces[networkInterface];
+        selectedNetworkInterfaces.forEach( (selectedNetworkInterface : any) => {
+          if (selectedNetworkInterface.family.toLowerCase() === 'ipv4' && !selectedNetworkInterface.internal) {
+            networkInterfaceInfo = {
+              address : selectedNetworkInterface.address,
+              netmask : selectedNetworkInterface.netmask,
+              mac : selectedNetworkInterface.mac
+            }
+          }
+        });
+      }
+
+      // const HostConfiguration = require("@brightsign/hostconfiguration");
+      // const hc = new HostConfiguration();
+      //
+      // hc.getConfig.then((hostConfig : any) => {
+      //   console.log('hostConfig configuration: ');
+      //   console.log(hostConfig);
+      // }).catch( (err : any) => {
+      //   console.log('hostConfig err: ');
+      //   console.log(err);
+      // })
+      //
       const NetworkInterface = require("@brightsign/networkconfiguration");
       const nc = new NetworkInterface(networkInterface);
       nc.getConfig().then((networkConfig : BSNetworkInterfaceConfig) => {
         if (networkConfig && networkConfig.domain === 'brightsign') {
-          console.log('received networkConfig');
+          Object.assign(networkConfig, networkInterfaceInfo);
           resolve(networkConfig);
+          console.log('getNetworkConfiguration for: ', networkInterface, ' is: ');
+          console.log(networkConfig);
         }
         else {
           reject();
@@ -107,7 +158,8 @@ class BrightSignPlatformService extends APlatformService {
       // });
 
 
-      resolve('');
+      // resolve('');
+
 
     });
 
