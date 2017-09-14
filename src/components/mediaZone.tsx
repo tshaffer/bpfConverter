@@ -12,7 +12,7 @@ import ImageContainer from '../containers/imageContainer';
 import SlickContainer from '../containers/slickContainer';
 import VideoContainer from '../containers/videoContainer';
 import MrssDisplayItemContainer from '../containers/mrssDisplayItemContainer';
-import ComponentPluginContainer from '../containers/componentPluginContainer';
+// import ComponentPluginContainer from '../containers/componentPluginContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 
@@ -27,8 +27,8 @@ import {
 } from '@brightsign/bscore';
 
 import {
-  DmHtmlComponentContentItem,
-  DmSlickCarouselContentItem,
+  // DmHtmlComponentContentItem,
+  // DmSlickCarouselContentItem,
   BsDmId,
   DmDataFeedContentItem,
   DmDerivedContentItem,
@@ -141,37 +141,37 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     );
   }
 
-  renderSlickItem(slickItem : DmSlickCarouselContentItem) {
+  // renderSlickItem(slickItem : DmSlickCarouselContentItem) {
+  //
+  //   // let foo : DmSlickCarouselContentItem | {} = {};
+  //
+  //   return (
+  //     <SlickContainer
+  //       width={this.props.width}
+  //       height={this.props.height}
+  //       contentItems={slickItem.contentItems}
+  //       filePaths={[]}
+  //     />
+  //   );
+  // }
 
-    // let foo : DmSlickCarouselContentItem | {} = {};
-
-    return (
-      <SlickContainer
-        width={this.props.width}
-        height={this.props.height}
-        contentItems={slickItem.contentItems}
-        filePaths={[]}
-      />
-    );
-  }
-
-  renderComponentPluginItem(mediaState : DmMediaState, componentPluginItem : DmHtmlComponentContentItem, event : DmEvent) {
-
-    let duration : number = event.data.interval;
-
-    const self = this;
-
-    let componentPath = path.join(componentPluginItem.reactComponent.path, componentPluginItem.reactComponent.name);
-    return (
-      <ComponentPluginContainer
-        name={componentPluginItem.name}
-        componentPath={componentPath}
-        properties={componentPluginItem.properties}
-        duration={duration * 1000}
-        onTimeout={self.postTimeoutEvent.bind(this)}
-      />
-    );
-  }
+  // renderComponentPluginItem(mediaState : DmMediaState, componentPluginItem : DmHtmlComponentContentItem, event : DmEvent) {
+  //
+  //   let duration : number = event.data.interval;
+  //
+  //   const self = this;
+  //
+  //   let componentPath = path.join(componentPluginItem.reactComponent.path, componentPluginItem.reactComponent.name);
+  //   return (
+  //     <ComponentPluginContainer
+  //       name={componentPluginItem.name}
+  //       componentPath={componentPath}
+  //       properties={componentPluginItem.properties}
+  //       duration={duration * 1000}
+  //       onTimeout={self.postTimeoutEvent.bind(this)}
+  //     />
+  //   );
+  // }
 
   getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
@@ -213,12 +213,12 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
       case 'MrssFeed': {
         return this.renderMrssItem(contentItem as DmDataFeedContentItem);
       }
-      case 'SlickCarousel': {
-        return this.renderSlickItem(contentItem as DmSlickCarouselContentItem);
-      }
-      case 'HtmlComponent': {
-        return this.renderComponentPluginItem(mediaState, contentItem as DmHtmlComponentContentItem, event);
-      }
+      // case 'SlickCarousel': {
+      //   return this.renderSlickItem(contentItem as DmSlickCarouselContentItem);
+      // }
+      // case 'HtmlComponent': {
+      //   return this.renderComponentPluginItem(mediaState, contentItem as DmHtmlComponentContentItem, event);
+      // }
       default: {
         break;
       }

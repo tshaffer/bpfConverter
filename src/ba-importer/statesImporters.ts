@@ -8,8 +8,8 @@ import {
 import {
   MediaStateAction,
   dmAddMediaStateWithContentItem,
-  dmCreateSlickCarouselContentItem,
-  DmSlickCarouselContentItem,
+  // dmCreateSlickCarouselContentItem,
+  // DmSlickCarouselContentItem,
   DmImageContentItemData,
   DmVideoContentItemData,
   dmCreateHtmlContentItem,
@@ -87,29 +87,29 @@ function addImageItem(name : string, bacImageItem : any, zoneId : BsDmId, dispat
     bsAssetItem, imageContentItemData));
 }
 
-function addSlickCarouselItem(name : string, bacSlickItem : any, zoneId : BsDmId, dispatch : Function) {
-
-  let contentItems : BsAssetItem[] = [];
-
-  bacSlickItem.files.imageItem.forEach( (fileItem : any) => {
-    const fileName : string = fileItem.file['@name'];
-    const filePath : string = Utilities.getPoolFilePath(fileName);
-    const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
-    contentItems.push(bsAssetItem);
-  });
-
-  const liveDataFeedName : string = bacSlickItem.liveDataFeedName || '';
-
-  const slickCarouselContentItem : DmSlickCarouselContentItem = dmCreateSlickCarouselContentItem(
-    bacSlickItem.name,
-    contentItems,
-    bacSlickItem.populateFromMediaLibrary,
-    // optional parameters
-  );
-  const mediaStateAction: MediaStateAction = dmAddMediaStateWithContentItem(bacSlickItem.name, dmGetZoneMediaStateContainer(zoneId),
-    slickCarouselContentItem);
-  const mediaStateParamsAction : BsDmAction<MediaStateParams> = dispatch(mediaStateAction);
-}
+// function addSlickCarouselItem(name : string, bacSlickItem : any, zoneId : BsDmId, dispatch : Function) {
+//
+//   let contentItems : BsAssetItem[] = [];
+//
+//   bacSlickItem.files.imageItem.forEach( (fileItem : any) => {
+//     const fileName : string = fileItem.file['@name'];
+//     const filePath : string = Utilities.getPoolFilePath(fileName);
+//     const bsAssetItem  : BsAssetItem= dmCreateAssetItemFromLocalFile(filePath, '', MediaType.Image);
+//     contentItems.push(bsAssetItem);
+//   });
+//
+//   const liveDataFeedName : string = bacSlickItem.liveDataFeedName || '';
+//
+//   const slickCarouselContentItem : DmSlickCarouselContentItem = dmCreateSlickCarouselContentItem(
+//     bacSlickItem.name,
+//     contentItems,
+//     bacSlickItem.populateFromMediaLibrary,
+//     // optional parameters
+//   );
+//   const mediaStateAction: MediaStateAction = dmAddMediaStateWithContentItem(bacSlickItem.name, dmGetZoneMediaStateContainer(zoneId),
+//     slickCarouselContentItem);
+//   const mediaStateParamsAction : BsDmAction<MediaStateParams> = dispatch(mediaStateAction);
+// }
 
 export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Function, getState : Function) {
 
@@ -125,10 +125,10 @@ export function addMediaStates(zoneId : BsDmId, bacZone : any, dispatch : Functi
       const bacImageItem : any = bacMediaState.imageItem;
       addImageItem(bacMediaState.name, bacImageItem, zoneId, dispatch);
     }
-    else if (bacMediaState.slickItem) {
-      const bacSlickItem : any = bacMediaState.slickItem;
-      addSlickCarouselItem(bacMediaState.name, bacSlickItem, zoneId, dispatch);
-    }
+    // else if (bacMediaState.slickItem) {
+    //   const bacSlickItem : any = bacMediaState.slickItem;
+    //   addSlickCarouselItem(bacMediaState.name, bacSlickItem, zoneId, dispatch);
+    // }
     else if (bacMediaState.videoItem) {
       const bacVideoItem : any = bacMediaState.videoItem;
       addVideoItem(bacMediaState.name, bacVideoItem, zoneId, dispatch);
