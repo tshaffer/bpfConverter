@@ -341,6 +341,9 @@ export class BSP {
           resolve();
         }
       }
+      else {
+        resolve();
+      }
     });
   }
 

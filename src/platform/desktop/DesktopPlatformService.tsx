@@ -119,7 +119,6 @@ class DesktopPlatformService {
   }
 
   static getGraphicsResolution(videoOutputObj : any) : Promise<BsSize> {
-    debugger;
     return new Promise( (resolve, reject) => {
       resolve(
         {
@@ -130,8 +129,19 @@ class DesktopPlatformService {
     });
   }
 
+  static deviceHasGpioConnector(deviceInfo : any) : boolean {
+    return true;
+  }
 
+  static readRegistrySection(registry : BsRegistry, registrySection : string) : Promise<string> {
+    return new Promise( (resolve) => {
+      resolve('');
+    });
+  }
 
+  static getRegistryValue(registrySection : any, key : string) : string {
+    return '';
+  }
 
 }
 
