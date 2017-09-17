@@ -88,6 +88,7 @@ export function getBrightSignObjects() : Promise<any> {
     promises.push(getGraphicsResolutionPromise);
 
     Promise.all(promises).then((results: any[]) => {
+      console.log('allPromises resolved');
 
       bsObjects.eth0Configuration = results[0];
       bsObjects.eth1Configuration = results[1];
@@ -112,6 +113,7 @@ export function getBrightSignObjects() : Promise<any> {
 
       resolve(bsObjects);
     })
+
       .catch(() => {
         reject();
       });
@@ -132,12 +134,13 @@ function getNetworkConfiguration(networkInterface : string) : Promise<BSNetworkI
 
 function getEdid(videoConnector : string) : Promise<any> {
   return new Promise( (resolve) => {
-    PlatformService.default.getEdid(videoConnector).then( (edid : any) => {
-      resolve(edid);
-    })
-    .catch( (err : any) => {
-      resolve(null);
-    })
+    resolve('not implemented');
+    // PlatformService.default.getEdid(videoConnector).then( (edid : any) => {
+    //   resolve(edid);
+    // })
+    // .catch( (err : any) => {
+    //   resolve(null);
+    // })
   });
 }
 
