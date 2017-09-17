@@ -128,7 +128,8 @@ class BrightSignPlatformService extends APlatformService {
       const NetworkInterface = require("@brightsign/networkconfiguration");
       const nc = new NetworkInterface(networkInterface);
       nc.getConfig().then((networkConfig : BSNetworkInterfaceConfig) => {
-        if (networkConfig && networkConfig.domain === 'brightsign') {
+        // if (networkConfig && networkConfig.domain === 'brightsign') {
+        if (networkConfig && networkConfig.clientIdentifier.startsWith('BrightSign')) {
           Object.assign(networkConfig, networkInterfaceInfo);
           resolve(networkConfig);
           console.log('getNetworkConfiguration for: ', networkInterface, ' is: ');
