@@ -21,6 +21,8 @@ import APlatformService from '../APlatformService';
 
 import {
   BsDeviceInfo,
+  BSInterfaceTestResult,
+  BsLog,
   BSNetworkInterfaceConfig,
   BsRegistry,
   BsScreenshot,
@@ -131,9 +133,33 @@ class BrightSignPlatformService extends APlatformService {
         // if (networkConfig && networkConfig.domain === 'brightsign') {
         if (networkConfig && networkConfig.clientIdentifier.startsWith('BrightSign')) {
           Object.assign(networkConfig, networkInterfaceInfo);
-          resolve(networkConfig);
+          // resolve(networkConfig);
           console.log('getNetworkConfiguration for: ', networkInterface, ' is: ');
           console.log(networkConfig);
+
+          const NetworkDiagnosticsClass = require("@brightsign/networkdiagnostics");
+          const nd = new NetworkDiagnosticsClass();
+          nd.testInternetConnectivity(networkInterface).then((data : any) => {
+
+            console.log(JSON.stringify(data));
+
+            const bsInterfaceTestResult : BSInterfaceTestResult = data as BSInterfaceTestResult;
+            console.log('BSInterfaceTestResult');
+            console.log('ok: ', bsInterfaceTestResult.ok);
+            console.log('diagnosis: ', bsInterfaceTestResult.diagnosis);
+            console.log('logs');
+            bsInterfaceTestResult.log.forEach( (bsLog : BsLog) => {
+              console.log('    log:');
+              console.log('       name: ', bsLog.name);
+              console.log('       pass: ', bsLog.pass);
+              console.log('       result: ', bsLog.result);
+              if (bsLog.info) {
+                console.log('       info: ', bsLog.info);
+              }
+            });
+
+            resolve(networkConfig);
+          });
         }
         else {
           reject();

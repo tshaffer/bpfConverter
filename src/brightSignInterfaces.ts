@@ -22,6 +22,19 @@ export interface BSNetworkInterfaceConfig {
   domain : string;
 }
 
+export interface BsLog {
+  name : string;
+  pass : boolean;
+  result : string;
+  info? : string[];
+}
+
+export interface BSInterfaceTestResult {
+  ok : boolean;
+  diagnosis : string;
+  log : BsLog[];
+}
+
 export interface BsRegistry {
   read(sectionName : string, key? : string) : Promise<string>;
   write(sectionName : string, key : string, value : string) : Promise<any>;
