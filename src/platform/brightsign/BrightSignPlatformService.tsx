@@ -196,7 +196,7 @@ class BrightSignPlatformService extends APlatformService {
       // });
 
 
-      // resolve('');
+      resolve('');
 
 
     });
