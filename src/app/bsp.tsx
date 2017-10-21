@@ -195,28 +195,25 @@ export class BSP {
 
     this.hsmList = [];
 
-    // TODO - could be current-sync.json
-    this.openSyncSpec(path.join(rootPath, 'local-sync.json')).then((cardSyncSpec: ArSyncSpec) => {
-      this.syncSpec = cardSyncSpec;
-      getBrightSignObjects().then((bsObjects: any) => {
-
+    // TODO - could be either local-sync.json or current-sync.json (more in the future?)
+    const syncSpecPath = path.join(rootPath, 'local-sync.json');
+    this.openSyncSpec(syncSpecPath)
+      .then((cardSyncSpec: ArSyncSpec) => {
+        this.syncSpec = cardSyncSpec;
+        return getBrightSignObjects()
+      }).then((bsObjects: any) => {
         Object.assign(this, bsObjects);
-
-        PlatformService.default.readRegistrySection(this.registry, 'networking').then((networkingRegistrySettings: any[]) => {
-
-          this.networkingRegistrySettings = networkingRegistrySettings;
-
-          this.setSystemInfo();
-
-          this.initRemoteSnapshots().then(() => {
-            this.continueInit();
-            this.parseNativeFiles(rootPath, pathToPool).then(() => {
-              this.launchHSM();
-            });
-          });
-        });
+        return PlatformService.default.readRegistrySection(this.registry, 'networking')
+      }).then((networkingRegistrySettings: any) => {
+        this.networkingRegistrySettings = networkingRegistrySettings;
+        this.setSystemInfo();
+        return this.initRemoteSnapshots()
+      }).then(() => {
+        this.continueInit();
+        return this.parseNativeFiles(rootPath, pathToPool)
+      }).then(() => {
+        this.launchHSM();
       });
-    });
   }
 
   setSystemInfo() {
@@ -460,7 +457,7 @@ export class BSP {
 
       if (!this.importPublishedFiles) {
         const autoplayFileName = presentationName + '.bml';
-        this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: object) => {
+        this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: any) => {
           console.log(autoPlay);
           // const signState = autoPlay as DmSignState;
           const signState = autoPlay.bsdm as DmSignState;
