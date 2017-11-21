@@ -15,15 +15,25 @@ import {
 } from '../brightSignInterfaces';
 
 import {
-  DataFeedUsageType, GraphicsZOrderType,
+  DataFeedUsageType,
+  EventType,
+  GraphicsZOrderType,
 } from '@brightsign/bscore';
 
 import {
   BsDmId,
+  BsDmThunkAction,
   DmSignState,
   DmState,
   DmZone,
+  EventAction,
+  EventParams,
+  TransitionAction,
+  TransitionParams,
+  dmAddEvent,
+  dmAddTransition,
   dmOpenSign,
+  dmGetMediaStateIdsForZone,
   dmGetZonesForSign,
   dmGetZoneById,
   dmGetDataFeedIdsForSign,
@@ -459,9 +469,28 @@ export class BSP {
         const autoplayFileName = presentationName + '.bml';
         this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: any) => {
           console.log(autoPlay);
-          // const signState = autoPlay as DmSignState;
-          const signState = autoPlay.bsdm as DmSignState;
+          const signState = autoPlay as DmSignState;
+          // const signState = autoPlay.bsdm as DmSignState;
           this.dispatch(dmOpenSign(signState));
+
+          const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
+          const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
+          const zoneId = zoneIds[0];
+          const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
+          const sourceMediaStateId = mediaStateIds[0];
+          const targetMediaStateId = mediaStateIds[2];
+
+          const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
+          const eventParams : EventParams = eventAction.payload;
+          const eventId = eventParams.id;
+
+          const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
+          const transitionParams : TransitionParams = transitionAction.payload;
+          const transitionId = transitionParams.id;
+
+          const theState = this.getState();
+          console.log(theState);
+
           this.getDataFeeds();
           resolve();
         });

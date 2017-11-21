@@ -176,7 +176,8 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
   getEvent( bsdm : DmState, mediaStateId: string ) : DmEvent {
 
     const eventIds : BsDmId[] = dmGetEventIdsForMediaState(bsdm, { id : mediaStateId });
-    if (eventIds.length !== 1) {
+    // if (eventIds.length !== 1) {
+    if (eventIds.length === 0) {
       console.log('no event');
       return null;
     }
