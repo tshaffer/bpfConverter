@@ -93,8 +93,6 @@ import {
   addDataFeed
 } from   '../store/dataFeeds';
 
-// import { importBPF } from '../bpfImporter/importer';
-
 let _singleton: BSP = null;
 
 export class BSP {
