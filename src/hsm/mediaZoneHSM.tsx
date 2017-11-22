@@ -18,7 +18,6 @@ import {
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
-import SlickState from './slickState';
 import ComponentPluginState from './componentPluginState';
 
 export class MediaZoneHSM extends ZoneHSM {
@@ -57,8 +56,6 @@ export class MediaZoneHSM extends ZoneHSM {
         newState = new VideoState(this, bsdmMediaState);
       } else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
         newState = new MRSSDataFeedState(this, bsdmMediaState);
-      } else if (bsdmMediaState.contentItem.type === 'SlickCarousel') {
-        newState = new SlickState(this, bsdmMediaState);
       } else if (bsdmMediaState.contentItem.type == 'HtmlComponent') {
         newState = new ComponentPluginState(this, bsdmMediaState);
       }
