@@ -107,7 +107,6 @@ export class BSP {
   hsmList: HSM[];
   playerHSM: PlayerHSM;
   liveDataFeedsToDownload: DataFeed[];
-  importPublishedFiles: boolean;
 
   version: string;
   sysFlags: any;
@@ -169,8 +168,6 @@ export class BSP {
 
   initialize(reduxStore: Store<ArState>) {
 
-    this.importPublishedFiles = false;
-
     console.log('bsp initialization');
 
     this.store = reduxStore;
@@ -185,7 +182,7 @@ export class BSP {
 
     this.hsmList = [];
 
-    // TODO - could be either local-sync.json or current-sync.json (more in the future?)
+    // TODO - could be either local-sync.json or current-sync.json (others in the future?)
     const syncSpecPath = path.join(rootPath, 'local-sync.json');
     this.openSyncSpec(syncSpecPath)
       .then((cardSyncSpec: ArSyncSpec) => {
