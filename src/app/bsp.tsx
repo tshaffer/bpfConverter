@@ -129,6 +129,7 @@ export class BSP {
   systemTime: any;
   controlPort: any;
   svcPort: any;
+  bp900ControlPort0: any;
   expanderControlPort: any;
   lightController0ControlPort: any;
   lightController1ControlPort: any;
@@ -410,6 +411,15 @@ export class BSP {
 
   launchHSM() {
 
+    // test code
+    if (this.bp900ControlPort0) {
+      this.bp900ControlPort0.oncontroldown = function(e : any){
+        console.log('### oncontroldown ' + e.code);
+        const newtext = " DOWN: " + e.code + "\n";
+        console.log(newtext);
+      }
+    }
+
     let state = this.getState();
 
 // Create player state machine
@@ -490,6 +500,12 @@ export class BSP {
 
           const theState = this.getState();
           console.log(theState);
+
+          // save presentation
+          // const bsdm = theState.bsdm;
+          // const bpfxPath = '/Users/tedshaffer/Desktop/autorunTs/interactive.bpfx';
+          // const bpfStr = JSON.stringify(bsdm, null, '\t');
+          // fs.writeFile(bpfxPath, bpfStr);
 
           this.getDataFeeds();
           resolve();

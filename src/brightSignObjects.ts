@@ -29,6 +29,7 @@ export function getBrightSignObjects() : Promise<any> {
     let getEdidPromise: Promise<any> = getEdid(bsObjects.videoOutput);
     let getBrightSignControlPortPromise: Promise<any> = PlatformService.default.getControlPort('BrightSign');
     let getExpanderControlPortPromise: Promise<any> = PlatformService.default.getControlPort('Expander-0-GPIO');
+    let getBP900ControlPort0Promise: Promise<any> = PlatformService.default.getControlPort('TouchBoard-0-GPIO');
     let getLightController0ControlPortPromise: Promise<any> =
       PlatformService.default.getControlPort('LightController-0-CONTROL');
     let getLightController1ControlPortPromise: Promise<any> =
@@ -86,6 +87,7 @@ export function getBrightSignObjects() : Promise<any> {
     promises.push(getLightController1DiagnosticsPortPromise);
     promises.push(getLightController2DiagnosticsPortPromise);
     promises.push(getGraphicsResolutionPromise);
+    promises.push(getBP900ControlPort0Promise);
 
     Promise.all(promises).then((results: any[]) => {
       console.log('allPromises resolved');
@@ -102,6 +104,7 @@ export function getBrightSignObjects() : Promise<any> {
       bsObjects.lightController1DiagnosticsPort = results[9];
       bsObjects.lightController2DiagnosticsPort = results[10];
       bsObjects.graphicsResolution = results[11];
+      bsObjects.bp900ControlPort0 = results[12];
 
       const deviceHasGpioConnector: boolean = PlatformService.default.deviceHasGpioConnector(bsObjects.deviceInfo);
       if (deviceHasGpioConnector) {

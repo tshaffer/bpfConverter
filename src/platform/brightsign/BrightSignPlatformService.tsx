@@ -220,6 +220,21 @@ class BrightSignPlatformService extends APlatformService {
     });
   }
 
+  // 	BSP.bpInputPorts[0] = CreateObject("roControlPort", "TouchBoard-0-GPIO")
+  // static getBP900ControlPort(portNumber : number) : any {
+  //   return new Promise( (resolve : any) => {
+  //     let controlPort : any = null;
+  //     const controlPortSpec : string = 'TouchBoard-' + portNumber.toString() + '-GPIO';
+  //     try {
+  //       controlPort = new BSControlPort(controlPortSpec);
+  //     }
+  //     catch (e) {
+  //       console.log('failed to create controlPort: ' + controlPortSpec);
+  //     }
+  //     resolve(controlPort);
+  //   });
+  // }
+
   static deviceHasGpioConnector(deviceInfo : any) : boolean {
     return (deviceInfo.HasFeature('GPIO Connector'));
   }
