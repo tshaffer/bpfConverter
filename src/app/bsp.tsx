@@ -450,8 +450,9 @@ export class BSP {
       const presentationName = presentationToSchedule.name;
 
       const autoplayFileName = presentationName + '.bml';
-      this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: any) => {
-        console.log(autoPlay);
+      this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((bpfxState: any) => {
+        console.log(bpfxState);
+        const autoPlay : any = bpfxState.bsdm;
         const signState = autoPlay as DmSignState;
         // const signState = autoPlay.bsdm as DmSignState;
         this.dispatch(dmOpenSign(signState));
