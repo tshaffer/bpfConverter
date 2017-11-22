@@ -42,10 +42,6 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-  importBPF
-} from '@brightsign/bpfimporter';
-
-import {
   ArEventType,
   ArSyncSpec,
   ArSyncSpecDownload,
