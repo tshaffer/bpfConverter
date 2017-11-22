@@ -54,10 +54,6 @@ import PlatformService from '../platform';
 import {getBrightSignObjects} from '../brightSignObjects';
 
 import {
-  importPublishedFiles,
-} from '../ba-importer/importer';
-
-import {
   setPoolAssetFiles,
 } from '../utilities/utilities';
 
@@ -154,19 +150,6 @@ export class BSP {
       console.log('bsp constructor invoked');
       _singleton = this;
     }
-  }
-
-  parseImportedPublishedFiles(rootPath: string, pathToPool: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      importPublishedFiles(rootPath, this.dispatch, this.getState).then((convertedPackage: any) => {
-        // autoplay results have been written to redux store.
-        this.syncSpec = convertedPackage.syncSpec;
-        this.autoSchedule = convertedPackage.autoSchedule;
-        const poolAssetFiles: ArFileLUT = this.buildPoolAssetFiles(this.syncSpec, pathToPool);
-        setPoolAssetFiles(poolAssetFiles);
-        resolve();
-      });
-    });
   }
 
   parseNativeFiles(rootPath: string, pathToPool: string): Promise<any> {
@@ -471,49 +454,41 @@ export class BSP {
       const presentationToSchedule = scheduledPresentation.presentationToSchedule;
       const presentationName = presentationToSchedule.name;
 
-      if (!this.importPublishedFiles) {
-        const autoplayFileName = presentationName + '.bml';
-        this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: any) => {
-          console.log(autoPlay);
-          const signState = autoPlay as DmSignState;
-          // const signState = autoPlay.bsdm as DmSignState;
-          this.dispatch(dmOpenSign(signState));
-
-          const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
-          const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
-          const zoneId = zoneIds[0];
-          const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
-          const sourceMediaStateId = mediaStateIds[0];
-          const targetMediaStateId = mediaStateIds[2];
-
-          const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
-          const eventParams : EventParams = eventAction.payload;
-          const eventId = eventParams.id;
-
-          const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
-          const transitionParams : TransitionParams = transitionAction.payload;
-          const transitionId = transitionParams.id;
-
-          const theState = this.getState();
-          console.log(theState);
-
-          // save presentation
-          // const bsdm = theState.bsdm;
-          // const bpfxPath = '/Users/tedshaffer/Desktop/autorunTs/interactive.bpfx';
-          // const bpfStr = JSON.stringify(bsdm, null, '\t');
-          // fs.writeFile(bpfxPath, bpfStr);
-
-          this.getDataFeeds();
-          resolve();
-        });
-
-      }
-      else {
-        const signState: DmSignState = dmGetSignState(this.getState().bsdm);
+      const autoplayFileName = presentationName + '.bml';
+      this.getSyncSpecReferencedFile(autoplayFileName, this.syncSpec, rootPath).then((autoPlay: any) => {
+        console.log(autoPlay);
+        const signState = autoPlay as DmSignState;
+        // const signState = autoPlay.bsdm as DmSignState;
         this.dispatch(dmOpenSign(signState));
+
+        const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
+        const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
+        const zoneId = zoneIds[0];
+        const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
+        const sourceMediaStateId = mediaStateIds[0];
+        const targetMediaStateId = mediaStateIds[2];
+
+        const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
+        const eventParams : EventParams = eventAction.payload;
+        const eventId = eventParams.id;
+
+        const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
+        const transitionParams : TransitionParams = transitionAction.payload;
+        const transitionId = transitionParams.id;
+
+        const theState = this.getState();
+        console.log(theState);
+
+        // save presentation
+        // const bsdm = theState.bsdm;
+        // const bpfxPath = '/Users/tedshaffer/Desktop/autorunTs/interactive.bpfx';
+        // const bpfStr = JSON.stringify(bsdm, null, '\t');
+        // fs.writeFile(bpfxPath, bpfStr);
+
         this.getDataFeeds();
         resolve();
-      }
+      });
+
     });
   }
 
