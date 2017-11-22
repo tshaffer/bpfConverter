@@ -11,7 +11,6 @@ import {
 import ImageContainer from '../containers/imageContainer';
 import VideoContainer from '../containers/videoContainer';
 import MrssDisplayItemContainer from '../containers/mrssDisplayItemContainer';
-// import ComponentPluginContainer from '../containers/componentPluginContainer';
 
 import { getPoolFilePath } from '../utilities/utilities';
 

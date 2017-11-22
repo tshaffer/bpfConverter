@@ -18,7 +18,6 @@ import {
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
-import ComponentPluginState from './componentPluginState';
 
 export class MediaZoneHSM extends ZoneHSM {
 
@@ -56,8 +55,6 @@ export class MediaZoneHSM extends ZoneHSM {
         newState = new VideoState(this, bsdmMediaState);
       } else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
         newState = new MRSSDataFeedState(this, bsdmMediaState);
-      } else if (bsdmMediaState.contentItem.type == 'HtmlComponent') {
-        newState = new ComponentPluginState(this, bsdmMediaState);
       }
 
       this.mediaStates.push(newState);
