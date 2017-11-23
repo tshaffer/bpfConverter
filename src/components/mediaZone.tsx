@@ -30,8 +30,10 @@ import {
   DmDerivedContentItem,
   DmMediaContentItem,
   DmEvent,
+  DmEventData,
   DmMediaState,
   DmState,
+  DmTimer,
   dmGetMediaStateById,
   dmGetEventIdsForMediaState,
   dmGetEventById,
@@ -79,7 +81,8 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     const eventName : EventType = event.type;
     switch (eventName) {
       case 'Timer': {
-        duration = event.data.interval;
+        const eventData : DmEventData = event.data;
+        duration = (eventData as DmTimer).interval;
         break;
       }
       case 'MediaEnd': {
