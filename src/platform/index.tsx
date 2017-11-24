@@ -10,7 +10,7 @@ declare class BSDeviceInfo {
   family : string;
 }
 
-let platform;
+let platform : string;
 
 platform = 'desktop';
 
@@ -37,7 +37,7 @@ catch (e) {
   platform = 'desktop';
 }
 
-let loadedModule = null;
+let loadedModule : any = null;
 if(platform === 'brightsign'){
   loadedModule = require('./brightsign/index.tsx');
 }else{
