@@ -18,6 +18,8 @@ import { HState } from './HSM';
 
 import { ZoneHSM } from './zoneHSM';
 
+import { MediaZoneHSM } from './mediaZoneHSM';
+
 import {
     setActiveMediaState,
 } from '../store/activeMediaStates';
@@ -86,24 +88,15 @@ export default class ImageState extends HState {
                 // iterate through all the HSM imageState objects in this HSM and find the one whose bsdmImageState.id
                 // matches targetMediaStateId
 
-                const mediaHStates : any[] = this.stateMachine.mediaStates;
-                mediaHStates.forEach( (mediaHState : any) => {
-                  if (mediaHState.id === targetMediaStateId) {
-                    // match found
-                    stateData.nextState = mediaHState;
-                    transitionFound = true;
-                    return 'TRANSITION';
-                  }
-                });
 
-                if (transitionFound) {
-                  return 'TRANSITION';
-                }
+                const targetMediaState : HState = (this.stateMachine as MediaZoneHSM).mediaStateIdToHState[targetMediaStateId];
+                stateData.nextState = targetMediaState;
+                transitionFound = true;
+                return 'TRANSITION';
               }
               if (transitionFound) {
                 return 'TRANSITION';
               }
-
             }
             if (transitionFound) {
               return 'TRANSITION';

@@ -13,6 +13,7 @@ import {
 
 import {
   MediaHState,
+  LUT,
 } from '../types';
 
 import ImageState from './imageState';
@@ -20,6 +21,8 @@ import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
 
 export class MediaZoneHSM extends ZoneHSM {
+
+  mediaStateIdToHState : LUT = {};
 
   constructor(dispatch: Function, getState: Function, zoneId: string) {
 
@@ -55,10 +58,11 @@ export class MediaZoneHSM extends ZoneHSM {
         newState = new VideoState(this, bsdmMediaState);
       } else if (bsdmMediaState.contentItem.type === 'MrssFeed') {
         newState = new MRSSDataFeedState(this, bsdmMediaState);
-      }
-
+      }      
       this.mediaStates.push(newState);
 
+      this.mediaStateIdToHState[mediaStateId] = newState;
+      
       if (index > 0) {
         this.mediaStates[index - 1].setNextState(newState);
       }

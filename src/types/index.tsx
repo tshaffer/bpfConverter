@@ -79,6 +79,8 @@ export interface MediaHState extends HState {
 // export type DataFeedLUT = { [dataFeedId:string]: DataFeed };
 export type ArFileLUT = { [fileName:string]: string };
 
+export type LUT = { [key: string] : any };
+
 // export interface ArFileLUT {
 //     [fileName : string] : string;
 // };
