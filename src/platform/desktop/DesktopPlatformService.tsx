@@ -14,7 +14,8 @@ class DesktopPlatformService {
   // static srcDirectory = '/Users/tedshaffer/Desktop/baconImportFromBac';   // bacon import from bac
   // static srcDirectory = '/Users/tedshaffer/Desktop/ab';   // importable component for now
   // static srcDirectory = '/Users/tedshaffer/Desktop/baconPluginPresentation';   // importable component for now
-  static srcDirectory = '/Users/tedshaffer/Desktop/autorunTs';   // bacon files - nonImport
+  // static srcDirectory = '/Users/tedshaffer/Desktop/autorunTs';   // bacon files - nonImport
+  static srcDirectory = '/Users/tedshaffer/Desktop/autorunTsInteractivity';
 
   static getRootDirectory(): string {
     return DesktopPlatformService.srcDirectory;

@@ -18,6 +18,7 @@ import {
   DataFeedUsageType,
   EventType,
   GraphicsZOrderType,
+  ButtonPanelName,
 } from '@brightsign/bscore';
 
 import {
@@ -385,13 +386,25 @@ export class BSP {
 
   launchHSM() {
 
+    const bsp = this;
+
     // test code
     if (this.bp900ControlPort0) {
       this.bp900ControlPort0.oncontroldown = function(e : any){
         console.log('### oncontroldown ' + e.code);
         const newtext = " DOWN: " + e.code + "\n";
         console.log(newtext);
-      }
+
+        const event : ArEventType = {
+          EventType: EventType.Bp,
+          EventData: {
+            ButtonPanelName: ButtonPanelName.Bp900a,
+            ButtonIndex: e.code
+          }
+        };
+
+        bsp.store.dispatch(bsp.postMessage(event));
+        };
     }
 
     let state = this.getState();
@@ -457,23 +470,24 @@ export class BSP {
         // const signState = autoPlay.bsdm as DmSignState;
         this.dispatch(dmOpenSign(signState));
 
-        const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
-        const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
-        const zoneId = zoneIds[0];
-        const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
-        const sourceMediaStateId = mediaStateIds[0];
-        const targetMediaStateId = mediaStateIds[2];
-
-        const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
-        const eventParams : EventParams = eventAction.payload;
-        const eventId = eventParams.id;
-
-        const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
-        const transitionParams : TransitionParams = transitionAction.payload;
-        const transitionId = transitionParams.id;
-
-        const theState = this.getState();
-        console.log(theState);
+        // this was test code to create interactivity programmatically
+        // const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
+        // const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
+        // const zoneId = zoneIds[0];
+        // const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
+        // const sourceMediaStateId = mediaStateIds[0];
+        // const targetMediaStateId = mediaStateIds[2];
+        //
+        // const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
+        // const eventParams : EventParams = eventAction.payload;
+        // const eventId = eventParams.id;
+        //
+        // const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
+        // const transitionParams : TransitionParams = transitionAction.payload;
+        // const transitionId = transitionParams.id;
+        //
+        // const theState = this.getState();
+        // console.log(theState);
 
         // save presentation
         // const bsdm = theState.bsdm;

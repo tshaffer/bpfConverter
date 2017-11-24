@@ -21,9 +21,9 @@ export default class Image extends React.Component<ImageProps, object> {
 
   shouldComponentUpdate() {
 
-    if (this.timeout) {
-      return false;
-    }
+    // if (this.timeout) {
+    //   return false;
+    // }
 
     return true;
   }
@@ -32,15 +32,18 @@ export default class Image extends React.Component<ImageProps, object> {
 
     const self: Image = this;
 
+    // WRONG
     if (this.timeout) {
-      debugger;
+      // debugger;
+      console.log('timeout still active');
     }
-
-    this.timeout = setTimeout( () => {
-        this.timeout = null;
-        self.props.onTimeout();
-      }
-      , this.props.duration);
+    else {
+      this.timeout = setTimeout( () => {
+          this.timeout = null;
+          self.props.onTimeout();
+        }
+        , this.props.duration);
+    }
 
     return (
       <img

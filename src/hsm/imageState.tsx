@@ -1,4 +1,15 @@
 import {
+    DataFeedUsageType,
+    EventType,
+    GraphicsZOrderType,
+    ButtonPanelName,
+} from '@brightsign/bscore';
+
+import {
+  BsDmId,
+  DmcEvent,
+  DmcMediaState,
+  DmcTransition,
     DmMediaState,
     DmState,
 } from '@brightsign/bsdatamodel';
@@ -43,17 +54,77 @@ export default class ImageState extends HState {
 
         stateData.nextState = null;
 
+        // javascript hackery
+        let transitionFound : boolean = false;
+
         if (event.EventType === 'ENTRY_SIGNAL') {
             console.log(this.id + ': entry signal');
             this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
             return 'HANDLED';
         } else if (event.EventType === 'EXIT_SIGNAL') {
-            console.log(this.id + ': exit signal');
-        } else if (event.EventType === 'timeoutEvent') {
-            console.log(this.id + ': timeoutEvent');
-            stateData.nextState = this.nextState;
+          console.log(this.id + ': exit signal');
+        } else {
+          // iterate through the events for which this state has transitions - if any match the supplied event,
+          // execute the associated transition
+          const eventList : DmcEvent[] = (this.bsdmImageState as DmcMediaState).eventList;
+          eventList.forEach ((registeredEvent : DmcEvent) => {
+            if (event.EventType === registeredEvent.type) {
+              const eventData : any = event.EventData;
+              const registeredEventData : any = registeredEvent.data;
+              // this is not real - don't be fooled
+              if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
+                // get transition associated with this event
+                // not sure about this
+                const transition : DmcTransition = registeredEvent.transitionList[0];
+                const targetMediaStateId : BsDmId = transition.targetMediaStateId;
+
+                console.log(this.stateMachine);
+                // next, find the targetMediaState in the HSM - how the hell do I find this?
+                // each imageState in the hsm has a bsdmImageState, which means that it has an id.
+                // X iterate through all the imageState objects in this zone and find the one whose id matches
+                // X targetMediaStateId
+                // iterate through all the HSM imageState objects in this HSM and find the one whose bsdmImageState.id
+                // matches targetMediaStateId
+
+                const mediaHStates : any[] = this.stateMachine.mediaStates;
+                mediaHStates.forEach( (mediaHState : any) => {
+                  if (mediaHState.id === targetMediaStateId) {
+                    // match found
+                    stateData.nextState = mediaHState;
+                    transitionFound = true;
+                    return 'TRANSITION';
+                  }
+                });
+
+                if (transitionFound) {
+                  return 'TRANSITION';
+                }
+              }
+              if (transitionFound) {
+                return 'TRANSITION';
+              }
+
+            }
+            if (transitionFound) {
+              return 'TRANSITION';
+            }
+          });
+          if (transitionFound) {
             return 'TRANSITION';
+          }
         }
+
+      if (transitionFound) {
+        return 'TRANSITION';
+      }
+
+      // } else if (event.EventType === 'timeoutEvent') {
+        //     console.log(this.id + ': timeoutEvent');
+        //     stateData.nextState = this.nextState;
+        //     return 'TRANSITION';
+        // } else if (event.EventType === EventType.Bp) {
+        //     debugger;
+        // }
 
         stateData.nextState = this.superState;
         return 'SUPER';
