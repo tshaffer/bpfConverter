@@ -159,7 +159,6 @@ export class BSP {
         this.getAutoschedule(this.syncSpec, rootPath).then((autoSchedule: any) => {
           this.autoSchedule = autoSchedule;
           resolve();
-          // this.launchHSM();
         });
       });
     });
@@ -469,31 +468,6 @@ export class BSP {
         const signState = autoPlay as DmSignState;
         // const signState = autoPlay.bsdm as DmSignState;
         this.dispatch(dmOpenSign(signState));
-
-        // this was test code to create interactivity programmatically
-        // const testSignState: DmSignState = dmGetSignState(this.getState().bsdm);
-        // const zoneIds: BsDmId[] = dmGetZonesForSign(testSignState);
-        // const zoneId = zoneIds[0];
-        // const mediaStateIds: BsDmId[] = dmGetMediaStateIdsForZone(testSignState, { id: zoneId });
-        // const sourceMediaStateId = mediaStateIds[0];
-        // const targetMediaStateId = mediaStateIds[2];
-        //
-        // const eventAction : any = this.dispatch(dmAddEvent('myEvent-0', EventType.Bp, sourceMediaStateId));
-        // const eventParams : EventParams = eventAction.payload;
-        // const eventId = eventParams.id;
-        //
-        // const transitionAction : TransitionAction = this.dispatch(dmAddTransition('myTransition-0', eventId, targetMediaStateId));
-        // const transitionParams : TransitionParams = transitionAction.payload;
-        // const transitionId = transitionParams.id;
-        //
-        // const theState = this.getState();
-        // console.log(theState);
-
-        // save presentation
-        // const bsdm = theState.bsdm;
-        // const bpfxPath = '/Users/tedshaffer/Desktop/autorunTs/interactive.bpfx';
-        // const bpfStr = JSON.stringify(bsdm, null, '\t');
-        // fs.writeFile(bpfxPath, bpfStr);
 
         this.getDataFeeds();
         resolve();
