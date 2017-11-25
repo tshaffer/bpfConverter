@@ -62,12 +62,7 @@ export class MediaZoneHSM extends ZoneHSM {
       this.mediaStates.push(newState);
 
       this.mediaStateIdToHState[mediaStateId] = newState;
-      
-      if (index > 0) {
-        this.mediaStates[index - 1].setNextState(newState);
-      }
     });
-    this.mediaStates[this.mediaStates.length - 1].setNextState(this.mediaStates[0]);
   }
 
   videoOrImagesZoneConstructor() {

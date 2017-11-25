@@ -64,7 +64,6 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     this.props.postBSPMessage(event);
   }
 
-
   renderMediaItem(mediaState : DmMediaState, contentItem: DmDerivedContentItem, events : DmEvent[]) {
 
     let duration : number = 10;

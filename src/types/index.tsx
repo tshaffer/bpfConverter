@@ -73,7 +73,7 @@ export interface ArSyncSpec {
 }
 
 export interface MediaHState extends HState {
-  setNextState : Function;
+  // setNextState : Function;
 }
 
 // export type DataFeedLUT = { [dataFeedId:string]: DataFeed };

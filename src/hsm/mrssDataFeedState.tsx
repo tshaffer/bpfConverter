@@ -44,10 +44,6 @@ export default class MRSSDataFeedState extends HState {
     this.dataFeed = this.stateMachine.getState().dataFeeds.dataFeedsById[contentItem.dataFeedId];
   }
 
-  setNextState( nextState : HState ) {
-    this.nextState = nextState;
-  }
-
   // STPlayingMediaRSSEventHandler in ba classic
 
   STDisplayingMRSSDataFeedEventHandler(event : ArEventType, stateData : HSMStateData) : string {

@@ -26,10 +26,6 @@ export default class RSSDataFeedState extends HState {
 
   }
 
-  setNextState( nextState : HState ) {
-    this.nextState = nextState;
-  }
-
   STDisplayingRSSDataFeedEventHandler(event : ArEventType, stateData : HSMStateData) : string {
     stateData.nextState = null;
 

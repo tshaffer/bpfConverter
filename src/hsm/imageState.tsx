@@ -48,10 +48,6 @@ export default class ImageState extends HState {
         this.HStateEventHandler = this.STDisplayingImageEventHandler;
     }
 
-    setNextState( nextState : HState ) {
-        this.nextState = nextState;
-    }
-
     STDisplayingImageEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
         
@@ -73,6 +69,7 @@ export default class ImageState extends HState {
             if (event.EventType === registeredEvent.type) {
               const eventData : any = event.EventData;
               const registeredEventData : any = registeredEvent.data;
+              // this next line is unique to button panel events - pay attention
               if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
                 const transition : DmcTransition = registeredEvent.transitionList[0];
                 const targetMediaStateId : BsDmId = transition.targetMediaStateId;

@@ -35,10 +35,6 @@ export default class VideoState extends HState {
     this.HStateEventHandler = this.STDisplayingVideoEventHandler;
   }
 
-  setNextState( nextState : HState ) {
-    this.nextState = nextState;
-  }
-
   STDisplayingVideoEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
     stateData.nextState = null;
