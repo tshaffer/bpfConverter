@@ -1,6 +1,7 @@
 import {Action} from 'redux';
 
 import {
+  DmEvent,
   DmState
 } from '@brightsign/bsdatamodel';
 
@@ -22,7 +23,6 @@ export type ArMrssDataFeedItemLUT = { [ dataFeedId: string ] : MRSSDataFeedItem 
 export interface MrssDataFeedItemShape  {
   mrssDataFeedItemsByFeedId : ArMrssDataFeedItemLUT
 };
-
 
 export interface ArEventType {
   EventType : string;
@@ -72,15 +72,16 @@ export interface ArSyncSpec {
   files : any;
 }
 
-export interface MediaHState extends HState {
-  // setNextState : Function;
-}
+// export interface MediaHState extends HState {
+//   // setNextState : Function;
+// }
 
 // export type DataFeedLUT = { [dataFeedId:string]: DataFeed };
 export type ArFileLUT = { [fileName:string]: string };
 
 export type LUT = { [key: string] : any };
 
+export type EventLUT = { [ eventKey : string] : HState}
 // export interface ArFileLUT {
 //     [fileName : string] : string;
 // };

@@ -4,11 +4,12 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import { HState } from './HSM';
+import MediaHState from './mediaHState';
 
 import {HSMStateData, ArEventType} from '../types/index';
 import {TickerZoneHSM} from './tickerZoneHSM';
 
-export default class RSSDataFeedState extends HState {
+export default class RSSDataFeedState extends MediaHState {
 
   bsdmState: DmMediaState;
   bsdm : DmState;

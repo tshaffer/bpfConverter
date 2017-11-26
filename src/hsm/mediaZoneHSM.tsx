@@ -4,7 +4,10 @@ import {
 
 import {
   BsDmId,
+  DmEvent,
   DmMediaState,
+  dmGetEventIdsForMediaState,
+  dmGetEventStateById,
   dmGetZoneById,
   dmGetZoneSimplePlaylist,
   dmGetMediaStateById,
@@ -12,10 +15,11 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-  MediaHState,
+  // MediaHState,
   LUT,
 } from '../types';
 
+import MediaHState from './mediaHState';
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
@@ -45,10 +49,10 @@ export class MediaZoneHSM extends ZoneHSM {
     this.height = this.bsdmZone.position.height;
 
     this.initialMediaStateId = this.bsdmZone.initialMediaStateId;
-    // this.mediaStateIds = dmGetZoneSimplePlaylist(this.bsdm, { id: zoneId });
     this.mediaStateIds = dmGetMediaStateIdsForZone(this.bsdm, { id: zoneId });
     this.mediaStates = [];
 
+    // states
     let newState : MediaHState = null;
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
       const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
@@ -62,6 +66,15 @@ export class MediaZoneHSM extends ZoneHSM {
       this.mediaStates.push(newState);
 
       this.mediaStateIdToHState[mediaStateId] = newState;
+    });
+
+    // events / transitions
+    this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
+
+      const mediaHState : MediaHState = this.mediaStateIdToHState[mediaStateId];
+
+      const eventIds : BsDmId[] = dmGetEventIdsForMediaState(this.bsdm, { id : mediaStateId });
+      mediaHState.addEvents(this, eventIds);
     });
   }
 

@@ -10,11 +10,11 @@ import {
   DmcEvent,
   DmcMediaState,
   DmcTransition,
-    DmMediaState,
-    DmState,
+  DmMediaState,
+  DmState,
 } from '@brightsign/bsdatamodel';
 
-import { HState } from './HSM';
+import MediaHState from './mediaHState';
 
 import { ZoneHSM } from './zoneHSM';
 
@@ -29,11 +29,10 @@ import {
     HSMStateData,
 } from '../types';
 
-export default class ImageState extends HState {
+export default class ImageState extends MediaHState {
 
     bsdm : DmState;
     bsdmImageState : DmMediaState;
-    nextState : HState;
     dispatch : Function;
     stateMachine : ZoneHSM;
 
@@ -50,7 +49,6 @@ export default class ImageState extends HState {
 
     STDisplayingImageEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
-        
         if (event.EventType === 'ENTRY_SIGNAL') {
             console.log(this.id + ': entry signal');
             this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
@@ -58,30 +56,90 @@ export default class ImageState extends HState {
         } else if (event.EventType === 'EXIT_SIGNAL') {
           console.log(this.id + ': exit signal');
         } else {
+
+/*
+current code (as of now)
+
+BrightSign event (from Javascript)
+  event.EventType = 'Bp'
+  event.EventData
+    ButtonIndex = 0
+    ButtonPanelName = 'bp900a'
+HState events [] (based on my bsdm code)
+  event.type = 'Bp'
+  event.data
+    buttonNumber = 0
+    buttonPanelIndex = 0
+    buttonPanelType = 'BP900'
+
+bac autorun
+    state.bpEvents = CreateObject("roArray", 4, true)
+    state.bpEvents[0] = CreateObject("roAssociativeArray")
+    state.bpEvents[1] = CreateObject("roAssociativeArray")
+    state.bpEvents[2] = CreateObject("roAssociativeArray")
+    state.bpEvents[3] = CreateObject("roAssociativeArray")
+
+    if event["EventType"] = "BPControlDown" then
+      bpIndex$ = event["ButtonPanelIndex"]
+      bpIndex% = int(val(bpIndex$))
+      bpNum$ = event["ButtonNumber"]
+      bpNum% = int(val(bpNum$))
+      m.bsp.diagnostics.PrintDebug("BP Press" + bpNum$ + " on button panel" + bpIndex$)
+      bpEvents = m.bpEvents
+      currentBPEvent = bpEvents[bpIndex%]
+      transition = currentBPEvent[bpNum$]
+  
+Notes:
+  bp900B, bp900C, bp900D, bp200A, bp200B, bp200C, bp200D also exist.
+*/
           // iterate through the events for which this state has transitions - if any match the supplied event,
           // execute the associated transition
           const eventList : DmcEvent[] = (this.bsdmImageState as DmcMediaState).eventList;
 
           stateData.nextState = this.superState;
             
-          for (let registeredEvent of eventList) {
-            console.log(registeredEvent);
-            if (event.EventType === registeredEvent.type) {
-              const eventData : any = event.EventData;
-              const registeredEventData : any = registeredEvent.data;
-              // this next line is unique to button panel events - pay attention
-              if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
-                const transition : DmcTransition = registeredEvent.transitionList[0];
-                const targetMediaStateId : BsDmId = transition.targetMediaStateId;
-                const targetMediaState : HState = (this.stateMachine as MediaZoneHSM).mediaStateIdToHState[targetMediaStateId];
-                stateData.nextState = targetMediaState;
-                return 'TRANSITION';
-              }
+          for (let stateEvent of eventList) {
+            console.log(stateEvent);
+
+            const bsEventKey : string = this.getBsEventKey(event);
+            if (this.eventLUT.hasOwnProperty(bsEventKey)) {
+              stateData.nextState = this.eventLUT[bsEventKey];
+              return 'TRANSITION';
             }
+            // if (event.EventType === stateEvent.type) {
+            //   const eventData : any = event.EventData;
+            //   const registeredEventData : any = stateEvent.data;
+            //   // this next line is unique to button panel events - pay attention
+            //   if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
+            //     const transition : DmcTransition = stateEvent.transitionList[0];
+            //     const targetMediaStateId : BsDmId = transition.targetMediaStateId;
+            //     const targetMediaState : MediaHState = (this.stateMachine as MediaZoneHSM).mediaStateIdToHState[targetMediaStateId];
+            //     stateData.nextState = targetMediaState;
+            //     return 'TRANSITION';
+            //   }
+            // }
           }
         }
 
         stateData.nextState = this.superState;
         let retValue : string = 'SUPER';
     }
+
+    getBsEventKey(bsEvent : ArEventType) :string {
+      
+      let bsEventKey : string = '';
+
+      switch (bsEvent.EventType) {
+        case EventType.Bp: {
+          bsEventKey = bsEvent.EventData.ButtonPanelName + '-' + bsEvent.EventData.ButtonIndex.toString();
+          break;
+        }
+        default: {
+          debugger;
+        }
+      };
+
+      return bsEventKey;  
+    }
+      
 }

@@ -36,11 +36,9 @@ import {
   updateDataFeed,
 } from '../store/dataFeeds';
 
-import {
-  MediaHState,
-} from '../types';
+import MediaHState from './mediaHState';
 
-import  DataFeed  from '../entities/dataFeed';
+import DataFeed  from '../entities/dataFeed';
 
 export class TickerZoneHSM extends ZoneHSM {
 

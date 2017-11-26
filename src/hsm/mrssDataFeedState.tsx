@@ -4,7 +4,7 @@ import {
   DmState,
 } from '@brightsign/bsdatamodel';
 
-import { HState } from './HSM';
+import MediaHState from './mediaHState';
 
 import { ZoneHSM } from './zoneHSM';
 import  MrssDataFeed  from '../entities/mrssDataFeed';
@@ -19,7 +19,7 @@ import {
 } from '../store/mrssDataFeedItems';
 import {HSMStateData, ArEventType} from '../types/index';
 
-export default class MRSSDataFeedState extends HState {
+export default class MRSSDataFeedState extends MediaHState {
 
   bsdm : DmState;
   bsdmState: DmMediaState;
@@ -28,7 +28,6 @@ export default class MRSSDataFeedState extends HState {
   pendingFeed : MRSSFeed;
   displayIndex : number;
   stateMachine : ZoneHSM;
-  nextState : HState;
 
   constructor(zoneHSM: ZoneHSM, bsdmState: DmMediaState) {
 
@@ -74,10 +73,10 @@ export default class MRSSDataFeedState extends HState {
       console.log('timeout event');
 
       // check to see if it's at the end of the feed
-      if (this.atEndOfFeed()) {
-        stateData.nextState = this.nextState;
-        return 'TRANSITION';
-      }
+      // if (this.atEndOfFeed()) {
+      //   stateData.nextState = this.nextState;
+      //   return 'TRANSITION';
+      // }
 
       this.advanceToNextMRSSItem(false);
     }
