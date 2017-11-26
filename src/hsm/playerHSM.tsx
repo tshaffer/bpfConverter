@@ -87,6 +87,7 @@ export class PlayerHSM extends HSM {
   addEventHandlers() {
 
     const bsp : any = this.bsp;
+    const playerHSM : any = this;
 
     if (bsp.bp900ControlPort0) {
       bsp.bp900ControlPort0.oncontroldown = function(e : any){
@@ -102,10 +103,16 @@ export class PlayerHSM extends HSM {
           }
         };
 
-        bsp.store.dispatch(bsp.postMessage(event));
-        };
+        playerHSM.dispatch(bsp.postMessage(event));
+      };
     }
   }
+
+  // function myFunc(arg) {
+  //   console.log(`arg was => ${arg}`);
+  // }
+  
+  // setTimeout(myFunc, 1500, 'funky');
 }
 
 
