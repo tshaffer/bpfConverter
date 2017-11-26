@@ -475,12 +475,14 @@ export class BSP {
     });
   }
 
-  postMessage(event: ArEventType): () => void {
+  dispatchPostMessage(event : ArEventType): void {
+    this.store.dispatch(this.postMessage(event));
+  }
 
+  postMessage(event: ArEventType): () => void {
     return () => {
       this.dispatchEvent(event);
     };
-
   }
 
   dispatchEvent(event: ArEventType) {
