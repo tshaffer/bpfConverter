@@ -88,6 +88,7 @@ export default class MediaHState extends HState {
                 debugger;
               }
             }
+            break;
           }
           case 'BP200': {
             // TODO

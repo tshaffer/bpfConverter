@@ -102,28 +102,36 @@ Notes:
             console.log(stateEvent);
 
             const bsEventKey : string = this.getBsEventKey(event);
-            if (this.eventLUT.hasOwnProperty(bsEventKey)) {
-              stateData.nextState = this.eventLUT[bsEventKey];
-              return 'TRANSITION';
+            // TODO - hack to workaround unfinished code
+            if (bsEventKey !== '') {
+              if (this.eventLUT.hasOwnProperty(bsEventKey)) {
+                stateData.nextState = this.eventLUT[bsEventKey];
+                console.log('transition');
+                return 'TRANSITION';
+              }
             }
-            // if (event.EventType === stateEvent.type) {
-            //   const eventData : any = event.EventData;
-            //   const registeredEventData : any = stateEvent.data;
-            //   // this next line is unique to button panel events - pay attention
-            //   if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
-            //     const transition : DmcTransition = stateEvent.transitionList[0];
-            //     const targetMediaStateId : BsDmId = transition.targetMediaStateId;
-            //     const targetMediaState : MediaHState = (this.stateMachine as MediaZoneHSM).mediaStateIdToHState[targetMediaStateId];
-            //     stateData.nextState = targetMediaState;
-            //     return 'TRANSITION';
-            //   }
-            // }
           }
         }
 
         stateData.nextState = this.superState;
-        let retValue : string = 'SUPER';
-    }
+        console.log('super');
+        console.log(stateData.nextState);
+        return 'SUPER';
+        
+      }
+
+// if (event.EventType === stateEvent.type) {
+//   const eventData : any = event.EventData;
+//   const registeredEventData : any = stateEvent.data;
+//   // this next line is unique to button panel events - pay attention
+//   if (eventData.ButtonIndex === registeredEventData.buttonNumber) {
+//     const transition : DmcTransition = stateEvent.transitionList[0];
+//     const targetMediaStateId : BsDmId = transition.targetMediaStateId;
+//     const targetMediaState : MediaHState = (this.stateMachine as MediaZoneHSM).mediaStateIdToHState[targetMediaStateId];
+//     stateData.nextState = targetMediaState;
+//     return 'TRANSITION';
+//   }
+// }
 
     getBsEventKey(bsEvent : ArEventType) :string {
       
@@ -135,7 +143,8 @@ Notes:
           break;
         }
         default: {
-          debugger;
+          console.log('bsEvent.EventType: ' + bsEvent.EventType);
+          break;
         }
       };
 
