@@ -93,11 +93,12 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         duration = (eventData as DmTimer).interval;
         break;
       }
-      case 'MediaEnd': {
+      case 'MediaEnd':
+      case 'Bp': {
         break;
       }
       default: {
-        debugger;
+        console.log('semi unknown eventName: ' + eventName);
       }
     }
 

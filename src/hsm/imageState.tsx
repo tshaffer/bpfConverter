@@ -49,80 +49,48 @@ export default class ImageState extends MediaHState {
 
     STDisplayingImageEventHandler(event : ArEventType, stateData : HSMStateData) : string {
 
-        if (event.EventType === 'ENTRY_SIGNAL') {
-            console.log(this.id + ': entry signal');
-            this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
-            return 'HANDLED';
-        } else if (event.EventType === 'EXIT_SIGNAL') {
-          console.log(this.id + ': exit signal');
-        } else {
+      if (event.EventType === 'ENTRY_SIGNAL') {
+          console.log(this.id + ': entry signal');
+          this.stateMachine.dispatch(setActiveMediaState(this.stateMachine.id, this.id));
+          this.launchTimer();
+          return 'HANDLED';
+      } else if (event.EventType === 'EXIT_SIGNAL') {
+        console.log(this.id + ': exit signal');
+      } else {
 
-/*
-current code (as of now)
+        // iterate through the events for which this state has transitions - if any match the supplied event,
+        // execute the associated transition
+        const eventList : DmcEvent[] = (this.bsdmImageState as DmcMediaState).eventList;
 
-BrightSign event (from Javascript)
-  event.EventType = 'Bp'
-  event.EventData
-    ButtonIndex = 0
-    ButtonPanelName = 'bp900a'
-HState events [] (based on my bsdm code)
-  event.type = 'Bp'
-  event.data
-    buttonNumber = 0
-    buttonPanelIndex = 0
-    buttonPanelType = 'BP900'
+        stateData.nextState = this.superState;
+          
+        for (let stateEvent of eventList) {
 
-bac autorun
-    state.bpEvents = CreateObject("roArray", 4, true)
-    state.bpEvents[0] = CreateObject("roAssociativeArray")
-    state.bpEvents[1] = CreateObject("roAssociativeArray")
-    state.bpEvents[2] = CreateObject("roAssociativeArray")
-    state.bpEvents[3] = CreateObject("roAssociativeArray")
-
-    if event["EventType"] = "BPControlDown" then
-      bpIndex$ = event["ButtonPanelIndex"]
-      bpIndex% = int(val(bpIndex$))
-      bpNum$ = event["ButtonNumber"]
-      bpNum% = int(val(bpNum$))
-      m.bsp.diagnostics.PrintDebug("BP Press" + bpNum$ + " on button panel" + bpIndex$)
-      bpEvents = m.bpEvents
-      currentBPEvent = bpEvents[bpIndex%]
-      transition = currentBPEvent[bpNum$]
-  
-Notes:
-  bp900B, bp900C, bp900D, bp200A, bp200B, bp200C, bp200D also exist.
-*/
-          // iterate through the events for which this state has transitions - if any match the supplied event,
-          // execute the associated transition
-          const eventList : DmcEvent[] = (this.bsdmImageState as DmcMediaState).eventList;
-
-          stateData.nextState = this.superState;
-            
-          for (let stateEvent of eventList) {
-
-            const bsEventKey : string = this.getBsEventKey(event);
-            // TODO - hack to workaround unfinished code
-            if (bsEventKey !== '') {
-              if (this.eventLUT.hasOwnProperty(bsEventKey)) {
-                stateData.nextState = this.eventLUT[bsEventKey];
-                return 'TRANSITION';
-              }
+          const bsEventKey : string = this.getBsEventKey(event);
+          // TODO - hack to workaround unfinished code
+          if (bsEventKey !== '') {
+            if (this.eventLUT.hasOwnProperty(bsEventKey)) {
+              stateData.nextState = this.eventLUT[bsEventKey];
+              return 'TRANSITION';
             }
           }
         }
-
-        stateData.nextState = this.superState;
-        return 'SUPER';
-        
       }
-
+      stateData.nextState = this.superState;
+      return 'SUPER';
+    }
+    
     getBsEventKey(bsEvent : ArEventType) :string {
-      
+
       let bsEventKey : string = '';
 
       switch (bsEvent.EventType) {
         case EventType.Bp: {
           bsEventKey = bsEvent.EventData.ButtonPanelName + '-' + bsEvent.EventData.ButtonIndex.toString();
+          break;
+        }
+        case EventType.Timer: {
+          bsEventKey = 'timer-' + this.id;
           break;
         }
         default: {

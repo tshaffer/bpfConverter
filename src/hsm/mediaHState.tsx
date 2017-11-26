@@ -11,6 +11,7 @@ import {
     DmMediaState,
     DmTransition,
     DmState,
+    DmTimer,
   } from '@brightsign/bsdatamodel';
   
   import {
@@ -24,17 +25,24 @@ import {
     dmGetMediaStateIdsForZone,
   } from '@brightsign/bsdatamodel';
   
+import { bsp } from '../app/bsp';
+  
 import { ZoneHSM } from './zoneHSM';
   
 import { HState } from './HSM';
 
 import { EventLUT } from '../types';
+import {
+  ArEventType,
+} from '../types/index';
+
 
 import { MediaZoneHSM } from './mediaZoneHSM';
 
 export default class MediaHState extends HState {
 
   eventLUT : EventLUT = {};
+  timeoutInterval : number = null;
 
   addEvents(zoneHSM : ZoneHSM, eventIds : BsDmId[]) {
     eventIds.forEach( (eventId : BsDmId) => {
@@ -43,6 +51,11 @@ export default class MediaHState extends HState {
       const event : DmEvent = dmGetEventStateById(zoneHSM.bsdm, { id : eventId });
       const eventKey : string = this.getHStateEventKey(event);
 
+      // not sure best way to do this, so do it this way for now
+      if (event.type === EventType.Timer) {
+        const interval : number = (event.data as DmTimer).interval;
+        this.timeoutInterval = interval;
+      }
       // get transition
       const transitionIds : BsDmId[] = dmGetTransitionIdsForEvent(zoneHSM.bsdm, {id : event.id} );
       // TODO - only support a single transition per event for now
@@ -66,6 +79,8 @@ export default class MediaHState extends HState {
   getHStateEventKey(event : DmEvent) :string {
 
     let eventKey : string = '';
+
+    console.log('getHState, event type is: ' + event.type);
 
     switch (event.type) {
       case EventType.Bp: {
@@ -95,12 +110,36 @@ export default class MediaHState extends HState {
             debugger;
           }
         }
+        break;
       }
-
+      case EventType.Timer: {
+        const eventData : DmTimer = event.data as DmTimer;
+        // const interval : number = eventData.interval;
+        eventKey = 'timer-' + this.id;
+      }
     }
 
     return eventKey;
   }
   
+  launchTimer() : void {
+    if (this.timeoutInterval && this.timeoutInterval > 0) {
+      setTimeout(this.timeoutHandler, this.timeoutInterval * 1000, this);
+    }
+  }
+
+  timeoutHandler(arg : any) {
+    const mediaHState : MediaHState = arg as MediaHState;
+    const eventKey : string = 'timer-' + mediaHState.id;
+    if (mediaHState.eventLUT.hasOwnProperty(eventKey)) {
+      const targetHState : HState = mediaHState.eventLUT[eventKey];
+
+      const event : ArEventType = {
+        EventType: EventType.Timer,
+      };
+
+      bsp.dispatchPostMessage(event);
+    }
+  }
 }
     
