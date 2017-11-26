@@ -26,8 +26,6 @@ export default class MrssDisplayItem extends React.Component<MrssDisplayItemProp
         <ImageContainer
           width={this.props.width}
           height={this.props.height}
-          duration={this.props.duration}
-          onTimeout={this.props.onTimeout.bind(this)}
           src={src}
         />
       );

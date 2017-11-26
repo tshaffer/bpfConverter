@@ -15,11 +15,10 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
-  // MediaHState,
   LUT,
 } from '../types';
 
-import MediaHState from './mediaHState';
+import BsHState from './bsHState';
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
@@ -53,7 +52,7 @@ export class MediaZoneHSM extends ZoneHSM {
     this.mediaStates = [];
 
     // states
-    let newState : MediaHState = null;
+    let newState : BsHState = null;
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
       const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'Image') {
@@ -71,10 +70,10 @@ export class MediaZoneHSM extends ZoneHSM {
     // events / transitions
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
 
-      const mediaHState : MediaHState = this.mediaStateIdToHState[mediaStateId];
+      const bsHState : BsHState = this.mediaStateIdToHState[mediaStateId];
 
       const eventIds : BsDmId[] = dmGetEventIdsForMediaState(this.bsdm, { id : mediaStateId });
-      mediaHState.addEvents(this, eventIds);
+      bsHState.addEvents(this, eventIds);
     });
   }
 

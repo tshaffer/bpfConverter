@@ -8,7 +8,7 @@ import {
   dmGetZoneSimplePlaylist,
 } from '@brightsign/bsdatamodel';
 
-import MediaHState from './mediaHState';
+import BsHState from './bsHState';
 
 export class ZoneHSM extends HSM {
 
@@ -27,7 +27,7 @@ export class ZoneHSM extends HSM {
   height : number;
   initialMediaStateId : string;
   mediaStateIds : BsDmId[];
-  mediaStates : MediaHState[];
+  mediaStates : BsHState[];
 
   constructor(dispatch: Function, getState : Function, zoneId : string) {
     super();

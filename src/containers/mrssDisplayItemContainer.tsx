@@ -14,9 +14,7 @@ import {
 
 export interface MRSSDisplayItemStateProps {
   dataFeedId : string;
-  duration : number;
   height : number;
-  onTimeout : () => void;
   width : number;
 }
 

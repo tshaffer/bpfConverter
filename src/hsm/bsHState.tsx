@@ -12,9 +12,6 @@ import {
     DmTransition,
     DmState,
     DmTimer,
-  } from '@brightsign/bsdatamodel';
-  
-  import {
     dmGetEventIdsForMediaState,
     dmGetEventStateById,
     dmGetTransitionById,
@@ -31,7 +28,7 @@ import { ZoneHSM } from './zoneHSM';
   
 import { HState } from './HSM';
 
-import { EventLUT } from '../types';
+import { SubscribedEvents } from '../types';
 import {
   ArEventType,
 } from '../types/index';
@@ -39,9 +36,9 @@ import {
 
 import { MediaZoneHSM } from './mediaZoneHSM';
 
-export default class MediaHState extends HState {
+export default class BsHState extends HState {
 
-  eventLUT : EventLUT = {};
+  eventLUT : SubscribedEvents = {};
   timeoutInterval : number = null;
 
   addEvents(zoneHSM : ZoneHSM, eventIds : BsDmId[]) {
@@ -71,8 +68,8 @@ export default class MediaHState extends HState {
       const mediaZoneHSM : MediaZoneHSM = zoneHSM as MediaZoneHSM;
 
       // TODO - use a function - don't use LUT directly
-      const targetMediaHState : HState = mediaZoneHSM.mediaStateIdToHState[targetMediaStateId];
-      this.eventLUT[eventKey] = targetMediaHState;
+      const targetBsHState : HState = mediaZoneHSM.mediaStateIdToHState[targetMediaStateId];
+      this.eventLUT[eventKey] = targetBsHState;
     });
   }
 
@@ -129,10 +126,10 @@ export default class MediaHState extends HState {
   }
 
   timeoutHandler(arg : any) {
-    const mediaHState : MediaHState = arg as MediaHState;
-    const eventKey : string = 'timer-' + mediaHState.id;
-    if (mediaHState.eventLUT.hasOwnProperty(eventKey)) {
-      const targetHState : HState = mediaHState.eventLUT[eventKey];
+    const bsHState : BsHState = arg as BsHState;
+    const eventKey : string = 'timer-' + bsHState.id;
+    if (bsHState.eventLUT.hasOwnProperty(eventKey)) {
+      const targetHState : HState = bsHState.eventLUT[eventKey];
 
       const event : ArEventType = {
         EventType: EventType.Timer,

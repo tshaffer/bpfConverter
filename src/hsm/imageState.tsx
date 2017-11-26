@@ -14,26 +14,23 @@ import {
   DmState,
 } from '@brightsign/bsdatamodel';
 
-import MediaHState from './mediaHState';
+import BsHState from './bsHState';
 
 import { ZoneHSM } from './zoneHSM';
 
 import { MediaZoneHSM } from './mediaZoneHSM';
 
-import {
-    setActiveMediaState,
-} from '../store/activeMediaStates';
+import { setActiveMediaState } from '../store/activeMediaStates';
 
 import {
     ArEventType,
     HSMStateData,
 } from '../types';
 
-export default class ImageState extends MediaHState {
+export default class ImageState extends BsHState {
 
     bsdm : DmState;
     bsdmImageState : DmMediaState;
-    dispatch : Function;
     stateMachine : ZoneHSM;
 
     constructor(zoneHSM : ZoneHSM, bsdmImageState : DmMediaState ) {
@@ -94,7 +91,6 @@ export default class ImageState extends MediaHState {
           break;
         }
         default: {
-          console.log('bsEvent.EventType: ' + bsEvent.EventType);
           break;
         }
       };

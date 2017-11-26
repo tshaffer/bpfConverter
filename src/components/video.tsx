@@ -16,7 +16,6 @@ export default class Video extends React.Component<VideoProps, object> {
     const self = this;
 
     // type="video/mp4"
-
     return (
       <video
         src={this.props.src}
@@ -27,7 +26,7 @@ export default class Video extends React.Component<VideoProps, object> {
           console.log('**** - videoEnd');
           self.props.onVideoEnd();
         }
-        }/>
+      }/>
     );
   }
 }

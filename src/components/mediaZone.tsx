@@ -64,9 +64,7 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
     this.props.postBSPMessage(event);
   }
 
-  renderMediaItem(mediaState : DmMediaState, contentItem: DmDerivedContentItem, events : DmEvent[]) {
-
-    let duration : number = 10;
+  renderMediaItem(mediaState : DmMediaState, contentItem: DmDerivedContentItem) {
 
     const self = this;
 
@@ -85,31 +83,12 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     const mediaType : ContentItemType = mediaContentItem.type;
 
-    const event : DmEvent = events[0];
-    const eventName : EventType = event.type;
-    switch (eventName) {
-      case 'Timer': {
-        const eventData : DmEventData = event.data;
-        duration = (eventData as DmTimer).interval;
-        break;
-      }
-      case 'MediaEnd':
-      case 'Bp': {
-        break;
-      }
-      default: {
-        console.log('semi unknown eventName: ' + eventName);
-      }
-    }
-
     switch (mediaType) {
       case 'Image': {
         return (
           <ImageContainer
             width={this.props.width}
             height={this.props.height}
-            duration={duration * 1000}
-            onTimeout={self.postTimeoutEvent.bind(this)}
             src={src}
           />
         );
@@ -143,8 +122,6 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
         dataFeedId={dataFeedId}
         width={this.props.width}
         height={this.props.height}
-        duration={duration * 1000}
-        onTimeout={self.postTimeoutEvent.bind(this)}
       />
     );
   }
@@ -164,8 +141,6 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
   render() {
 
-    console.log('mediaZone.js::render invoked');
-
     if (this.props.playbackState !== 'active') {
       return (
         <div>Playback state inactive</div>
@@ -174,14 +149,12 @@ export default class MediaZone extends React.Component<MediaZoneStateProps & Med
 
     const mediaStateId : string = this.props.activeMediaStateId;
     const mediaState : DmMediaState = dmGetMediaStateById(this.props.bsdm, { id : mediaStateId });
-
-    const events : DmEvent[] = this.getEvents(this.props.bsdm, mediaState.id);
     const contentItem : DmDerivedContentItem = mediaState.contentItem;
 
     switch (contentItem.type) {
       case'Video':
       case 'Image': {
-        return this.renderMediaItem(mediaState, contentItem as DmMediaContentItem, events);
+        return this.renderMediaItem(mediaState, contentItem as DmMediaContentItem);
       }
       case 'MrssFeed': {
         return this.renderMrssItem(contentItem as DmDataFeedContentItem);

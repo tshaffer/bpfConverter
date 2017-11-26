@@ -72,19 +72,11 @@ export interface ArSyncSpec {
   files : any;
 }
 
-// export interface MediaHState extends HState {
-//   // setNextState : Function;
-// }
-
-// export type DataFeedLUT = { [dataFeedId:string]: DataFeed };
 export type ArFileLUT = { [fileName:string]: string };
 
 export type LUT = { [key: string] : any };
 
-export type EventLUT = { [ eventKey : string] : HState}
-// export interface ArFileLUT {
-//     [fileName : string] : string;
-// };
+export type SubscribedEvents = { [ eventKey : string] : HState}
 
 // not working yet
 // https://basarat.gitbooks.io/typescript/docs/types/index-signatures.html
