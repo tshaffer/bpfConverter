@@ -387,25 +387,6 @@ export class BSP {
 
     const bsp = this;
 
-    // test code
-    if (this.bp900ControlPort0) {
-      this.bp900ControlPort0.oncontroldown = function(e : any){
-        console.log('### oncontroldown ' + e.code);
-        const newtext = " DOWN: " + e.code + "\n";
-        console.log(newtext);
-
-        const event : ArEventType = {
-          EventType: EventType.Bp,
-          EventData: {
-            ButtonPanelName: ButtonPanelName.Bp900a,
-            ButtonIndex: e.code
-          }
-        };
-
-        bsp.store.dispatch(bsp.postMessage(event));
-        };
-    }
-
     let state = this.getState();
 
 // Create player state machine

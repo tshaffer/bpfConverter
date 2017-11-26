@@ -5,6 +5,12 @@ import {
   dmGetDataFeedIdsForSign,
 } from '@brightsign/bsdatamodel';
 
+import {
+  EventType,
+  ButtonPanelName,
+} from '@brightsign/bscore';
+
+
 import {BSP} from '../app/bsp';
 import {
   ArEventType,
@@ -15,7 +21,7 @@ import {
 export class PlayerHSM extends HSM {
 
   type: string;
-  // bsp: BSP;
+  bsp: BSP;
   dispatch: Function;
   getState: Function;
   bsdm: DmState;
@@ -51,6 +57,8 @@ export class PlayerHSM extends HSM {
 
     console.log('initializePlayerStateMachine invoked');
 
+    this.addEventHandlers();
+
     // ISSUE
     // would like restartBSP to return a promise, then transition to the stPlaying state once that is done.
     // however, this function requires an immediate response
@@ -75,7 +83,31 @@ export class PlayerHSM extends HSM {
     // because of issue above
     return this.stWaiting;
   }
+
+  addEventHandlers() {
+
+    const bsp : any = this.bsp;
+
+    if (bsp.bp900ControlPort0) {
+      bsp.bp900ControlPort0.oncontroldown = function(e : any){
+        console.log('### oncontroldown ' + e.code);
+        const newtext = " DOWN: " + e.code + "\n";
+        console.log(newtext);
+
+        const event : ArEventType = {
+          EventType: EventType.Bp,
+          EventData: {
+            ButtonPanelName: ButtonPanelName.Bp900a,
+            ButtonIndex: e.code
+          }
+        };
+
+        bsp.store.dispatch(bsp.postMessage(event));
+        };
+    }
+  }
 }
+
 
 class STPlayer extends HState {
 
