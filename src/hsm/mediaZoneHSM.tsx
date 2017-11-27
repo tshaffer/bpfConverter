@@ -18,7 +18,7 @@ import {
   LUT,
 } from '../types';
 
-import BsHState from './bsHState';
+import MediaHState from './mediaHState';
 import ImageState from './imageState';
 import VideoState from './videoState';
 import MRSSDataFeedState from './mrssDataFeedState';
@@ -52,7 +52,7 @@ export class MediaZoneHSM extends ZoneHSM {
     this.mediaStates = [];
 
     // states
-    let newState : BsHState = null;
+    let newState : MediaHState = null;
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
       const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});
       if (bsdmMediaState.contentItem.type === 'Image') {
@@ -70,10 +70,10 @@ export class MediaZoneHSM extends ZoneHSM {
     // events / transitions
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
 
-      const bsHState : BsHState = this.mediaStateIdToHState[mediaStateId];
+      const targetHState : MediaHState = this.mediaStateIdToHState[mediaStateId];
 
       const eventIds : BsDmId[] = dmGetEventIdsForMediaState(this.bsdm, { id : mediaStateId });
-      bsHState.addEvents(this, eventIds);
+      targetHState.addEvents(this, eventIds);
     });
   }
 

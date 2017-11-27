@@ -4,7 +4,7 @@ import {
   DmState,
 } from '@brightsign/bsdatamodel';
 
-import BsHState from './bsHState';
+import MediaHState from './mediaHState';
 
 import { ZoneHSM } from './zoneHSM';
 import  MrssDataFeed  from '../entities/mrssDataFeed';
@@ -19,7 +19,7 @@ import {
 } from '../store/mrssDataFeedItems';
 import {HSMStateData, ArEventType} from '../types/index';
 
-export default class MRSSDataFeedState extends BsHState {
+export default class MRSSDataFeedState extends MediaHState {
 
   bsdm : DmState;
   bsdmState: DmMediaState;

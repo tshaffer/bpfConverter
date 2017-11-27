@@ -3,7 +3,7 @@ import {
   DmState,
 } from '@brightsign/bsdatamodel';
 
-import BsHState from './bsHState';
+import MediaHState from './mediaHState';
 
 import { ZoneHSM } from './zoneHSM';
 
@@ -16,7 +16,7 @@ import {
   HSMStateData,
 } from '../types';
 
-export default class VideoState extends BsHState {
+export default class VideoState extends MediaHState {
 
   bsdm : DmState;
   bsdmVideoState : DmMediaState;

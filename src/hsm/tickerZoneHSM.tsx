@@ -36,7 +36,7 @@ import {
   updateDataFeed,
 } from '../store/dataFeeds';
 
-import BsHState from './bsHState';
+import MediaHState from './mediaHState';
 
 import DataFeed  from '../entities/dataFeed';
 
@@ -151,7 +151,7 @@ export class TickerZoneHSM extends ZoneHSM {
       }
     });
 
-    let newState : BsHState = null;
+    let newState : MediaHState = null;
 
     this.mediaStateIds.forEach( (mediaStateId : BsDmId, index : number) => {
       const bsdmMediaState : DmMediaState = dmGetMediaStateById(this.bsdm, { id : mediaStateId});

@@ -6,6 +6,7 @@ import {
     BsDmId,
     DmBpEventData,
     DmEvent,
+    DmcEvent,
     DmcMediaState,
     DmcTransition,
     DmMediaState,
@@ -21,27 +22,26 @@ import {
     dmGetMediaStateById,
     dmGetMediaStateIdsForZone,
   } from '@brightsign/bsdatamodel';
-  
-import { bsp } from '../app/bsp';
-  
-import { ZoneHSM } from './zoneHSM';
-  
+    
+  import {
+    ArEventType,
+    HSMStateData,
+    SubscribedEvents,
+  } from '../types';
+import { bsp } from '../app/bsp';  
 import { HState } from './HSM';
-
-import { SubscribedEvents } from '../types';
-import {
-  ArEventType,
-} from '../types/index';
-
-
+import { ZoneHSM } from './zoneHSM';
 import { MediaZoneHSM } from './mediaZoneHSM';
 
-export default class BsHState extends HState {
+export default class MediaHState extends HState {
 
+  mediaState: DmMediaState;
+  
   eventLUT : SubscribedEvents = {};
   timeoutInterval : number = null;
 
   addEvents(zoneHSM : ZoneHSM, eventIds : BsDmId[]) {
+    
     eventIds.forEach( (eventId : BsDmId) => {
       
       // generate eventKey
@@ -68,12 +68,56 @@ export default class BsHState extends HState {
       const mediaZoneHSM : MediaZoneHSM = zoneHSM as MediaZoneHSM;
 
       // TODO - use a function - don't use LUT directly
-      const targetBsHState : HState = mediaZoneHSM.mediaStateIdToHState[targetMediaStateId];
-      this.eventLUT[eventKey] = targetBsHState;
+      const targetMediaHState : HState = mediaZoneHSM.mediaStateIdToHState[targetMediaStateId];
+      this.eventLUT[eventKey] = targetMediaHState;
     });
   }
 
-  getHStateEventKey(event : DmEvent) :string {
+  mediaHStateEventHandler(event : ArEventType, stateData : HSMStateData) : string {
+
+    // iterate through the events for which this state has transitions - if any match the supplied event,
+    // execute the associated transition
+    const eventList : DmcEvent[] = (this.mediaState as DmcMediaState).eventList;
+    
+    for (let stateEvent of eventList) {
+      const bsEventKey : string = this.getBsEventKey(event);
+      // TODO - hack to workaround unfinished code
+      if (bsEventKey !== '') {
+        if (this.eventLUT.hasOwnProperty(bsEventKey)) {
+          stateData.nextState = this.eventLUT[bsEventKey];
+          return 'TRANSITION';
+        }
+      }
+    }
+
+    stateData.nextState = this.superState;
+    return 'SUPER';
+  }
+
+
+  getBsEventKey(bsEvent : ArEventType) :string {
+    
+    let bsEventKey : string = '';
+
+    switch (bsEvent.EventType) {
+      case EventType.Bp: {
+        bsEventKey = bsEvent.EventData.ButtonPanelName + '-' + bsEvent.EventData.ButtonIndex.toString();
+        break;
+      }
+      case EventType.Timer: {
+        bsEventKey = 'timer-' + this.id;
+        break;
+      }
+      default: {
+        break;
+      }
+    };
+
+    return bsEventKey;  
+  }
+
+
+  getHStateEventKey(event : DmEvent) : string {
 
     let eventKey : string = '';
 
@@ -96,14 +140,14 @@ export default class BsHState extends HState {
                 break;                
               }
               default: {
-                // TODO
+                // TODO - implement me
                 debugger;
               }
             }
             break;
           }
           case 'BP200': {
-            // TODO
+              // TODO - implement me
             debugger;
           }
         }
@@ -111,7 +155,6 @@ export default class BsHState extends HState {
       }
       case EventType.Timer: {
         const eventData : DmTimer = event.data as DmTimer;
-        // const interval : number = eventData.interval;
         eventKey = 'timer-' + this.id;
       }
     }
@@ -125,11 +168,10 @@ export default class BsHState extends HState {
     }
   }
 
-  timeoutHandler(arg : any) {
-    const bsHState : BsHState = arg as BsHState;
-    const eventKey : string = 'timer-' + bsHState.id;
-    if (bsHState.eventLUT.hasOwnProperty(eventKey)) {
-      const targetHState : HState = bsHState.eventLUT[eventKey];
+  timeoutHandler(mediaHState : MediaHState) {
+    const eventKey : string = 'timer-' + mediaHState.id;
+    if (mediaHState.eventLUT.hasOwnProperty(eventKey)) {
+      const targetHState : HState = mediaHState.eventLUT[eventKey];
 
       const event : ArEventType = {
         EventType: EventType.Timer,
