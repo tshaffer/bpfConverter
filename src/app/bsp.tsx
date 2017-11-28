@@ -191,6 +191,8 @@ export class BSP {
   
   initialize(reduxStore: Store<ArState>) {
 
+    debugger;
+
     console.log('bsp initialization');
 
     this.store = reduxStore;
@@ -207,10 +209,25 @@ export class BSP {
     .then((buf : Buffer) => {
       const token : string = biCreateOpenPresentationFromBufferSession(buf);
       biLaunchPresentationOpener(token).then(() => {
-        debugger;
-        const presentationOpenState: BiPresentationOpenState = biGetPresentationOpenerStatus(token);        
-        debugger;
-        // this.dispatch(onPresentationOpenerStatusUpdated(token, filePath, false));
+        let presentationOpenState: BiPresentationOpenState = biGetPresentationOpenerStatus(token);
+        if (presentationOpenState === BiPresentationOpenState.Complete) {
+          // it would be a surprise if initial import was complete - won't happen unless bpfImporter is changed
+          debugger;
+        }
+        else if (presentationOpenState === BiPresentationOpenState.BrokenLinksPending) {
+          biFixBrokenLinks(token, contentDirectory).then( (token) => {
+            presentationOpenState = biGetPresentationOpenerStatus(token);
+            if (presentationOpenState !== BiPresentationOpenState.Complete) {
+              debugger; // should resolve links if all assets are in the contentDirectory
+              
+            }
+            else {
+              debugger;
+              // save to disk and publish
+              const bpfxState = biGetProjectFileState(token);
+            }
+          });
+        }          
       }).catch((err : any) => {
         console.log(err);
         debugger;
