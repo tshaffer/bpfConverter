@@ -189,6 +189,18 @@ export class BSP {
     });
   };
   
+  savePresentationFile(filePath : string, presentation : any) : Promise<any> {
+    return new Promise((resolve, reject) => {
+      const bpfStr = JSON.stringify(presentation, null, '\t');
+      fs.writeFile(filePath, bpfStr, (err) => {
+        if(err)
+          reject(err);
+        else
+          resolve();
+      });
+    });  
+  }
+
   initialize(reduxStore: Store<ArState>) {
 
     debugger;
@@ -204,7 +216,8 @@ export class BSP {
     console.log(PlatformService);
     const contentDirectory = PlatformService.default.getContentDirectory();
     const bpfPath = path.join(contentDirectory, 'test.bpf');
-    
+    const bpfxPath = path.join(contentDirectory, 'test.bpfx');
+
     this.readFileAsBuffer(bpfPath)
     .then((buf : Buffer) => {
       const token : string = biCreateOpenPresentationFromBufferSession(buf);
@@ -225,6 +238,11 @@ export class BSP {
               debugger;
               // save to disk and publish
               const bpfxState = biGetProjectFileState(token);
+              // const bsdm : any = bpfxState.bsdm;
+              this.savePresentationFile(bpfxPath, bpfxState).then( () => {
+                console.log('presentation save complete');
+                debugger;
+              })
             }
           });
         }          
