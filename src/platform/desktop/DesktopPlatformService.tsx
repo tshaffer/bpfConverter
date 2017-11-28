@@ -17,6 +17,12 @@ class DesktopPlatformService {
   // static srcDirectory = '/Users/tedshaffer/Desktop/autorunTs';   // bacon files - nonImport
   static srcDirectory = '/Users/tedshaffer/Desktop/autorunTsInteractivity';
 
+  static contentDirectory = '/Users/tedshaffer/Desktop/bacInteractive';
+
+  static getContentDirectory() : string {
+    return DesktopPlatformService.contentDirectory;
+  }
+
   static getRootDirectory(): string {
     return DesktopPlatformService.srcDirectory;
     // return '/Users/tedshaffer/Desktop/baconImagesPlusVideos';

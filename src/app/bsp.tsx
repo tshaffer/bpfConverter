@@ -43,6 +43,19 @@ import {
 } from '@brightsign/bsdatamodel';
 
 import {
+  biDeleteOpenPresentationSession,
+  biCreateOpenPresentationFromBufferSession,
+  biFixBrokenLinks,
+  biLaunchPresentationOpener,
+  biGetPresentationOpenerStatus,
+  biGetNumberOfBrokenLinks,
+  biGetBrokenLinksExist,
+  biGetBrokenLinkFilePath,
+  biGetProjectFileState,
+  BiPresentationOpenState,
+} from '@brightsign/bpfimporter';
+
+import {
   ArEventType,
   ArSyncSpec,
   ArSyncSpecDownload,
@@ -164,6 +177,18 @@ export class BSP {
     });
   }
 
+  readFileAsBuffer = (filePath = '') => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(filePath, (err, buf) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(buf);
+        }
+      });
+    });
+  };
+  
   initialize(reduxStore: Store<ArState>) {
 
     console.log('bsp initialization');
@@ -175,30 +200,50 @@ export class BSP {
     this.version = '0.0.1';
 
     console.log(PlatformService);
-    const rootPath = PlatformService.default.getRootDirectory();
-    const pathToPool = PlatformService.default.getPathToPool();
-
-    this.hsmList = [];
-
-    // TODO - could be either local-sync.json or current-sync.json (others in the future?)
-    const syncSpecPath = path.join(rootPath, 'local-sync.json');
-    this.openSyncSpec(syncSpecPath)
-      .then((cardSyncSpec: ArSyncSpec) => {
-        this.syncSpec = cardSyncSpec;
-        return getBrightSignObjects()
-      }).then((bsObjects: any) => {
-        Object.assign(this, bsObjects);
-        return PlatformService.default.readRegistrySection(this.registry, 'networking')
-      }).then((networkingRegistrySettings: any) => {
-        this.networkingRegistrySettings = networkingRegistrySettings;
-        this.setSystemInfo();
-        return this.initRemoteSnapshots()
-      }).then(() => {
-        this.continueInit();
-        return this.parseNativeFiles(rootPath, pathToPool)
-      }).then(() => {
-        this.launchHSM();
+    const contentDirectory = PlatformService.default.getContentDirectory();
+    const bpfPath = path.join(contentDirectory, 'test.bpf');
+    
+    this.readFileAsBuffer(bpfPath)
+    .then((buf : Buffer) => {
+      const token : string = biCreateOpenPresentationFromBufferSession(buf);
+      biLaunchPresentationOpener(token).then(() => {
+        debugger;
+        const presentationOpenState: BiPresentationOpenState = biGetPresentationOpenerStatus(token);        
+        debugger;
+        // this.dispatch(onPresentationOpenerStatusUpdated(token, filePath, false));
+      }).catch((err : any) => {
+        console.log(err);
+        debugger;
       });
+    }).catch((err) => {
+      console.log(err);
+      debugger;
+    });
+
+    // const rootPath = PlatformService.default.getRootDirectory();
+    // const pathToPool = PlatformService.default.getPathToPool();
+
+    // this.hsmList = [];
+
+    // // TODO - could be either local-sync.json or current-sync.json (others in the future?)
+    // const syncSpecPath = path.join(rootPath, 'local-sync.json');
+    // this.openSyncSpec(syncSpecPath)
+    //   .then((cardSyncSpec: ArSyncSpec) => {
+    //     this.syncSpec = cardSyncSpec;
+    //     return getBrightSignObjects()
+    //   }).then((bsObjects: any) => {
+    //     Object.assign(this, bsObjects);
+    //     return PlatformService.default.readRegistrySection(this.registry, 'networking')
+    //   }).then((networkingRegistrySettings: any) => {
+    //     this.networkingRegistrySettings = networkingRegistrySettings;
+    //     this.setSystemInfo();
+    //     return this.initRemoteSnapshots()
+    //   }).then(() => {
+    //     this.continueInit();
+    //     return this.parseNativeFiles(rootPath, pathToPool)
+    //   }).then(() => {
+    //     this.launchHSM();
+    //   });
   }
 
   setSystemInfo() {
