@@ -1,7 +1,7 @@
 {
-  "name": "autorun-ts",
+  "name": "bpfconverter",
   "version": "0.0.1",
-  "description": "autorun implemented in Typescript",
+  "description": "convert bpf files",
   "main": "main.js",
   "scripts": {
     "build": "webpack --config ./webpack.config.js --watch",
