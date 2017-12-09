@@ -18,13 +18,13 @@ import {
   BiPresentationOpenState,
 } from '@brightsign/bpfimporter';
 
-import {
-  generatePublishData,
-  executePublish,
-  PresentationToSchedule,
-  PublishParams,
-  ScheduledPresentationToPublish,
-} from '@brightsign/bspublisher';
+// import {
+//   generatePublishData,
+//   executePublish,
+//   PresentationToSchedule,
+//   PublishParams,
+//   ScheduledPresentationToPublish,
+// } from '@brightsign/bspublisher';
 
 let _singleton: BSP = null;
 
@@ -67,52 +67,52 @@ export class BSP {
     });  
   }
 
-  publishPresentation(presentationName: string, presentationPath: string, bsdm : any) {
+  // publishPresentation(presentationName: string, presentationPath: string, bsdm : any) {
 
-    const presentationToSchedule = new PresentationToSchedule(
-      presentationName, presentationName + '.bpfx', presentationPath, bsdm);
+  //   const presentationToSchedule = new PresentationToSchedule(
+  //     presentationName, presentationName + '.bpfx', presentationPath, bsdm);
 
-    const scheduledPresentationToPublish : ScheduledPresentationToPublish = new ScheduledPresentationToPublish(
-      presentationToSchedule,
-      new Date(),
-      1440,
-      true,
-      false,
-      'daily',
-      'EveryDay',
-      127,
-      new Date(),
-      true,
-      new Date(),
-      false
-    );
+  //   const scheduledPresentationToPublish : ScheduledPresentationToPublish = new ScheduledPresentationToPublish(
+  //     presentationToSchedule,
+  //     new Date(),
+  //     1440,
+  //     true,
+  //     false,
+  //     'daily',
+  //     'EveryDay',
+  //     127,
+  //     new Date(),
+  //     true,
+  //     new Date(),
+  //     false
+  //   );
 
-    let publishParams = new PublishParams();
-    publishParams.scheduledPresentations = [scheduledPresentationToPublish];
-    publishParams.fwUpdateType = 'Standard'; // FirmwareUpdateType.Standard;
-    publishParams.type = 'standalone';
-    publishParams.targetFolder = path.join(this.contentDirectory, 'publish');
-    publishParams.fwPublishData = null;
-    publishParams.lfnDeviceIPAddresses = [];
-    // TODO
-    publishParams.syncSpecClientParams = this.generateSyncSpecClientParams();
-    publishParams.syncSpecServerParams = this.generateSyncSpecServerParams();
+  //   let publishParams = new PublishParams();
+  //   publishParams.scheduledPresentations = [scheduledPresentationToPublish];
+  //   publishParams.fwUpdateType = 'Standard'; // FirmwareUpdateType.Standard;
+  //   publishParams.type = 'standalone';
+  //   publishParams.targetFolder = path.join(this.contentDirectory, 'publish');
+  //   publishParams.fwPublishData = null;
+  //   publishParams.lfnDeviceIPAddresses = [];
+  //   // TODO
+  //   publishParams.syncSpecClientParams = this.generateSyncSpecClientParams();
+  //   publishParams.syncSpecServerParams = this.generateSyncSpecServerParams();
   
-    // TODO
-    publishParams.syncSpecServerParams = {};
-    publishParams.usbUpdatePassword = '';
-    publishParams.simpleNetworkingUrl = '';
+  //   // TODO
+  //   publishParams.syncSpecServerParams = {};
+  //   publishParams.usbUpdatePassword = '';
+  //   publishParams.simpleNetworkingUrl = '';
 
-    generatePublishData(publishParams).then( (publishAllFilesToCopy : any) => {
-      executePublish(publishParams, publishAllFilesToCopy)
-      .then( () => {
-        console.log('publish complete');
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    });
-  }
+  //   generatePublishData(publishParams).then( (publishAllFilesToCopy : any) => {
+  //     executePublish(publishParams, publishAllFilesToCopy)
+  //     .then( () => {
+  //       console.log('publish complete');
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  //   });
+  // }
 
   generateSyncSpecClientParams() : any {
 
@@ -185,7 +185,7 @@ export class BSP {
               // const bsdm : any = bpfxState.bsdm;
               this.savePresentationFile(bpfxPath, bpfxState).then( () => {
                 console.log('presentation save complete');
-                this.publishPresentation('test', bpfxPath, bpfxState.bsdm);
+                // this.publishPresentation('test', bpfxPath, bpfxState.bsdm);
               })
             }
           });
