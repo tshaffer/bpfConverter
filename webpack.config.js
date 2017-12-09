@@ -1,3 +1,5 @@
+var environment = require('./environment');
+
 module.exports = {
   entry: "./src/index.tsx",
   output: {
