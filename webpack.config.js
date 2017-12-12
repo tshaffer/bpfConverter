@@ -1,3 +1,5 @@
+var webpack = require('webpack');
+var CopyWebpackPlugin =  require('copy-webpack-plugin');
 var environment = require('./environment');
 
 module.exports = {
@@ -43,4 +45,12 @@ module.exports = {
       { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin(environment.globals),
+    new CopyWebpackPlugin([{
+      context: 'node_modules/@brightsign/bs-device-artifacts/static',
+      from: '**/*',
+      to: './static'
+    }])
+  ]
 };
