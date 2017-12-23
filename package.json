@@ -6,14 +6,16 @@
   "scripts": {
     "build": "node node_modules/webpack/bin/webpack --config ./webpack.config.js --watch",
     "run": "electron .",
+    "linkGlobalPackages": "npm link typescript webpack tslint",
+    "linkDevPackages": "npm link @brightsign/bsdatamodel @brightsign/bpfimporter @brightsign/bspublisher",
     "tsLint": "tslint -c tslint.json 'lib/**/*.ts' 'tests/**/*.ts'"
   },
   "author": "Ted Shaffer",
   "license": "ISC",
   "dependencies": {
-    "@brightsign/bscore": "0.2.3",
-    "@brightsign/bsdatamodel": "0.7.13",
-    "@brightsign/bpfimporter": "0.0.29",
+    "@brightsign/bscore": "0.3.2",
+    "@brightsign/bsdatamodel": "0.8.4",
+    "@brightsign/bpfimporter": "0.0.30",
     "@brightsign/bspublisher": "0.0.23",
     "@brightsign/bs-device-artifacts": "1.0.1",
     "core-js": "^2.4.1",
@@ -35,7 +37,7 @@
     "copy-webpack-plugin": "^4.2.3",
     "source-map-loader": "^0.2.1",
     "tslint": "^5.3.2",
-    "typescript": "2.3.4",
+    "typescript": "2.5.3",
     "webpack": "^2.6.1"
   }
 }
