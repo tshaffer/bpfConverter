@@ -153,6 +153,13 @@ export class BSP {
 
     debugger;
 
+    var cmdLineArg = process.argv[2];
+ 
+    if (cmdLineArg === undefined)
+      console.log("no cmdline argument passed!");
+    else
+      console.log("cmdline argument passed :: " + cmdLineArg);
+
     console.log('bsp initialization');
 
     this.store = reduxStore;

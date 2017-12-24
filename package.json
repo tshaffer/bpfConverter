@@ -2,10 +2,8 @@
   "name": "bpfconverter",
   "version": "0.0.1",
   "description": "convert bpf files",
-  "main": "main.js",
   "scripts": {
     "build": "node node_modules/webpack/bin/webpack --config ./webpack.config.js --watch",
-    "run": "electron .",
     "linkGlobalPackages": "npm link typescript webpack tslint",
     "linkDevPackages": "npm link @brightsign/bsdatamodel @brightsign/bpfimporter @brightsign/bspublisher",
     "tsLint": "tslint -c tslint.json 'lib/**/*.ts' 'tests/**/*.ts'"
@@ -19,9 +17,6 @@
     "@brightsign/bspublisher": "0.0.23",
     "@brightsign/bs-device-artifacts": "1.0.1",
     "core-js": "^2.4.1",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
-    "react-redux": "^5.0.4",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
     "tsutils": "^2.1.0",
@@ -29,9 +24,6 @@
   },
   "devDependencies": {
     "@types/electron": "^1.4.37",
-    "@types/react": "^15.0.24",
-    "@types/react-dom": "^15.5.0",
-    "@types/react-redux": "4.4.40",
     "@types/redux-thunk": "^2.1.0",
     "awesome-typescript-loader": "^3.1.3",
     "copy-webpack-plugin": "^4.2.3",

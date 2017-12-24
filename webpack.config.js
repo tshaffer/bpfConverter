@@ -11,10 +11,8 @@ module.exports = {
     path: __dirname + "/build"
   },
 
-  devtool: "source-map",
-
-  target: 'electron',
-
+  target: 'node',
+  
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: [".ts", ".tsx", ".js", ".json"]
