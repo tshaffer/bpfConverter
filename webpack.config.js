@@ -10,7 +10,7 @@ module.exports = {
     filename: "bundle.js",
     path: __dirname + "/build"
   },
-
+  devtool: 'source-map',
   target: 'node',
   
   resolve: {
@@ -19,19 +19,6 @@ module.exports = {
   },
 
   externals: {
-    BSDeviceInfo : 'BSDeviceInfo',
-    '@brightsign/registry': 'commonjs @brightsign/registry',
-    '@brightsign/systemtime': 'commonjs @brightsign/systemtime',
-    '@brightsign/networkconfiguration': 'commonjs @brightsign/networkconfiguration',
-    '@brightsign/videooutput': 'commonjs @brightsign/videooutput',
-    '@brightsign/screenshot': 'commonjs @brightsign/screenshot',
-
-    '@brightsign/videomodeconfiguration': 'commonjs @brightsign/videomodeconfiguration',
-    '@brightsign/videoinput': 'commonjs @brightsign/videoinput',
-    '@brightsign/system': 'commonjs @brightsign/system',
-
-    '@brightsign/hostconfiguration': 'commonjs @brightsign/hostconfiguration',
-    '@brightsign/networkdiagnostics': 'commonjs @brightsign/networkdiagnostics',
     'core-js/fn/object/assign' : 'commonjs core-js/fn/object/assign',
   },
 
