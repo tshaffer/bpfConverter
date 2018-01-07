@@ -28,6 +28,16 @@ import {
 
 let _singleton: BSP = null;
 
+function branchHandler(p1: any, p2: any) : any {
+  console.log(branchHandler);
+  debugger;
+}
+
+function branchLocalHandler(p1: any, p2: any): any {
+  console.log(branchLocalHandler);
+  debugger;
+}
+
 export class BSP {
 
   store: Store<ArState>;
@@ -148,10 +158,55 @@ export class BSP {
     return syncSpecServerParams;
   }
 
-
   initialize(reduxStore: Store<ArState>) {
 
-    debugger;
+    // debugger;
+
+    var shell = require('shelljs');
+
+    shell.cd('/Users/tedshaffer/Documents/Projects/bsPublisher');
+    shell.pwd();
+    shell.exec('pwd');
+    shell.exec('git status');
+
+    shell.cd('/Users/tedshaffer/Documents/Projects/bpfImporter');
+    shell.pwd();
+    shell.exec('pwd');
+    shell.exec('git status');
+
+    return;
+
+    // var poo = shell.exec('pwd');
+    // console.log('first pwd: ', poo);
+    //
+    // var gitStatus = shell.exec('git status');
+    // console.log(gitStatus);
+
+    console.log('gitStatus complete');
+
+    shell.exec(('cd /Users/tedshaffer/Documents/Projects/bsPublisher && exec pwd'));
+    shell.exec(('cd /Users/tedshaffer/Documents/Projects/bsPublisher && exec git status'));
+
+    shell.exec('pwd');
+    shell.exec('git status');
+
+    // gitStatus = shell.exec('git status 2');
+    // console.log(gitStatus);
+    //
+    // console.log('gitStatus 2 complete');
+    //
+    // poo = shell.exec('pwd');
+    // console.log('second pwd: ', poo);
+return;
+
+    // const workingDirPath : string = '/Users/tedshaffer/Documents/Projects/bpfImporter';
+    // const simpleGit = require('simple-git')(workingDirPath);
+    // const branchSummary : any = simpleGit.branch(branchHandler);
+    // console.log(branchSummary);
+    // const branchSummaryLocal: any = simpleGit.branchLocal(branchLocalHandler);
+    // console.log(branchSummaryLocal);
+
+    // debugger;
 
     var cmdLineArg = process.argv[2];
  

@@ -11,14 +11,16 @@
   "author": "Ted Shaffer",
   "license": "ISC",
   "dependencies": {
+    "@brightsign/bpfimporter": "0.0.30-dev1",
+    "@brightsign/bs-device-artifacts": "1.0.1",
     "@brightsign/bscore": "0.3.3",
     "@brightsign/bsdatamodel": "0.8.6",
-    "@brightsign/bpfimporter": "0.0.30-dev1",
     "@brightsign/bspublisher": "0.0.27",
-    "@brightsign/bs-device-artifacts": "1.0.1",
     "core-js": "^2.4.1",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
+    "shelljs": "^0.7.8",
+    "simple-git": "^1.85.0",
     "tsutils": "^2.1.0",
     "xml2js": "^0.4.17"
   },
