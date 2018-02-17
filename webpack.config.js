@@ -29,13 +29,5 @@ module.exports = {
 
       { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
     ],
-  },
-  plugins: [
-    new webpack.DefinePlugin(environment.globals),
-    new CopyWebpackPlugin([{
-      context: 'node_modules/@brightsign/bs-device-artifacts/static',
-      from: '**/*',
-      to: './static'
-    }])
-  ]
+  }
 };

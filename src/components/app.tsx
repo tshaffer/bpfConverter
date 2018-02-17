@@ -15,6 +15,10 @@ import SelectField from 'material-ui/SelectField';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import TextField from 'material-ui/TextField';
 
+import {
+  convertBpf,
+} from '../controller/importer';
+
 class App extends React.Component<any, object> {
 
   state: any;
@@ -31,6 +35,7 @@ class App extends React.Component<any, object> {
 
   convertButtonClicked() {
     console.log('convert: ', this.state.bpfPath);
+    this.props.onConvertBpf(this.state.bpfPath);
   }
 
   handleChange = (event: any) => {
@@ -74,15 +79,11 @@ function mapStateToProps(state : any) {
   };
 }
 
-// const mapDispatchToProps = (dispatch: Dispatch<any>) => {
-//   return bindActionCreators({
-//     addPackage,
-//     setPackageVersionSelector,
-//     setSelectedBranchName,
-//     setSelectedTagIndex,
-//     setSpecifiedCommitHash,
-//   }, dispatch);
-// };
+const mapDispatchToProps = (dispatch: Dispatch<any>) => {
+  return bindActionCreators({
+    onConvertBpf: convertBpf,
+  }, dispatch);
+};
 
-// export default connect(mapStateToProps, mapDispatchToProps)(App);
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+// export default connect(mapStateToProps)(App);
