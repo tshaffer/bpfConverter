@@ -18,25 +18,7 @@ import {
   BiPresentationOpenState,
 } from '@brightsign/bpfimporter';
 
-import {
-  generatePublishData,
-  executePublish,
-  PresentationToSchedule,
-  PublishParams,
-  ScheduledPresentationToPublish,
-} from '@brightsign/bspublisher';
-
 let _singleton: BSP = null;
-
-function branchHandler(p1: any, p2: any) : any {
-  console.log(branchHandler);
-  debugger;
-}
-
-function branchLocalHandler(p1: any, p2: any): any {
-  console.log(branchLocalHandler);
-  debugger;
-}
 
 export class BSP {
 
@@ -77,136 +59,7 @@ export class BSP {
     });  
   }
 
-  publishPresentation(presentationName: string, presentationPath: string, bsdm : any) {
-
-    const presentationToSchedule = new PresentationToSchedule(
-      presentationName, presentationName + '.bpfx', presentationPath, bsdm);
-
-    const scheduledPresentationToPublish : ScheduledPresentationToPublish = new ScheduledPresentationToPublish(
-      presentationToSchedule,
-      new Date(),
-      1440,
-      true,
-      false,
-      'daily',
-      'EveryDay',
-      127,
-      new Date(),
-      true,
-      new Date(),
-      false
-    );
-
-    let publishParams = new PublishParams();
-    publishParams.scheduledPresentations = [scheduledPresentationToPublish];
-    publishParams.fwUpdateType = 'Standard'; // FirmwareUpdateType.Standard;
-    publishParams.type = 'standalone';
-    publishParams.targetFolder = path.join(this.contentDirectory, 'publish');
-    publishParams.fwPublishData = null;
-    publishParams.lfnDeviceIPAddresses = [];
-    // TODO
-    publishParams.syncSpecClientParams = this.generateSyncSpecClientParams();
-    publishParams.syncSpecServerParams = this.generateSyncSpecServerParams();
-  
-    // TODO
-    publishParams.syncSpecServerParams = {};
-    publishParams.usbUpdatePassword = '';
-    publishParams.simpleNetworkingUrl = '';
-
-    generatePublishData(publishParams).then( (publishAllFilesToCopy : any) => {
-      executePublish(publishParams, publishAllFilesToCopy)
-      .then( () => {
-        console.log('publish complete');
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    });
-  }
-
-  generateSyncSpecClientParams() : any {
-
-    let syncSpecClientParams : any = {};
-
-    syncSpecClientParams.enableSerialDebugging = true;
-    syncSpecClientParams.enableSystemLogDebugging = true;
-  
-    syncSpecClientParams.limitStorageSpace = false;
-    syncSpecClientParams.spaceLimitedByAbsoluteSize = false;
-    syncSpecClientParams.publishedDataSizeLimitMB = 0;
-    syncSpecClientParams.dynamicDataSizeLimitMB = 0;
-    syncSpecClientParams.htmlDataSizeLimitMB = 0;
-    syncSpecClientParams.htmlLocalStorageSizeLimitMB = 0;
-    syncSpecClientParams.htmlIndexedDBSizeLimitMB = 0;
-  
-    syncSpecClientParams.playbackLoggingEnabled = true;
-    syncSpecClientParams.eventLoggingEnabled = true;
-    syncSpecClientParams.diagnosticLoggingEnabled = true;
-    syncSpecClientParams.stateLoggingEnabled = true;
-    syncSpecClientParams.variableLoggingEnabled = true;
-  
-    syncSpecClientParams.uploadLogFilesAtBoot = false;
-    syncSpecClientParams.uploadLogFilesAtSpecificTime = false;
-    syncSpecClientParams.uploadLogFilesTime = 0;
-  
-    return syncSpecClientParams;
-  }
-
-
-  generateSyncSpecServerParams() : any {
-    let syncSpecServerParams = {};
-    return syncSpecServerParams;
-  }
-
   initialize(reduxStore: Store<ArState>) {
-
-    // debugger;
-
-    var shell = require('shelljs');
-
-    shell.cd('/Users/tedshaffer/Documents/Projects/bsPublisher');
-    shell.pwd();
-    shell.exec('pwd');
-    shell.exec('git status');
-
-    shell.cd('/Users/tedshaffer/Documents/Projects/bpfImporter');
-    shell.pwd();
-    shell.exec('pwd');
-    shell.exec('git status');
-
-    return;
-
-    // var poo = shell.exec('pwd');
-    // console.log('first pwd: ', poo);
-    //
-    // var gitStatus = shell.exec('git status');
-    // console.log(gitStatus);
-
-    console.log('gitStatus complete');
-
-    shell.exec(('cd /Users/tedshaffer/Documents/Projects/bsPublisher && exec pwd'));
-    shell.exec(('cd /Users/tedshaffer/Documents/Projects/bsPublisher && exec git status'));
-
-    shell.exec('pwd');
-    shell.exec('git status');
-
-    // gitStatus = shell.exec('git status 2');
-    // console.log(gitStatus);
-    //
-    // console.log('gitStatus 2 complete');
-    //
-    // poo = shell.exec('pwd');
-    // console.log('second pwd: ', poo);
-return;
-
-    // const workingDirPath : string = '/Users/tedshaffer/Documents/Projects/bpfImporter';
-    // const simpleGit = require('simple-git')(workingDirPath);
-    // const branchSummary : any = simpleGit.branch(branchHandler);
-    // console.log(branchSummary);
-    // const branchSummaryLocal: any = simpleGit.branchLocal(branchLocalHandler);
-    // console.log(branchSummaryLocal);
-
-    // debugger;
 
     var cmdLineArg = process.argv[2];
  
@@ -247,7 +100,6 @@ return;
               // const bsdm : any = bpfxState.bsdm;
               this.savePresentationFile(bpfxPath, bpfxState).then( () => {
                 console.log('presentation save complete');
-                this.publishPresentation('test', bpfxPath, bpfxState.bsdm);
               })
             }
           });
