@@ -25,6 +25,12 @@ class App extends React.Component<any, object> {
     this.state = {
       bpfPath: '',
     };
+
+    this.convertButtonClicked = this.convertButtonClicked.bind(this);
+  }
+
+  convertButtonClicked() {
+    console.log('convert: ', this.state.bpfPath);
   }
 
   handleChange = (event: any) => {
@@ -52,7 +58,7 @@ class App extends React.Component<any, object> {
             onChange={this.handleChange}
           />
 
-          <RaisedButton label='Convert'/>
+          <RaisedButton label='Convert'onClick={this.convertButtonClicked}/>
         </div>
       </MuiThemeProvider>
     );
