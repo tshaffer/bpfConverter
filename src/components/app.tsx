@@ -17,15 +17,41 @@ import TextField from 'material-ui/TextField';
 
 class App extends React.Component<any, object> {
 
+  state: any;
+
   constructor(props: any){
     super(props);
+
+    this.state = {
+      bpfPath: '',
+    };
+  }
+
+  handleChange = (event: any) => {
+    this.setState({
+      bpfPath: event.target.value,
+    });
   }
 
   render() {
 
+    const textEntryStyle = {
+        width: '600px',
+        marginLeft: '8px',
+        marginRight: '8px',
+    };
+
     return (
       <MuiThemeProvider>
         <div>
+          bpf path:
+          <TextField
+            id='bpfPath'
+            style={textEntryStyle}
+            value={this.state.bpfPath}
+            onChange={this.handleChange}
+          />
+
           <RaisedButton label='Convert'/>
         </div>
       </MuiThemeProvider>
