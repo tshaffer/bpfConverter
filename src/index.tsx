@@ -9,7 +9,8 @@ import { createStore, applyMiddleware } from 'redux';
 
 import reducers from './store/reducers';
 
-import App from './components/app';
+// import App from './components/app';
+import AppContainer from './containers/appContainer';
 
 const store = createStore(
   reducers,
@@ -20,7 +21,7 @@ const store = createStore(
 
 ReactDOM.render(
   <Provider store={store}>
-      <App />
+      <AppContainer />
   </Provider>,
   document.getElementById('content') as HTMLElement,
 );
