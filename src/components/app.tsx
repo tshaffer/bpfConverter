@@ -4,6 +4,9 @@ import * as React from 'react';
 
 import * as fs from 'fs-extra';
 
+// import { dialog } from 'electron';
+const {dialog} = require('electron').remote
+
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 
@@ -31,6 +34,20 @@ class App extends React.Component<any, object> {
     };
 
     this.convertButtonClicked = this.convertButtonClicked.bind(this);
+    this.browseButtonClicked = this.browseButtonClicked.bind(this);
+  }
+
+  browseButtonClicked() {
+    dialog.showOpenDialog({
+      title: 'Select presentation to convert',
+      filters: [
+        {name: 'Presentations', extensions: ['bpf']},
+      ],
+      message: 'Message',
+      properties: ['openFile']
+    }, ( (selectedPaths: string[]) => {
+      this.setState({ bpfPath: selectedPaths[0] });
+    }));
   }
 
   convertButtonClicked() {
@@ -55,15 +72,20 @@ class App extends React.Component<any, object> {
     return (
       <MuiThemeProvider>
         <div>
-          bpf path:
-          <TextField
-            id='bpfPath'
-            style={textEntryStyle}
-            value={this.state.bpfPath}
-            onChange={this.handleChange}
-          />
+          <div>
+            bpf path:
+            <TextField
+              id='bpfPath'
+              style={textEntryStyle}
+              value={this.state.bpfPath}
+              onChange={this.handleChange}
+            />
 
-          <RaisedButton label='Convert'onClick={this.convertButtonClicked}/>
+            <RaisedButton label='Browse'onClick={this.browseButtonClicked}/>
+          </div>
+          <div>
+            <RaisedButton label='Convert'onClick={this.convertButtonClicked}/>
+          </div>
         </div>
       </MuiThemeProvider>
     );
