@@ -1,7 +1,10 @@
 import * as React from 'react';
 
 // import { dialog } from 'electron';
-const {dialog} = require('electron').remote
+// const {dialog} = require('electron').remote
+import { remote } from 'electron';
+
+// const {app} = require('electron');
 
 import MuiThemeable from 'material-ui/styles/muiThemeable';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -9,6 +12,10 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 
 class App extends React.Component<any, object> {
+
+  static propTypes = {
+    onConvertBpf: React.PropTypes.func.isRequired,
+  }
 
   state: any;
 
@@ -19,17 +26,18 @@ class App extends React.Component<any, object> {
       bpfPath: '',
     };
 
+    console.log(remote.app.getPath('home'));
+
     this.convertButtonClicked = this.convertButtonClicked.bind(this);
     this.browseButtonClicked = this.browseButtonClicked.bind(this);
   }
 
   browseButtonClicked() {
-    dialog.showOpenDialog({
-      title: 'Select presentation to convert',
+    remote.dialog.showOpenDialog({
       filters: [
         {name: 'Presentations', extensions: ['bpf']},
       ],
-      message: 'Message',
+      message: 'Select presentation to convert',
       properties: ['openFile']
     }, ( (selectedPaths: string[]) => {
       this.setState({ bpfPath: selectedPaths[0] });
