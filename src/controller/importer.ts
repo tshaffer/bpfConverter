@@ -1,4 +1,5 @@
 import * as fse from 'fs-extra';
+import * as path from 'path';
 
 import {
   bscAssetLocatorForLocalAsset,
@@ -32,17 +33,26 @@ import {
   getBsAssetForLocalFile,
 } from '@brightsign/bs-content-manager';
 
+let bsPresentationPath: string = '';
+let bsPresentationAsset: BsAsset = null;
+let bsPresentationAssetLocator: BsAssetLocator = null;
+
 // import { getLocalSystemScopeId } from '@brightsign/fsconnector';
 
 export const convertBpf = (path: string) => {
   return (dispatch: any) => {
+    bsPresentationPath = path;
     readFileAsBuffer(path)
       .then((buf: any) => {
         const token : string = biCreateOpenPresentationFromBufferSession(buf);
         biLaunchPresentationOpener(token).then(() => {
           // const localScopeId = getLocalSystemScopeId();
           const bsAsset: BsAsset = getBsAssetForLocalFile(path);
-          // const assetLocator : BsAssetLocator = bscAssetLocatorForLocalAsset(AssetType.Project, path, localScopeId);
+          const assetLocator : BsAssetLocator = bscAssetLocatorForLocalAsset(AssetType.Project, path);
+
+          bsPresentationAsset = bsAsset;
+          bsPresentationAssetLocator = assetLocator;
+
           // dispatch(onPresentationOpenerStatusUpdated(token, assetLocator, false));
           dispatch(onPresentationOpenerStatusUpdated(token, null, false));
         }).catch((err: any) => {
@@ -69,8 +79,26 @@ function onPresentationOpenerStatusUpdated(token : string, assetLocator : BsAsse
       //   dispatch(closeFixBrokenLinksDialog());
       // }
 
-      debugger;
       const bpfxState = biGetProjectFileState(token);
+
+      console.log(bsPresentationAsset);
+      console.log(bsPresentationAssetLocator);
+
+      debugger;
+
+      const dirname: string = path.dirname(bsPresentationPath);
+      const presentationName: string = path.basename(bsPresentationPath, '.bpf');
+      const newPath: string = path.join(dirname, presentationName + '.bpfx');
+
+      const bpfxStr = JSON.stringify(bpfxState, null, '\t');
+      fse.writeFile(newPath, bpfxStr, (err: any) => {
+        if (err) {
+          console.log(err);
+          debugger;
+        }
+        console.log('write complete');
+      });
+
       // hashHistory.push({
       //   pathname: '/presentation/edit',
       //   state: {
