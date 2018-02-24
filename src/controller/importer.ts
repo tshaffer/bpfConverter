@@ -36,7 +36,6 @@ import {
 
 export const convertBpf = (path: string) => {
   return (dispatch: any) => {
-    debugger;
     readFileAsBuffer(path)
       .then((buf: any) => {
         const token : string = biCreateOpenPresentationFromBufferSession(buf);
@@ -70,7 +69,8 @@ function onPresentationOpenerStatusUpdated(token : string, assetLocator : BsAsse
       //   dispatch(closeFixBrokenLinksDialog());
       // }
 
-      // const bpfxState = biGetProjectFileState(token);
+      debugger;
+      const bpfxState = biGetProjectFileState(token);
       // hashHistory.push({
       //   pathname: '/presentation/edit',
       //   state: {
