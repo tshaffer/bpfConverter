@@ -1,4 +1,4 @@
-console.log("hello autoRunTS");
+console.log("hello bpfConverter");
 const electron = require('electron');
 
 // Module to control application life.
