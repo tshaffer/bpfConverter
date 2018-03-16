@@ -164,8 +164,7 @@ export function generateDmStateFromBpf(bpf : any) : Function {
 
       addLiveDataFeedsPromise.then( () => {
         dispatch(addZones(bpf));
-        console.log(getState());
-        resolve();
+        resolve(getState().bsdm);
       }).catch( (err) => {
         return reject(new BpfConverterError(BpfConverterErrorType.unexpectedError, 'generateDmStateFromBpf: ' + err));
       });

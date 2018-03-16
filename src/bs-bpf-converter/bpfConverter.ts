@@ -3,6 +3,7 @@ import thunkMiddleware from 'redux-thunk';
 
 import { cloneDeep } from 'lodash';
 import { isObject } from 'lodash';
+import { isNil } from 'lodash';
 
 import { AssetLocation, AssetType } from '@brightsign/bscore';
 import { BsAssetCollection, getBsAssetCollection } from '@brightsign/bs-content-manager';
@@ -36,8 +37,10 @@ export function bsBpfCConvertPresentation(buffer: Buffer) : Function {
           bpfToJson(buffer).then( (bpf : any) => {
 
             // convert bpf json to dmState.
-            dispatch(generateDmStateFromBpf(bpf)).then( () => {
-              resolve();
+            dispatch(generateDmStateFromBpf(bpf)).then( (bsdm: any) => {
+              console.log(bsdm);
+              const bpfxState : any = createProjectFileStateFromDmState(bsdm);
+              resolve(bpfxState);
             });
           });
         }
@@ -45,6 +48,31 @@ export function bsBpfCConvertPresentation(buffer: Buffer) : Function {
     });
   };
 }
+
+// TODO - rework once non bsdm properties are added to bpfxState
+const createProjectFileStateFromDmState = (bsDmState: any): Object => {
+
+  // const bsDmState: DmState = state.bsdm;
+  if (!isObject(bsDmState)){
+    // throw 'TODO error'; // TODO implement error;
+    debugger;
+  }
+
+  const state: any = {};
+  state.bsdm = bsDmState;
+  let bpfxState = getBpfxState(state);
+  if (isNil(bpfxState)) {
+    bpfxState = {};
+  }
+  bpfxState.bsdm = bsDmState;
+
+  return bpfxState;
+};
+
+// TODO - placeholder
+export const getBpfxState = (state : any) : any => {
+  return null;
+};
 
 function getLocalContentCollection(path: string): BsAssetCollection {
   return getBsAssetCollection(AssetLocation.Local, [
