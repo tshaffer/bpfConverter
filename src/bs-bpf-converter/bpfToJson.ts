@@ -513,9 +513,10 @@ function fixZones(rawZoneSpecs: any) : any {
   const zones : any = [];
 
   // const rawZones = getParameterArray(rawZoneSpecs.zone);
-  const rawZones = getParameterArray(rawZoneSpecs);
-  rawZones.forEach( (rawZone) => {
-    zones.push(fixZone(rawZone));
+  // const rawZones = getParameterArray(rawZoneSpecs);
+  // rawZones.forEach( (rawZone) => {
+  rawZoneSpecs.forEach( (rawZoneSpec: any) => {
+    zones.push(fixZone(rawZoneSpec.zone));
   });
 
   return zones;
@@ -674,7 +675,8 @@ function getAudioZoneSpecificParametersSpec() : any {
 
 function getVideoZoneSpecificParametersSpec() : any {
 
-  const audioZoneSpecificParametersSpec = Object.assign({}, getAudioZoneSpecificParametersSpec());
+  // const audioZoneSpecificParametersSpec = Object.assign({}, getAudioZoneSpecificParametersSpec());
+  const audioZoneSpecificParametersSpec = getAudioZoneSpecificParametersSpec();
 
   let videoZoneSpecificParametersSpec: any[] = [
     { name: 'brightness', type: 'number'},
@@ -693,7 +695,9 @@ function getVideoZoneSpecificParametersSpec() : any {
     { name: 'zOrderFront', type: 'boolean'},
   ];
 
-  videoZoneSpecificParametersSpec = Object.assign(videoZoneSpecificParametersSpec, audioZoneSpecificParametersSpec);
+  // TODO - Array.concat?
+  // videoZoneSpecificParametersSpec = Object.assign(videoZoneSpecificParametersSpec, audioZoneSpecificParametersSpec);
+  videoZoneSpecificParametersSpec = videoZoneSpecificParametersSpec.concat(audioZoneSpecificParametersSpec);
 
   return videoZoneSpecificParametersSpec;
 }
@@ -706,12 +710,14 @@ function getImageZoneSpecificParametersSpec() : any {
   return imageZoneSpecificParametersSpec;
 }
 
-function getVideoOrImageZoneSpecificParametersSpec(): any {
+function getVideoOrImageZoneSpecificParametersSpec(): any[] {
 
   const imageZoneSpecificParametersSpec: any = getImageZoneSpecificParametersSpec();
   const videoZoneSpecificParametersSpec: any = getVideoZoneSpecificParametersSpec();
-  const videoOrImageZoneSpecificParametersSpec: any = Object.assign({}, imageZoneSpecificParametersSpec,
-    videoZoneSpecificParametersSpec);
+  // const videoOrImageZoneSpecificParametersSpec: any[] = Object.assign({}, imageZoneSpecificParametersSpec,
+  //   videoZoneSpecificParametersSpec);
+  const videoOrImageZoneSpecificParametersSpec : any[] =
+    imageZoneSpecificParametersSpec.concat(videoZoneSpecificParametersSpec);
   return videoOrImageZoneSpecificParametersSpec;
 }
 

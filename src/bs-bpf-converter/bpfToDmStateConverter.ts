@@ -88,6 +88,8 @@ import {
   VideoOrImagesZonePropertyParams,
   VideoZonePropertyParams,
   ZoneAction,
+  ZoneAddAction,
+  ZoneAddParams,
   ZonePropertyUpdateAction,
   ZonePropertyUpdateParams,
   dmAddBrightScriptPlugin,
@@ -162,6 +164,7 @@ export function generateDmStateFromBpf(bpf : any) : Function {
 
       addLiveDataFeedsPromise.then( () => {
         dispatch(addZones(bpf));
+        console.log(getState());
         resolve();
       }).catch( (err) => {
         return reject(new BpfConverterError(BpfConverterErrorType.unexpectedError, 'generateDmStateFromBpf: ' + err));
@@ -1281,10 +1284,15 @@ function addZones(bpf: any) : Function {
         height,
         pct: false
       };
-      const zoneAction : ZoneAction = dispatch(dmAddZone(bpfZone.name, bpfZone.type, bpfZone.id, zoneRect, true));
+      // const zoneAddAction : BsDmThunkAction<ZoneAddParams> = dispatch(dmAddZone(bpfZone.name, bpfZone.type,
+      // bpfZone.id,
+      //   zoneRect, true));
+      const zoneAddAction : ZoneAddAction = dispatch(dmAddZone(bpfZone.name, bpfZone.type, bpfZone.id,
+        zoneRect, true));
+      const zoneAddParams: ZoneAddParams = zoneAddAction.payload;
 
-      const zoneId : BsDmId = zoneAction.payload.id;
-      const zoneType : ZoneType = zoneAction.payload.type;
+      const zoneId : BsDmId = zoneAddParams.zone.id;
+      const zoneType : ZoneType = zoneAddParams.zone.type;
 
       dispatch(setZoneProperties(bpfZone, zoneId, zoneType));
 
