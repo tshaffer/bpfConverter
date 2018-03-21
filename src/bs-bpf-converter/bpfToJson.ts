@@ -34,6 +34,24 @@ export function bpfToJson(xmlBPF : any) : any {
   });
 }
 
+function validateFileIsSupportedBpf(presentationParameters: any) {
+  
+  // validate that this is a bpf and that this conversion utility supports it.
+  // TODO - for now, minimum supported version is 6. This requires further investigation
+  if (isNil(presentationParameters)
+    || !isString(presentationParameters.BrightAuthorVersion)
+    || !isString(presentationParameters.type)
+    || (presentationParameters.type !== 'project')
+    || !isNumber(presentationParameters.version)) {
+    throw new BpfConverterError(BpfConverterErrorType.errorNotAValidBpf,
+      'fixJsonBPF: not a valid bpf file');
+  }
+  if (presentationParameters.version < 6) {
+    throw new BpfConverterError(BpfConverterErrorType.errorUnsupportedBpf,
+      'fixJsonBPF: convert does not support this bpf version');
+  }
+}
+
 function fixJsonBPF(rawBPF : any) : any {
 
   const bpf : any = {};
@@ -49,18 +67,8 @@ function fixJsonBPF(rawBPF : any) : any {
   const rawZones = getParameterArray(rawBrightAuthor.zones);
 
   bpf.presentationParameters = fixPresentationParameters(rawPresentationParameters);
-
-  // validate that this is a bpf and that this conversion utility supports it.
-  // TODO - for now, minimum supported version is 6. This requires further investigation
-  if (isNil(bpf.presentationParameters)
-    || !isString(bpf.presentationParameters.BrightAuthorVersion)
-    || !isString(bpf.presentationParameters.type)
-    || (bpf.presentationParameters.type !== 'project')
-    || !isNumber(bpf.presentationParameters.version)) {
-    throw new BpfConverterError(BpfConverterErrorType.errorNotAValidBpf,
-      'fixJsonBPF: not a valid bpf file');
-  }
-
+  validateFileIsSupportedBpf(bpf.presentationParameters);
+  
   bpf.metadata = fixMetadata(rawMetadata);
   bpf.zones = fixZones(rawZones);
 
