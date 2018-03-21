@@ -648,11 +648,12 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     // TODO - why are some of these parameters unused?
     const {file, fileIsLocal, slideDelayInterval, transitionDuration, videoPlayerRequired} = state;
 
+    const fileName = file.name;
     const filePath = file.path;
     let bsAssetItem: BsAssetItem = getAssetItemFromFile(filePath);
     const linkBroken: boolean = bsAssetItem === null;
     if (!bsAssetItem) {
-      bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, path.basename(filePath),
+      bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
         filePath);
     }
 
@@ -691,11 +692,12 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     // TODO - why are some of these parameters unused?
     const {automaticallyLoop, file, fileIsLocal, videoDisplayMode, volume} = state;
 
-    const filePath = state.file.path;
+    const fileName = file.name;
+    const filePath = file.path;
     let bsAssetItem: BsAssetItem = getAssetItemFromFile(filePath);
     const linkBroken : boolean = bsAssetItem === null;
     if (!bsAssetItem) {
-      bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, path.basename(filePath),
+      bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
         filePath);
     }
 
@@ -911,8 +913,6 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           break;
         }
         case 'videoStreamItem': {
-
-          debugger;
 
           const { timeOnScreen } = state;
 

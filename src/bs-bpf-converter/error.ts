@@ -4,9 +4,13 @@ export enum BpfConverterErrorType {
   errorFetchingBsnFeedProperties,
   errorUpdatingAssetCollection,
   errorEnumMatchError,
+  errorUnsupportedBpf,
+  errorNotAValidBpf,
 }
 
 const bpfConverterErrorMessage: {[type: number]: string} = {
+  [BpfConverterErrorType.errorNotAValidBpf]: 'Not a valid bpf file',
+  [BpfConverterErrorType.errorUnsupportedBpf]: 'Bpf version unsupported',
   [BpfConverterErrorType.unexpectedError]: 'Unexpected error',
   [BpfConverterErrorType.errorFetchingBsnFeeds]: 'Error fetching bsn feeds',
   [BpfConverterErrorType.errorUpdatingAssetCollection]: 'Error updating asset collection',

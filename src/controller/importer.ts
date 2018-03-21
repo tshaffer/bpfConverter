@@ -11,18 +11,16 @@ import {
 
 export const convertBpf = (bpfPath: string) => {
   return (dispatch: any) => {
-    debugger;
     readFileAsBuffer(bpfPath)
       .then((buf: any) => {
         dispatch(bsBpfCConvertPresentation(buf)).then((bpfxState: any) => {
           console.log(bpfxState);
-          debugger;
           const bpfFileName = path.basename(bpfPath, '.bpf');
           const bpfxFileName = bpfFileName + '.bpfx';
           const bpfDirName = path.dirname(bpfPath);
           const bpfxFilePath = path.join(bpfDirName, bpfxFileName);
           savePresentationFile(bpfxFilePath, bpfxState).then( () => {
-            debugger;
+            console.log('presentation save complete');
           });
         });
       })

@@ -1,4 +1,5 @@
 import { Parser } from 'xml2js';
+import { isNil, isString, isNumber } from 'lodash';
 
 import {
   HtmlSiteType,
@@ -38,12 +39,28 @@ function fixJsonBPF(rawBPF : any) : any {
   const bpf : any = {};
 
   const rawBrightAuthor : any = rawBPF.BrightAuthor;
+  if (isNil(rawBrightAuthor) || isNil(rawBrightAuthor.$) || isNil(rawBrightAuthor.meta)) {
+    throw new BpfConverterError(BpfConverterErrorType.errorNotAValidBpf,
+      'fixJsonBPF: not a valid bpf file');
+  }
   const rawPresentationParameters : any = rawBrightAuthor.$;
   const rawMetadata = rawBrightAuthor.meta;
 
   const rawZones = getParameterArray(rawBrightAuthor.zones);
 
   bpf.presentationParameters = fixPresentationParameters(rawPresentationParameters);
+
+  // validate that this is a bpf and that this conversion utility supports it.
+  // TODO - for now, minimum supported version is 6. This requires further investigation
+  if (isNil(bpf.presentationParameters)
+    || !isString(bpf.presentationParameters.BrightAuthorVersion)
+    || !isString(bpf.presentationParameters.type)
+    || (bpf.presentationParameters.type !== 'project')
+    || !isNumber(bpf.presentationParameters.version)) {
+    throw new BpfConverterError(BpfConverterErrorType.errorNotAValidBpf,
+      'fixJsonBPF: not a valid bpf file');
+  }
+
   bpf.metadata = fixMetadata(rawMetadata);
   bpf.zones = fixZones(rawZones);
 
