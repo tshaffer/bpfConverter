@@ -6,7 +6,7 @@ import { isObject } from 'lodash';
 import { isNil } from 'lodash';
 
 import { AssetLocation, AssetType } from '@brightsign/bscore';
-import { BsAssetCollection, getBsAssetCollection } from '@brightsign/bs-content-manager';
+import { BsAssetCollection, cmGetBsAssetCollection } from '@brightsign/bs-content-manager';
 import {
   dmOpenSign,
   DmState,
@@ -75,7 +75,7 @@ export const getBpfxState = (state : any) : any => {
 };
 
 function getLocalContentCollection(path: string): BsAssetCollection {
-  return getBsAssetCollection(AssetLocation.Local, [
+  return cmGetBsAssetCollection(AssetLocation.Local, [
       AssetType.Content,
       AssetType.Project,
       AssetType.ProjectBpf,

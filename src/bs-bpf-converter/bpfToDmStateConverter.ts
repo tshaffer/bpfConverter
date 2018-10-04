@@ -3,6 +3,8 @@ import path from 'isomorphic-path';
 import { isNil } from 'lodash';
 
 import {
+  EventIntrinsicAction,
+
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
   AccessType,
@@ -36,9 +38,17 @@ import {
   ZoneType,
 } from '@brightsign/bscore';
 
-import { getAssetItemFromFile } from '@brightsign/fsconnector';
+import { fsGetAssetItemFromFile } from '@brightsign/fsconnector';
 
 import {
+  dmCreateEventDataForEventType,
+  DmEventSpecification,
+  dmCreateDefaultEventSpecificationForEventType,
+  dmInteractiveAddTransitionForEventSpecification,
+  InteractiveAddEventTransitionAction,
+  InteractiveAddEventTransitionParams,
+  dmGetMediaStateById,
+
   AudioSignPropertyMapParams,
   BrightScriptPluginParams,
   BsDmAction,
@@ -46,6 +56,7 @@ import {
   BsDmThunkAction,
   BsnDataFeedAction,
   DataFeedAction,
+  DmEventData,
   DmcHtmlSite,
   DmcParserBrightScriptPlugin,
   DmcUserVariable,
@@ -100,7 +111,7 @@ import {
   dmAddParserBrightScriptPlugin,
   dmAddRemoteHtmlSite,
   dmAddDataFeed,
-  dmAddTransition,
+  // dmAddTransition,
   dmAddUserVariable,
   dmAddZone,
   dmAppendStringToParameterizedString,
@@ -126,13 +137,13 @@ import {
   dmUpdateSignProperties,
   dmUpdateSignSerialPorts,
   dmUpdateZone,
-  dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams,
+  dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams, DmcMediaState,
 } from '@brightsign/bsdatamodel';
 
 import {
   BsAsset,
   BsAssetCollection,
-  getBsAssetCollection
+  cmGetBsAssetCollection
 } from '@brightsign/bs-content-manager';
 
 import * as Converters from './converters';
@@ -258,6 +269,9 @@ function setSignProperties(bpf : any) : Function {
     const {a, r, g, b} = bpf.metadata.backgroundScreenColor;
     const backgroundScreenColor: BsColor = {a, r, g, b};
 
+// TEDDY - the following variable(s) are in the bsdm definition but not yet imported from bpf
+//    networkedVariablesUpdateInterval - note that this appears in bpfToJson.ts#metadataSpec
+//
     signAction = dispatch(dmUpdateSignProperties(
       {
         id: signProperties.id,
@@ -577,7 +591,7 @@ function setZoneProperties(bpfZone : any, zoneId : BsDmId, zoneType : ZoneType) 
 
         const backgroundBitmapFilePath: string = widgetParameters.backgroundBitmap;
         if (backgroundBitmapFilePath !== '') {
-          bsAssetItem = getAssetItemFromFile(backgroundBitmapFilePath);
+          bsAssetItem = fsGetAssetItemFromFile(backgroundBitmapFilePath);
           if (isNil(bsAssetItem)) {
             bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, path.basename(backgroundBitmapFilePath),
               backgroundBitmapFilePath);
@@ -650,7 +664,7 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
 
     const fileName = file.name;
     const filePath = file.path;
-    let bsAssetItem: BsAssetItem = getAssetItemFromFile(filePath);
+    let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
     const linkBroken: boolean = bsAssetItem === null;
     if (!bsAssetItem) {
       bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
@@ -661,12 +675,13 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-      {interval: slideDelayInterval}));
-    const eventParams: EventParams = eventAction.payload;
+    // const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
+    //   {interval: slideDelayInterval}));
+    // const eventParams: EventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
+    eventIds.push('');
     transitionTypes.push(TransitionType.NoEffect);
     transitionDurations.push(transitionDuration);
 
@@ -694,7 +709,7 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
 
     const fileName = file.name;
     const filePath = file.path;
-    let bsAssetItem: BsAssetItem = getAssetItemFromFile(filePath);
+    let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
     const linkBroken : boolean = bsAssetItem === null;
     if (!bsAssetItem) {
       bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
@@ -887,7 +902,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
 
   return (dispatch: Function, getState: Function): any => {
 
-    const bsdm : DmState = getState().bsdm;
+    let bsdm : DmState = getState().bsdm;
 
     const mediaStateIds: BsDmId[] = [];
     const eventIds: BsDmId[] = [];
@@ -963,16 +978,70 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
       }
     });
 
-    // add transitions to all media states
+    bsdm = getState().bsdm;
+
     for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-      const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[i],
-        mediaStateIds[i + 1], transitionTypes[i], transitionDurations[i]));
+
+      buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
+
+      // sourceMediaState = dmGetMediaStateById(bsdm, { id: mediaStateIds[i]});
+      // targetMediaState = dmGetMediaStateById(bsdm, { id: mediaStateIds[i + 1]});
+      //
+      // const dmEventType = EventType.Timer;
+      // const eventData: DmEventData =
+      //   dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
+      // // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
+      // // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
+      //
+      // const eventSpecification: DmEventSpecification =
+      //   dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
+      //     EventIntrinsicAction.None);
+      // const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
+      //   dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
+      //     sourceMediaState.id,
+      //     targetMediaState.id,
+      //     eventSpecification);
+      // const addEventResults = dispatch(thunkAction as any);
+      // const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
+      // console.log(eventId);
     }
-    // TODO - best way to do this when some of the transitions don't have transitionTypes / transitionDurations?
-    const wrapAroundTransitionAction : TransitionAction =
-      dispatch(dmAddTransition('', eventIds[mediaStateIds.length - 1],
-      mediaStateIds[0], transitionTypes[mediaStateIds.length - 1], transitionDurations[mediaStateIds.length - 1]));
+
+    buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
+
+    // add transitions to all media states
+  //   for (let i = 0; i < (mediaStateIds.length - 1); i++) {
+  //     const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[i],
+  //       mediaStateIds[i + 1], transitionTypes[i], transitionDurations[i]));
+  //   }
+  //   // TODO - best way to do this when some of the transitions don't have transitionTypes / transitionDurations?
+  //   const wrapAroundTransitionAction : TransitionAction =
+  //     dispatch(dmAddTransition('', eventIds[mediaStateIds.length - 1],
+  //     mediaStateIds[0], transitionTypes[mediaStateIds.length - 1], transitionDurations[mediaStateIds.length - 1]));
   };
+}
+
+function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string, targetIndex: string) {
+
+  const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
+  const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
+
+  const dmEventType = EventType.Timer;
+  const eventData: DmEventData =
+    dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
+  // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
+  // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
+
+  const eventSpecification: DmEventSpecification =
+    dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
+      EventIntrinsicAction.None);
+  const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
+    dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
+      sourceMediaState.id,
+      targetMediaState.id,
+      eventSpecification);
+  const addEventResults = dispatch(thunkAction as any);
+  const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
+  console.log(eventId);
 }
 
 function convertParameterValue(bsdm: DmState, bpfParameterValue : any) : DmParameterizedString {
@@ -1122,7 +1191,7 @@ function addLiveDataFeeds(liveDataFeeds: any[]) : Function {
 
 function fetchBsnFeeds(feedType : AssetType) : Promise<BsAssetCollection> {
   return new Promise( (resolve, reject) => {
-    const assetCollection : BsAssetCollection = getBsAssetCollection(AssetLocation.Bsn, feedType);
+    const assetCollection : BsAssetCollection = cmGetBsAssetCollection(AssetLocation.Bsn, feedType);
     assetCollection
       .update()
       .then(() => {
@@ -1187,7 +1256,7 @@ function addHtmlSites(htmlSites : any[]) : Function {
       if (htmlSite.type === HtmlSiteType.Hosted) {
         const { name, filePath, queryString } = htmlSite;
 
-        let bsAssetItem : BsAssetItem = getAssetItemFromFile(filePath);
+        let bsAssetItem : BsAssetItem = fsGetAssetItemFromFile(filePath);
         const brokenLink : boolean = isNil(bsAssetItem);
         if (isNil(bsAssetItem)) {
           bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.HtmlSite, name, filePath);
@@ -1232,7 +1301,7 @@ function addScriptPlugins(scriptPlugins : any) : Function {
       const name = scriptPlugin.name;
       const filePath = scriptPlugin.path;
 
-      let bsAssetItem : BsAssetItem = getAssetItemFromFile(filePath);
+      let bsAssetItem : BsAssetItem = fsGetAssetItemFromFile(filePath);
       const linkBroken : boolean = bsAssetItem === null;
       if (!bsAssetItem) {
         bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.BrightScript, path.basename(filePath),
@@ -1255,7 +1324,7 @@ function addParserPlugins(parserPlugins : any) : Function {
       const { name, parseFeedFunctionName, parseUVFunctionName, userAgentFunctionName } = parserPlugin;
       const filePath = parserPlugin.path;
 
-      let bsAssetItem : BsAssetItem = getAssetItemFromFile(filePath);
+      let bsAssetItem : BsAssetItem = fsGetAssetItemFromFile(filePath);
       if (!bsAssetItem) {
         bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.BrightScript, path.basename(filePath),
           filePath);
