@@ -1019,14 +1019,21 @@ function buildInteractiveTransitions(dispatch: Function, bsdm: DmState, bpfZone:
 
       const eventType: EventType = EventType.Bp;
 
+      let pressContinuous: any = null;
+      if (!isNil(userEvent.parameters.pressContinuous)) {
+        pressContinuous = {
+          repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
+          initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
+        };
+      }
+
       const eventData: DmBpEventData = {
         bpType: BpType.Bp900,
         bpIndex: BpIndex.A,
         buttonNumber: userEvent.parameters.buttonNumber,
-        pressContinuous: null,
-// TEDDY
-// pressContinuous
+        pressContinuous,
       };
+
       const eventSpecification: DmEventSpecification =
         dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
           EventIntrinsicAction.None);
@@ -1039,8 +1046,6 @@ function buildInteractiveTransitions(dispatch: Function, bsdm: DmState, bpfZone:
       const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
       console.log(eventId);
     }
-
-    debugger;
   });
 }
 

@@ -1031,6 +1031,26 @@ function fixInteractiveTransition(rawTransition: any): any {
   return transition;
 }
 
+function fixRawPressContinuous(rawPressContinuous: any) : any {
+
+  const rawPressContinuousParametersSpec: any[] = [
+    { name: 'repeatInterval', type: 'number'},
+    { name: 'initialHoldoff', type: 'number'},
+  ];
+
+  return fixJson(rawPressContinuousParametersSpec, rawPressContinuous);
+
+}
+
+function fixRawPress(rawBpUserEventParameters: any) : any {
+  if (!isNil(rawBpUserEventParameters.pressContinuous)) {
+    return fixRawPressContinuous(rawBpUserEventParameters.pressContinuous);
+  }
+  else {
+    return null;
+  }
+}
+
 function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
   const bpUserEventParametersSpec: any[] = [
     { name: 'buttonNumber', type: 'number'},
@@ -1038,7 +1058,9 @@ function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
     { name: 'buttonPanelType', type: 'string'},
   ];
 
-  return fixJson(bpUserEventParametersSpec, rawBpUserEventParameters);
+  const bpUserEventParameters = fixJson(bpUserEventParametersSpec, rawBpUserEventParameters);
+  bpUserEventParameters.pressContinuous = fixRawPress(rawBpUserEventParameters);
+  return bpUserEventParameters;
 }
 
 function fixRawUserEvent(rawUserEvent: any): any {
@@ -1049,8 +1071,6 @@ function fixRawUserEvent(rawUserEvent: any): any {
   switch (userEvent.name) {
     case 'bp900AUserEvent':
       userEvent.parameters = fixRawBpUserEventParameters(rawUserEvent.parameters);
-      // TEDDY - implement me properly
-      userEvent.parameters.press = {};
       break;
   }
 
