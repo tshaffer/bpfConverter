@@ -925,7 +925,9 @@ function fixVideoOrImagesZonePlaylist(rawZonePlaylist : any) : any {
     return fixZonePlaylistStates(rawZonePlaylist.$$);
   }
   else {
-    return fixZonePlaylistStatesInteractive(rawZonePlaylist);
+    const interactiveZonePlaylist: any =  fixInteractiveZonePlaylist(rawZonePlaylist);
+    console.log(interactiveZonePlaylist);
+    return interactiveZonePlaylist;
   }
 }
 
@@ -971,27 +973,30 @@ function fixEnhancedAudioZonePlaylist(rawEnhancedAudioZonePlaylist : any) : any 
       'fixEnhancedAudioZonePlaylist: interactive playlist not supported');
   }
 }
-function fixZonePlaylistStatesInteractive(rawZonePlaylist: any) : any {
+function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
 
-  const states = rawZonePlaylist.states.state;
-  const interactivePlaylistStates: any[] = [];
-  states.forEach ( (state: any) => {
-    interactivePlaylistStates.push(fixInteractiveState(state));
+  const rawStates = rawZonePlaylist.states.state;
+  const states: any[] = [];
+  rawStates.forEach ( (state: any) => {
+    states.push(fixInteractiveState(state));
   });
 
-  const transitions = rawZonePlaylist.states.transition;
-  const interactivePlaylistTransitions: any[] = [];
-  transitions.forEach ( (transition: any) => {
-    interactivePlaylistTransitions.push(fixInteractiveTransition(transition));
+  const rawTransitions = rawZonePlaylist.states.transition;
+  const transitions: any[] = [];
+  rawTransitions.forEach ( (transition: any) => {
+    transitions.push(fixInteractiveTransition(transition));
   });
+
+  return {
+    states,
+    transitions
+  };
 }
 
 function fixInteractiveState(rawInteractiveState: any): any {
 
   if (isObject(rawInteractiveState.imageItem)) {
-    const interactiveState = fixImageItem(rawInteractiveState.imageItem);
-    console.log('interactiveState: ');
-    console.log(interactiveState);
+    return fixImageItem(rawInteractiveState.imageItem);
   }
   else {
     debugger;
@@ -1013,9 +1018,7 @@ function fixInteractiveTransition(rawTransition: any): any {
   const transition : any = fixJson(transitionParametersSpec, rawTransition);
   transition.userEvent = fixRawUserEvent(rawTransition.userEvent);
 
-  console.log('fixInteractiveTransition');
-  console.log(transition);
-
+  return transition;
 }
 
 function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
@@ -1027,6 +1030,7 @@ function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
 
   return fixJson(bpUserEventParametersSpec, rawBpUserEventParameters);
 }
+
 function fixRawUserEvent(rawUserEvent: any): any {
 
   const userEvent: any = {};
@@ -1037,8 +1041,6 @@ function fixRawUserEvent(rawUserEvent: any): any {
       userEvent.parameters = fixRawBpUserEventParameters(rawUserEvent.parameters);
       // TEDDY - implement me properly
       userEvent.parameters.press = {};
-      console.log('userEvent');
-      console.log(userEvent);
       break;
   }
 
