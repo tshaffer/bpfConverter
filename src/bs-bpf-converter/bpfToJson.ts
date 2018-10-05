@@ -1,5 +1,5 @@
 import { Parser } from 'xml2js';
-import { isNil, isString, isNumber } from 'lodash';
+import { isNil, isString, isNumber, isObject } from 'lodash';
 
 import {
   HtmlSiteType,
@@ -973,26 +973,39 @@ function fixEnhancedAudioZonePlaylist(rawEnhancedAudioZonePlaylist : any) : any 
 }
 function fixZonePlaylistStatesInteractive(rawZonePlaylist: any) : any {
 
-  const states = rawZonePlaylist.states;
-
+  const states = rawZonePlaylist.states.state;
   const interactivePlaylistStates: any[] = [];
-  states.state.forEach ( (state: any) => {
+  states.forEach ( (state: any) => {
     interactivePlaylistStates.push(fixInteractiveState(state));
   });
+  console.log(interactivePlaylistStates);
 
+  const transitions = rawZonePlaylist.states.transition;
   const interactivePlaylistTransitions: any[] = [];
-  states.transition.forEach ( (transition: any) => {
+  transitions.forEach ( (transition: any) => {
     interactivePlaylistTransitions.push(fixInteractiveTransition(transition));
   });
-  debugger;
+  console.log(interactivePlaylistTransitions);
 }
 
 function fixInteractiveState(rawInteractiveState: any): any {
+  console.log('fixInteractiveState');
+  console.log(rawInteractiveState);
+
+  if (isObject(rawInteractiveState.imageItem)) {
+    const interactiveState = fixImageItem(rawInteractiveState.imageItem);
+    console.log('interactiveState: ');
+    console.log(interactiveState);
+  }
+  else {
+    debugger;
+  }
 
 }
 
 function fixInteractiveTransition(rawInteractiveTransition: any): any {
-
+  console.log('fixInteractiveTransition');
+  console.log(rawInteractiveTransition);
 }
 
 function fixZonePlaylistStates(rawPlaylistItems: any) : any {
