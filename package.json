@@ -14,7 +14,7 @@
     "@brightsign/bs-content-manager": "0.5.13",
     "@brightsign/bs-playlist-dm": "0.1.10",
     "@brightsign/bscore": "0.4.3",
-    "@brightsign/bsdatamodel": "0.10.18",
+    "@brightsign/bsdatamodel": "0.10.19",
     "@brightsign/bsnconnector": "0.4.8",
     "@brightsign/fsconnector": "0.4.10",
     "@brightsign/bs-device-artifacts": "1.0.23",
