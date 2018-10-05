@@ -978,19 +978,15 @@ function fixZonePlaylistStatesInteractive(rawZonePlaylist: any) : any {
   states.forEach ( (state: any) => {
     interactivePlaylistStates.push(fixInteractiveState(state));
   });
-  console.log(interactivePlaylistStates);
 
   const transitions = rawZonePlaylist.states.transition;
   const interactivePlaylistTransitions: any[] = [];
   transitions.forEach ( (transition: any) => {
     interactivePlaylistTransitions.push(fixInteractiveTransition(transition));
   });
-  console.log(interactivePlaylistTransitions);
 }
 
 function fixInteractiveState(rawInteractiveState: any): any {
-  console.log('fixInteractiveState');
-  console.log(rawInteractiveState);
 
   if (isObject(rawInteractiveState.imageItem)) {
     const interactiveState = fixImageItem(rawInteractiveState.imageItem);
@@ -1000,12 +996,53 @@ function fixInteractiveState(rawInteractiveState: any): any {
   else {
     debugger;
   }
+}
+
+function fixInteractiveTransition(rawTransition: any): any {
+
+  const transitionParametersSpec: any[] = [
+    { name: 'assignInputToUserVariable', type: 'string'},
+    { name: 'assignWildcardToUserVariable', type: 'string'},
+    { name: 'displayMode', type: 'string'},
+    { name: 'labelLocation', type: 'string'},
+    { name: 'remainOnCurrentStateActions', type: 'string'},
+    { name: 'sourceMediaState', type: 'string'},
+    { name: 'targetMediaState', type: 'string'},
+  ];
+
+  const transition : any = fixJson(transitionParametersSpec, rawTransition);
+  transition.userEvent = fixRawUserEvent(rawTransition.userEvent);
+
+  console.log('fixInteractiveTransition');
+  console.log(transition);
 
 }
 
-function fixInteractiveTransition(rawInteractiveTransition: any): any {
-  console.log('fixInteractiveTransition');
-  console.log(rawInteractiveTransition);
+function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
+  const bpUserEventParametersSpec: any[] = [
+    { name: 'buttonNumber', type: 'number'},
+    { name: 'buttonPanelIndex', type: 'number'},
+    { name: 'buttonPanelType', type: 'string'},
+  ];
+
+  return fixJson(bpUserEventParametersSpec, rawBpUserEventParameters);
+}
+function fixRawUserEvent(rawUserEvent: any): any {
+
+  const userEvent: any = {};
+
+  userEvent.name = rawUserEvent.name;
+  switch (userEvent.name) {
+    case 'bp900AUserEvent':
+      userEvent.parameters = fixRawBpUserEventParameters(rawUserEvent.parameters);
+      // TEDDY - implement me properly
+      userEvent.parameters.press = {};
+      console.log('userEvent');
+      console.log(userEvent);
+      break;
+  }
+
+  return userEvent;
 }
 
 function fixZonePlaylistStates(rawPlaylistItems: any) : any {
