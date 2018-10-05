@@ -836,42 +836,51 @@ function fixZonePlaylist(zoneType : string, rawZonePlaylist : any) : any {
 
   const zonePlaylist : any = fixJson(playlistParametersSpec, rawZonePlaylist);
 
-  switch (zoneType) {
-    case 'VideoOrImages': {
-      zonePlaylist.states = fixVideoOrImagesZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'VideoOnly': {
-      zonePlaylist.states = fixVideoOnlyZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'Images': {
-      zonePlaylist.states = fixImagesZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'AudioOnly': {
-      zonePlaylist.states = fixAudioOnlyZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'EnhancedAudio': {
-      zonePlaylist.states = fixEnhancedAudioZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'Clock': {
-      zonePlaylist.states = fixClockZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'BackgroundImage': {
-      zonePlaylist.states = fixBackgroundImageZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    case 'Ticker': {
-      zonePlaylist.states = fixTickerZonePlaylist(rawZonePlaylist);
-      break;
-    }
-    default: {
-      // throw error
-      debugger;
+  if (zonePlaylist.type === 'interactive') {
+    const interactiveZonePlaylist: any =  fixInteractiveZonePlaylist(rawZonePlaylist);
+    zonePlaylist.states = interactiveZonePlaylist.states;
+    zonePlaylist.transitions = interactiveZonePlaylist.transitions;
+    zonePlaylist.initialState = interactiveZonePlaylist.initialState;
+    console.log(zonePlaylist);
+  }
+  else {
+    switch (zoneType) {
+      case 'VideoOrImages': {
+        zonePlaylist.states = fixVideoOrImagesZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'VideoOnly': {
+        zonePlaylist.states = fixVideoOnlyZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'Images': {
+        zonePlaylist.states = fixImagesZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'AudioOnly': {
+        zonePlaylist.states = fixAudioOnlyZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'EnhancedAudio': {
+        zonePlaylist.states = fixEnhancedAudioZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'Clock': {
+        zonePlaylist.states = fixClockZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'BackgroundImage': {
+        zonePlaylist.states = fixBackgroundImageZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      case 'Ticker': {
+        zonePlaylist.states = fixTickerZonePlaylist(rawZonePlaylist);
+        break;
+      }
+      default: {
+        // throw error
+        debugger;
+      }
     }
   }
 
@@ -925,9 +934,7 @@ function fixVideoOrImagesZonePlaylist(rawZonePlaylist : any) : any {
     return fixZonePlaylistStates(rawZonePlaylist.$$);
   }
   else {
-    const interactiveZonePlaylist: any =  fixInteractiveZonePlaylist(rawZonePlaylist);
-    console.log(interactiveZonePlaylist);
-    return interactiveZonePlaylist;
+    debugger;
   }
 }
 
@@ -988,6 +995,7 @@ function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
   });
 
   return {
+    initialState: rawZonePlaylist.states.initialState,
     states,
     transitions
   };
