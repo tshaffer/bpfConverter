@@ -4,6 +4,8 @@ import { isNil } from 'lodash';
 
 import {
   EventIntrinsicAction,
+  BpType,
+  BpIndex,
 
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
@@ -48,6 +50,8 @@ import {
   InteractiveAddEventTransitionAction,
   InteractiveAddEventTransitionParams,
   dmGetMediaStateById,
+  dmGetMediaStateByName,
+  DmBpEventData,
 
   AudioSignPropertyMapParams,
   BrightScriptPluginParams,
@@ -660,7 +664,7 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // TODO - why are some of these parameters unused?
-    const {file, fileIsLocal, slideDelayInterval, transitionDuration, videoPlayerRequired} = state;
+    const {file, fileIsLocal, slideDelayInterval, slideTransition, transitionDuration, videoPlayerRequired} = state;
 
     const fileName = file.name;
     const filePath = file.path;
@@ -671,7 +675,7 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         filePath);
     }
 
-    // const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    // TEDDY - convert slideTransition to TransitionType and supply here instead of hardcoded value.
     const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem,
       { defaultTransition: TransitionType.NoEffect, transitionDuration} );
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
@@ -982,11 +986,69 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
 
     bsdm = getState().bsdm;
 
-    for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-      buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
+    // transition generation differs for interactive vs. non inactive playlists
+    if (bpfZone.playlist.type === 'interactive') {
+      buildInteractiveTransitions(dispatch, bsdm, bpfZone);
     }
-    buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
+    else {
+      buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds);
+    }
   };
+}
+
+function buildInteractiveTransitions(dispatch: Function, bsdm: DmState, bpfZone: any) {
+  bpfZone.playlist.transitions.forEach( (transition: any) => {
+    console.log(transition);
+
+    const {
+      assignInputToUserVariable,
+      assignWildcardToUserVariable,
+      displayMode,
+      labelLocation,
+      remainOnCurrentStateActions,
+      sourceMediaState,
+      targetMediaState,
+      userEvent,
+    } = transition;
+
+    const sourceMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaState });
+    const targetMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaState });
+
+    // TEDDY - only support bp event for now
+    if (userEvent.name === 'bp900AUserEvent') {
+
+      const eventType: EventType = EventType.Bp;
+
+      const eventData: DmBpEventData = {
+        bpType: BpType.Bp900,
+        bpIndex: BpIndex.A,
+        buttonNumber: userEvent.parameters.buttonNumber,
+        pressContinuous: null,
+// TEDDY
+// pressContinuous
+      };
+      const eventSpecification: DmEventSpecification =
+        dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
+          EventIntrinsicAction.None);
+      const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
+        dmInteractiveAddTransitionForEventSpecification(sourceMediaStateObj.name + '_ev',
+          sourceMediaStateObj.id,
+          targetMediaStateObj.id,
+          eventSpecification);
+      const addEventResults = dispatch(thunkAction as any);
+      const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
+      console.log(eventId);
+    }
+
+    debugger;
+  });
+}
+
+function buildNonInteractiveTransitions(dispatch: Function, bsdm: DmState, mediaStateIds: string[]) {
+  for (let i = 0; i < (mediaStateIds.length - 1); i++) {
+    buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
+  }
+  buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
 }
 
 function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string, targetIndex: string) {
@@ -1327,7 +1389,7 @@ function addZones(bpf: any) : Function {
       // bpfZone.id,
       //   zoneRect, true));
       const zoneAddAction : ZoneAddAction = dispatch(dmAddZone(bpfZone.name, bpfZone.type, bpfZone.id,
-        zoneRect, true));
+        zoneRect, bpfZone.playlist.type !== 'interactive'));
       const zoneAddParams: ZoneAddParams = zoneAddAction.payload;
 
       const zoneId : BsDmId = zoneAddParams.zone.id;

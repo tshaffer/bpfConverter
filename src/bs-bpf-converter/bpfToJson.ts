@@ -928,6 +928,8 @@ function fixTickerZonePlaylistStates(rssDataFeedPlaylistItems: any[]) : any {
   return rssDataFeedItems;
 }
 
+// TEDDY
+// is it necessary to have all of these different functions to fix the different zone types?
 function fixVideoOrImagesZonePlaylist(rawZonePlaylist : any) : any {
   // TODO - check me
   if (rawZonePlaylist.type === 'non-interactive') {
