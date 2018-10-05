@@ -925,9 +925,7 @@ function fixVideoOrImagesZonePlaylist(rawZonePlaylist : any) : any {
     return fixZonePlaylistStates(rawZonePlaylist.$$);
   }
   else {
-    // TODO - implement me
-    throw new BpfConverterError(BpfConverterErrorType.unexpectedError,
-      'fixVideoOrImagesZonePlaylist: interactive playlist not supported');
+    return fixZonePlaylistStatesInteractive(rawZonePlaylist);
   }
 }
 
@@ -972,6 +970,29 @@ function fixEnhancedAudioZonePlaylist(rawEnhancedAudioZonePlaylist : any) : any 
     throw new BpfConverterError(BpfConverterErrorType.unexpectedError,
       'fixEnhancedAudioZonePlaylist: interactive playlist not supported');
   }
+}
+function fixZonePlaylistStatesInteractive(rawZonePlaylist: any) : any {
+
+  const states = rawZonePlaylist.states;
+
+  const interactivePlaylistStates: any[] = [];
+  states.state.forEach ( (state: any) => {
+    interactivePlaylistStates.push(fixInteractiveState(state));
+  });
+
+  const interactivePlaylistTransitions: any[] = [];
+  states.transition.forEach ( (transition: any) => {
+    interactivePlaylistTransitions.push(fixInteractiveTransition(transition));
+  });
+  debugger;
+}
+
+function fixInteractiveState(rawInteractiveState: any): any {
+
+}
+
+function fixInteractiveTransition(rawInteractiveTransition: any): any {
+
 }
 
 function fixZonePlaylistStates(rawPlaylistItems: any) : any {
