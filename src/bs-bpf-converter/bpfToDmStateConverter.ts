@@ -996,6 +996,30 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
   };
 }
 
+function getBpTypeFromButtonPanelType(buttonPanelType: string): BpType {
+  switch (buttonPanelType) {
+    case 'BP200':
+      return BpType.Bp200;
+    case 'BP900':
+    default:
+      return BpType.Bp900;
+  }
+}
+
+function getBpIndexFromButtonPanelIndex(buttonPanelIndex: number): BpIndex {
+  switch (buttonPanelIndex) {
+    case 3:
+      return BpIndex.D;
+    case 2:
+      return BpIndex.C;
+    case 1:
+      return BpIndex.B;
+    case 0:
+    default:
+      return BpIndex.A;
+  }
+}
+
 function buildInteractiveTransitions(dispatch: Function, bsdm: DmState, bpfZone: any) {
   bpfZone.playlist.transitions.forEach( (transition: any) => {
     console.log(transition);
@@ -1028,8 +1052,8 @@ function buildInteractiveTransitions(dispatch: Function, bsdm: DmState, bpfZone:
       }
 
       const eventData: DmBpEventData = {
-        bpType: BpType.Bp900,
-        bpIndex: BpIndex.A,
+        bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
+        bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
         buttonNumber: userEvent.parameters.buttonNumber,
         pressContinuous,
       };
