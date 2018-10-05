@@ -981,42 +981,10 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     bsdm = getState().bsdm;
 
     for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-
       buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
-
-      // sourceMediaState = dmGetMediaStateById(bsdm, { id: mediaStateIds[i]});
-      // targetMediaState = dmGetMediaStateById(bsdm, { id: mediaStateIds[i + 1]});
-      //
-      // const dmEventType = EventType.Timer;
-      // const eventData: DmEventData =
-      //   dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
-      // // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
-      // // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
-      //
-      // const eventSpecification: DmEventSpecification =
-      //   dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
-      //     EventIntrinsicAction.None);
-      // const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
-      //   dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
-      //     sourceMediaState.id,
-      //     targetMediaState.id,
-      //     eventSpecification);
-      // const addEventResults = dispatch(thunkAction as any);
-      // const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
-      // console.log(eventId);
     }
 
     buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
-
-    // add transitions to all media states
-  //   for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-  //     const transitionAction : TransitionAction = dispatch(dmAddTransition('', eventIds[i],
-  //       mediaStateIds[i + 1], transitionTypes[i], transitionDurations[i]));
-  //   }
-  //   // TODO - best way to do this when some of the transitions don't have transitionTypes / transitionDurations?
-  //   const wrapAroundTransitionAction : TransitionAction =
-  //     dispatch(dmAddTransition('', eventIds[mediaStateIds.length - 1],
-  //     mediaStateIds[0], transitionTypes[mediaStateIds.length - 1], transitionDurations[mediaStateIds.length - 1]));
   };
 }
 
@@ -1025,6 +993,8 @@ function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string,
   const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
   const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
 
+  // TEDDY - event type must be state dependent
+  // TEDDY - event parameters must come from bpf data
   const dmEventType = EventType.Timer;
   const eventData: DmEventData =
     dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
