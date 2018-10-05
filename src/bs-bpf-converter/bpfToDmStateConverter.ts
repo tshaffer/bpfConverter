@@ -671,7 +671,9 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         filePath);
     }
 
-    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    // const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem,
+      { defaultTransition: TransitionType.NoEffect, transitionDuration} );
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
@@ -983,7 +985,6 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     for (let i = 0; i < (mediaStateIds.length - 1); i++) {
       buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
     }
-
     buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
   };
 }
