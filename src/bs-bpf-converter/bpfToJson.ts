@@ -995,11 +995,10 @@ function fixInteractiveState(rawInteractiveState: any): any {
   if (isArray(rawInteractiveState.brightSignCmd)) {
     interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
   }
-  if (isObject(rawInteractiveState.brightSignExitCommands)) {
-    debugger;
-  }
-  else {
-    debugger;
+  if (isObject(rawInteractiveState.brightSignExitCommands) &&
+    isArray(rawInteractiveState.brightSignExitCommands.brightSignCmd)) {
+    interactiveState.brightSignExitCommands =
+      fixInteractiveCommands(rawInteractiveState.brightSignExitCommands.brightSignCmd);
   }
 }
 
@@ -1019,18 +1018,37 @@ function fixBrightSignCommand(brightSignCommand: any): any {
     { name: 'customUI', type: 'boolean'},
   ];
 
-  debugger;
-
   const brightSignCmd : any = fixJson(commandParametersSpec, brightSignCommand);
-  brightSignCmd.command = fixCommand(brightSignCommand.command.parameter);
+  brightSignCmd.command = fixBrightSignCmdCommand(brightSignCommand.command);
+  return brightSignCmd;
 }
 
-function fixCommand(bsCommand: any): any {
+function fixBrightSignCmdCommand(bsCommand: any): any {
   const commandParametersSpec: any[] = [
     { name: 'name', type: 'string'},
   ];
+
   const command: any = fixJson(commandParametersSpec, bsCommand);
-  command.parameterValue = fixParameterValue(bsCommand.parameterValue);
+  command.parameters = [];
+  if (isArray(bsCommand.parameter)) {
+    bsCommand.parameter.forEach((bsCommandParameter: any) => {
+      command.parameters.push(fixBrightSignCmdParameter(bsCommandParameter));
+    });
+  }
+  else {
+    command.parameters.push(fixBrightSignCmdParameter(bsCommand.parameter));
+  }
+
+  return command;
+}
+
+function fixBrightSignCmdParameter(bsCommandParameter: any): any {
+  const parameterParametersSpec: any[] = [
+    { name: 'name', type: 'string'},
+  ];
+  const parameter: any = fixJson(parameterParametersSpec, bsCommandParameter);
+  parameter.parameterValue = fixParameterValue(bsCommandParameter.parameterValue);
+  return parameter;
 }
 
 function fixInteractiveTransition(rawTransition: any): any {
