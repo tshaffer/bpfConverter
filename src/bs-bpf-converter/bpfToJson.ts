@@ -1,5 +1,5 @@
 import { Parser } from 'xml2js';
-import { isNil, isString, isNumber, isObject } from 'lodash';
+import { isArray, isNil, isNumber, isObject, isString } from 'lodash';
 
 import {
   HtmlSiteType,
@@ -429,26 +429,13 @@ function fixParserPlugins(rawParserPluginSpecs : any) : any {
   return parserPlugins;
 }
 
-// TODO - check me
 function fixUserVariables(rawUserVariablesSpec: any) : any {
 
   let userVariables : any[] = [];
 
-  // TODO add LiveDataFeedName
-
-  const userVariableConfigurationSpec: any [] = [
-    { name: 'access', type: 'string'},
-    { name: 'defaultValue', type: 'string'},
-    { name: 'name', type: 'string'},
-    { name: 'networked', type: 'boolean'},
-  ];
-
   if (rawUserVariablesSpec && rawUserVariablesSpec.userVariable) {
     const rawUserVariables = getParameterArray(rawUserVariablesSpec.userVariable);
     userVariables = rawUserVariables.map( (rawUserVariable : any) : any => {
-      // const userVariable : any = fixJson(userVariableConfigurationSpec, rawUserVariable);
-      // userVariable.liveDataFeedName = fixString(rawUserVariable.liveDataFeedName);
-      // userVariable.systemVariable = fixString(rawUserVariable.systemVariable);
       const userVariable: any = fixUserVariable(rawUserVariable);
       return userVariable;
     });
@@ -457,7 +444,6 @@ function fixUserVariables(rawUserVariablesSpec: any) : any {
   return userVariables;
 }
 
-// TODO - check me
 function fixUserVariable(rawUserVariable : any) : any {
 
   const userVariableConfigurationSpec: any [] = [
@@ -466,14 +452,10 @@ function fixUserVariable(rawUserVariable : any) : any {
     { name: 'name', type: 'string'},
     { name: 'liveDataFeedName', type: 'string'},
     { name: 'networked', type: 'boolean'},
-    { name: 'systemVariable', type: 'boolean'},
+    { name: 'systemVariable', type: 'string'},
   ];
 
   const userVariable : any = fixJson(userVariableConfigurationSpec, rawUserVariable);
-  // userVariable.liveDataFeedName = fixString(rawUserVariable.liveDataFeedName);
-  // // TODO - systemVariable - string?
-  // userVariable.systemVariable = fixString(rawUserVariable.systemVariable);
-
   return userVariable;
 }
 
@@ -1005,12 +987,50 @@ function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
 
 function fixInteractiveState(rawInteractiveState: any): any {
 
+  const interactiveState: any = {};
+
   if (isObject(rawInteractiveState.imageItem)) {
-    return fixImageItem(rawInteractiveState.imageItem);
+    interactiveState.mediaItem = fixImageItem(rawInteractiveState.imageItem);
+  }
+  if (isArray(rawInteractiveState.brightSignCmd)) {
+    interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
+  }
+  if (isObject(rawInteractiveState.brightSignExitCommands)) {
+    debugger;
   }
   else {
     debugger;
   }
+}
+
+function fixInteractiveCommands(brightSignCommands: any): any {
+  const brightSignCmds: any[] = [];
+  brightSignCommands.forEach( (brightSignCommand: any) => {
+    const brightSignCmd = fixBrightSignCommand(brightSignCommand);
+    brightSignCmds.push(brightSignCmd);
+  });
+
+  return brightSignCmds;
+}
+
+function fixBrightSignCommand(brightSignCommand: any): any {
+  const commandParametersSpec: any[] = [
+    { name: 'name', type: 'string'},
+    { name: 'customUI', type: 'boolean'},
+  ];
+
+  debugger;
+
+  const brightSignCmd : any = fixJson(commandParametersSpec, brightSignCommand);
+  brightSignCmd.command = fixCommand(brightSignCommand.command.parameter);
+}
+
+function fixCommand(bsCommand: any): any {
+  const commandParametersSpec: any[] = [
+    { name: 'name', type: 'string'},
+  ];
+  const command: any = fixJson(commandParametersSpec, bsCommand);
+  command.parameterValue = fixParameterValue(bsCommand.parameterValue);
 }
 
 function fixInteractiveTransition(rawTransition: any): any {
