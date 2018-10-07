@@ -271,7 +271,6 @@ function fixLiveDataFeeds(rawLiveDataFeedSpec: any) : any {
 // TODO - check me
 // all parameter value types implemented?
 function fixParameterValue(rawParameterValue : any) : any {
-  console.log(rawParameterValue);
 
   const parameterValue : any = {};
   parameterValue.parameterValueItems = [];
@@ -1035,7 +1034,7 @@ function fixBrightSignCmdCommand(bsCommand: any): any {
       command.parameters.push(fixBrightSignCmdParameter(bsCommandParameter));
     });
   }
-  else {
+  else if (isObject(bsCommand.parameter)) {
     command.parameters.push(fixBrightSignCmdParameter(bsCommand.parameter));
   }
 
@@ -1065,6 +1064,14 @@ function fixInteractiveTransition(rawTransition: any): any {
 
   const transition : any = fixJson(transitionParametersSpec, rawTransition);
   transition.userEvent = fixRawUserEvent(rawTransition.userEvent);
+
+  transition.brightSignCommands = [];
+  if (isArray(rawTransition.brightSignCmd)) {
+    transition.brightSignCommands = fixInteractiveCommands(rawTransition.brightSignCmd);
+  }
+  else if (isObject(rawTransition.brightSignCmd)) {
+    transition.brightSignCommands.push(fixBrightSignCommand(rawTransition.brightSignCmd));
+  }
 
   return transition;
 }
