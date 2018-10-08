@@ -55,6 +55,7 @@ import {
   dmGetMediaStateByName,
   DmBpEventData,
   DmGpioEventData,
+  DmRectangularTouchEventData,
   DmTimer,
 
   AudioSignPropertyMapParams,
@@ -145,7 +146,7 @@ import {
   dmUpdateSignProperties,
   dmUpdateSignSerialPorts,
   dmUpdateZone,
-  dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams, DmcMediaState, DmEvent,
+  dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams, DmcMediaState, DmEvent, BsDmIdNone,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -1096,6 +1097,20 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         break;
       }
       case 'rectangularTouchEvent':
+        eventType = EventType.RectangularTouch;
+
+        eventData = {
+          regions: [
+            {
+              x: userEvent.parameters.x,
+              y: userEvent.parameters.y,
+              width: userEvent.parameters.width,
+              height: userEvent.parameters.height,
+              pct: false,
+            }
+          ]
+        } as DmRectangularTouchEventData;
+        break;
       case 'mediaEnd':
       case 'synchronize':
       case 'udp':
@@ -1119,10 +1134,19 @@ function newBuildTransition(assignInputToUserVariable: boolean,
     const eventSpecification: DmEventSpecification =
       dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
         EventIntrinsicAction.None);
+
+    let targetMediaStateId: string;
+    if (isNil(targetMediaStateObj)) {
+      targetMediaStateId = BsDmIdNone;
+    }
+    else {
+      targetMediaStateId = targetMediaStateObj.id;
+    }
+
     const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
       dmInteractiveAddTransitionForEventSpecification(sourceMediaStateObj.name + '_ev',
         sourceMediaStateObj.id,
-        targetMediaStateObj.id,
+        targetMediaStateId,
         eventSpecification);
     const addEventResults = dispatch(thunkAction as any);
     const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
