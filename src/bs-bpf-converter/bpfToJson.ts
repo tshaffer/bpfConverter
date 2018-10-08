@@ -986,10 +986,11 @@ function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
 
 function fixInteractiveState(rawInteractiveState: any): any {
 
-  const interactiveState: any = {};
+  let interactiveState: any;
 
   if (isObject(rawInteractiveState.imageItem)) {
-    interactiveState.mediaItem = fixImageItem(rawInteractiveState.imageItem);
+    // interactiveState.mediaItem = fixImageItem(rawInteractiveState.imageItem);
+    interactiveState = fixImageItem(rawInteractiveState.imageItem);
   }
   if (isArray(rawInteractiveState.brightSignCmd)) {
     interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
@@ -999,6 +1000,8 @@ function fixInteractiveState(rawInteractiveState: any): any {
     interactiveState.brightSignExitCommands =
       fixInteractiveCommands(rawInteractiveState.brightSignExitCommands.brightSignCmd);
   }
+
+  return interactiveState;
 }
 
 function fixInteractiveCommands(brightSignCommands: any): any {

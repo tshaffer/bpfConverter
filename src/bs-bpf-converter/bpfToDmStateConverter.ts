@@ -32,6 +32,7 @@ import {
   MediaType,
   MonitorOrientationType,
   RotationType,
+  SystemVariableType,
   TextHAlignmentType,
   TextScrollingMethodType,
   TransitionType,
@@ -171,6 +172,7 @@ export function generateDmStateFromBpf(bpf : any) : Function {
       dispatch(setSignProperties(bpf));
       dispatch(setSignAudioProperties(bpf));
       dispatch(setSerialPortConfiguration(bpf));
+      // need to add data feeds before adding user variables, or need to make two passes through user variables
       dispatch(addUserVariables(bpf.metadata.userVariables));
       dispatch(addHtmlSites(bpf.metadata.htmlSites));
       dispatch(addScriptPlugins(bpf.metadata.scriptPlugins));
@@ -1298,6 +1300,18 @@ function addUserVariables(userVariables : any) : Function {
       if (liveDataFeedName !== '') {
         const dmcDataFeed : DmcDataFeed = dmGetDataFeedByName(getState().bsdm, { name : liveDataFeedName });
         dataFeedId = dmcDataFeed.id;
+      }
+
+      // dmAddUserVariable(name: string, defaultValue: string, access?: AccessType, isNetworked?: boolean,
+      // dataFeedId?: BsDmId, systemVariable?: SystemVariableType | null): UserVariableAction;
+
+      let systemVariableType: SystemVariableType;
+      switch (systemVariable.toLowerCase()) {
+        case 'serialnumber':
+        default: {
+          systemVariableType = SystemVariableType.SerialNumber;
+          break;
+        }
       }
 
       const userVariableAction : UserVariableAction = dmAddUserVariable(name, defaultValue, access, networked,
