@@ -6,6 +6,7 @@ import {
   EventIntrinsicAction,
   BpType,
   BpIndex,
+  ButtonDirection,
 
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
@@ -53,6 +54,8 @@ import {
   dmGetMediaStateById,
   dmGetMediaStateByName,
   DmBpEventData,
+  DmGpioEventData,
+  DmTimer,
 
   AudioSignPropertyMapParams,
   BrightScriptPluginParams,
@@ -728,11 +731,11 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    const eventAction: any = dispatch(dmAddEvent('mediaEnd', EventType.MediaEnd, mediaStateParams.id));
-    const eventParams: EventParams = eventAction.payload;
+    // const eventAction: any = dispatch(dmAddEvent('mediaEnd', EventType.MediaEnd, mediaStateParams.id));
+    // const eventParams: EventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
     transitionTypes.push(null);
     transitionDurations.push(0);
 
@@ -765,12 +768,12 @@ function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-      {interval: timeOnScreen}));
-    const eventParams: EventParams = eventAction.payload;
+    // const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
+    //   {interval: timeOnScreen}));
+    // const eventParams: EventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
     transitionTypes.push(null);
     transitionDurations.push(0);
 
@@ -806,12 +809,12 @@ function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: B
     const mediaStateParams = mediaStateAction.payload;
 
     // TODO - HACK!!
-    const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-      {interval: 10}));
-    const eventParams = eventAction.payload;
+    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
+    //   {interval: 10}));
+    // const eventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
     transitionTypes.push(null);
     transitionDurations.push(0);
 
@@ -844,12 +847,12 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: 
     const mediaStateParams = mediaStateAction.payload;
 
     // TODO - timeOnScreen??
-    const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-      {interval: 10}));
-    const eventParams = eventAction.payload;
+    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
+    //   {interval: 10}));
+    // const eventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
     transitionTypes.push(null);
     transitionDurations.push(0);
 
@@ -887,12 +890,12 @@ function addHtmlItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
 
-    const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-      {interval: timeOnScreen}));
-    const eventParams = eventAction.payload;
+    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
+    //   {interval: timeOnScreen}));
+    // const eventParams = eventAction.payload;
 
     mediaStateIds.push(mediaStateParams.id);
-    eventIds.push(eventParams.id);
+    // eventIds.push(eventParams.id);
     transitionTypes.push(null);
     transitionDurations.push(0);
 
@@ -921,13 +924,17 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
+          bsdm = getState().bsdm;
           dispatch(addImageItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
             index === 0));
+          bsdm = getState().bsdm;
           break;
         }
         case 'videoItem': {
+          bsdm = getState().bsdm;
           dispatch(addVideoItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
             index === 0));
+          bsdm = getState().bsdm;
           break;
         }
         case 'liveVideoItem': {
@@ -1027,6 +1034,17 @@ function getBpIndexFromButtonPanelIndex(buttonPanelIndex: number): BpIndex {
   }
 }
 
+function getPressContinuous(userEvent: any) {
+  let pressContinuous: any = null;
+  if (!isNil(userEvent.parameters.pressContinuous)) {
+    pressContinuous = {
+      repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
+      initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
+    };
+  }
+  return pressContinuous;
+}
+
 function newBuildTransition(assignInputToUserVariable: boolean,
                             assignWildcardToUserVariable: boolean,
                             displayMode: string,
@@ -1049,25 +1067,34 @@ function newBuildTransition(assignInputToUserVariable: boolean,
       case 'bp900AUserEvent': {
         eventType = EventType.Bp;
 
-        let pressContinuous: any = null;
-        if (!isNil(userEvent.parameters.pressContinuous)) {
-          pressContinuous = {
-            repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
-            initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
-          };
-        }
-
         eventData = {
           bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
           bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
           buttonNumber: userEvent.parameters.buttonNumber,
-          pressContinuous,
+          pressContinuous: getPressContinuous(userEvent),
         } as DmBpEventData;
 
         break;
       }
-      case 'timeout':
-      case 'gpioUserEvent':
+      case 'timeout': {
+        eventType = EventType.Timer;
+        eventData = {
+          interval: userEvent.parameters.parameter,
+        } as DmTimer;
+        break;
+      }
+      case 'gpioUserEvent': {
+        eventType = EventType.Gpio;
+
+        const buttonDirection: ButtonDirection = userEvent.parameters.buttonDirection.toLowerCase() === 'down' ?
+          ButtonDirection.Down : ButtonDirection.Up;
+        eventData = {
+          buttonNumber: userEvent.parameters.buttonNumber,
+          buttonDirection,
+          pressContinuous: getPressContinuous(userEvent),
+        } as DmGpioEventData;
+        break;
+      }
       case 'rectangularTouchEvent':
       case 'mediaEnd':
       case 'synchronize':
@@ -1101,7 +1128,7 @@ function newBuildTransition(assignInputToUserVariable: boolean,
     const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
     console.log(eventId);
 
-    console.log(getState().bsdm);
+    console.log(getState().bsdm.events);
   };
 }
 

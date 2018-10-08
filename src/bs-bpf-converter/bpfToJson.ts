@@ -1154,6 +1154,8 @@ function fixGpioUserEventParameters(rawParameters: any) : any {
     { name: 'buttonDirection', type: 'string'},
   ];
   const parameters = fixJson(parametersSpec, rawParameters);
+  // TEDDY
+  parameters.pressContinuous = null;
   return parameters;
 }
 
