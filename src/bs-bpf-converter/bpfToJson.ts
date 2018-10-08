@@ -1008,37 +1008,29 @@ function fixInteractiveState(rawInteractiveState: any): any {
   if (isObject(rawInteractiveState.imageItem)) {
     interactiveState = fixImageItem(rawInteractiveState.imageItem);
   }
-  if (isObject(rawInteractiveState.videoItem)) {
-    console.log('videoItem');
-    return null;
+  else if (isObject(rawInteractiveState.videoItem)) {
+    interactiveState = fixVideoItem(rawInteractiveState.videoItem);
   }
-  if (isObject(rawInteractiveState.audioItem)) {
-    console.log('audioItem');
-    return null;
+  else if (isObject(rawInteractiveState.audioItem)) {
+    interactiveState = fixAudioItem(rawInteractiveState.audioItem);
   }
-  if (isObject(rawInteractiveState.html5Item)) {
-    console.log('html5Item');
-    return null;
+  else if (isObject(rawInteractiveState.html5Item)) {
+    interactiveState = fixHtml5Item(rawInteractiveState.html5Item);
   }
-  if (isObject(rawInteractiveState.liveVideoItem)) {
-    console.log('liveVideoItem');
-    return null;
+  else if (isObject(rawInteractiveState.liveVideoItem)) {
+    interactiveState = fixLiveVideoItem(rawInteractiveState.liveVideoItem);
   }
-  if (isObject(rawInteractiveState.mrssDataFeedPlaylistItem)) {
-    console.log('mrssDataFeedPlaylistItem');
-    return null;
+  else if (isObject(rawInteractiveState.mrssDataFeedPlaylistItem)) {
+    interactiveState = fixMrssDataFeedItem(rawInteractiveState.mrssDataFeedPlaylistItem);
   }
-  if (isObject(rawInteractiveState.mediaListItem)) {
-    console.log('mediaListItem');
-    return null;
+  else if (isObject(rawInteractiveState.mediaListItem)) {
+    interactiveState = fixMediaListItem(rawInteractiveState.mediaListItem);
   }
-  if (isObject(rawInteractiveState.eventHandler2Item)) {
-    console.log('eventHandler2Item');
-    return null;
+  else if (isObject(rawInteractiveState.eventHandler2Item)) {
+    interactiveState = fixEventHandlerItem(rawInteractiveState.eventHandler2Item);
   }
-  if (isObject(rawInteractiveState.superStateItem)) {
-    console.log('superStateItem');
-    return null;
+  else if (isObject(rawInteractiveState.superStateItem)) {
+    interactiveState = fixSuperStateItem(rawInteractiveState.superStateItem);
   }
 
   if (isArray(rawInteractiveState.brightSignCmd)) {
@@ -1148,6 +1140,142 @@ function fixRawPress(rawBpUserEventParameters: any) : any {
   }
 }
 
+function fixTimeoutParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'number'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixGpioUserEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'buttonNumber', type: 'number'},
+    { name: 'buttonDirection', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixRectangularTouchEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'x', type: 'number'},
+    { name: 'y', type: 'number'},
+    { name: 'width', type: 'number'},
+    { name: 'height', type: 'number'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixMediaEndEventParameters(rawParameters: any) : any {
+  return [];
+}
+
+function fixSynchronizeEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixUdpEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+    { name: 'label', type: 'string'},
+    { name: 'export', type: 'boolean'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixSerialEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'number'},
+    { name: 'parameter2', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixKeyboardEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixUsbEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+// need more test cases!!
+function fixTimeClockEventEventParameters(rawParameters: any) : any {
+  // TBD
+  const parametersSpec: any[] = [
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixZoneMessageEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixRemoteEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixPluginMessageEventParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'parameter', type: 'string'},
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixVideoTimeCodeEventParameters(rawParameters: any) : any {
+  // TBD
+  const parametersSpec: any[] = [
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixGpsEventParameters(rawParameters: any) : any {
+  // TBD
+  const parametersSpec: any[] = [
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixAudioTimeCodeEventParameters(rawParameters: any) : any {
+  // TBD
+  const parametersSpec: any[] = [
+  ];
+  const parameters = fixJson(parametersSpec, rawParameters);
+  return parameters;
+}
+
+function fixMediaListEndEventParameters(rawParameters: any) : any {
+  return [];
+}
+
 function fixRawBpUserEventParameters(rawBpUserEventParameters: any): any {
   const bpUserEventParametersSpec: any[] = [
     { name: 'buttonNumber', type: 'number'},
@@ -1170,24 +1298,56 @@ function fixRawUserEvent(rawUserEvent: any): any {
       userEvent.parameters = fixRawBpUserEventParameters(rawUserEvent.parameters);
       break;
     case 'timeout':
+      userEvent.parameters = fixTimeoutParameters(rawUserEvent.parameters);
+      break;
     case 'gpioUserEvent':
+      userEvent.parameters = fixGpioUserEventParameters(rawUserEvent.parameters);
+      break;
     case 'rectangularTouchEvent':
+      userEvent.parameters = fixRectangularTouchEventParameters(rawUserEvent.parameters);
+      break;
     case 'mediaEnd':
+      userEvent.parameters = fixMediaEndEventParameters(rawUserEvent.parameters);
+      break;
     case 'synchronize':
+      userEvent.parameters = fixSynchronizeEventParameters(rawUserEvent.parameters);
+      break;
     case 'udp':
+      userEvent.parameters = fixUdpEventParameters(rawUserEvent.parameters);
+      break;
     case 'serial':
+      userEvent.parameters = fixSerialEventParameters(rawUserEvent.parameters);
+      break;
     case 'keyboard':
+      userEvent.parameters = fixKeyboardEventParameters(rawUserEvent.parameters);
+      break;
     case 'usb':
+      userEvent.parameters = fixUsbEventParameters(rawUserEvent.parameters);
+      break;
     case 'timeClockEvent':
+      userEvent.parameters = fixTimeClockEventEventParameters(rawUserEvent.parameters);
+      break;
     case 'zoneMessage':
+      userEvent.parameters = fixZoneMessageEventParameters(rawUserEvent.parameters);
+      break;
     case 'remote':
+      userEvent.parameters = fixRemoteEventParameters(rawUserEvent.parameters);
+      break;
     case 'pluginMessageEvent':
+      userEvent.parameters = fixPluginMessageEventParameters(rawUserEvent.parameters);
+      break;
     case 'videoTimeCodeEvent':
+      userEvent.parameters = fixVideoTimeCodeEventParameters(rawUserEvent.parameters);
+      break;
     case 'gpsEvent':
+      userEvent.parameters = fixGpsEventParameters(rawUserEvent.parameters);
+      break;
     case 'audioTimeCodeEvent':
+      userEvent.parameters = fixAudioTimeCodeEventParameters(rawUserEvent.parameters);
+      break;
     case 'mediaListEnd':
-      console.log('userEvent name: ', userEvent.name);
-      userEvent.parameters = null;
+      userEvent.parameters = fixMediaListEndEventParameters(rawUserEvent.parameters);
+      break;
   }
 
   return userEvent;
@@ -1264,6 +1424,26 @@ function fixVideoItem(rawVideoItem : any) : any {
   videoItem.type = 'videoItem';
 
   return videoItem;
+}
+
+// TBD
+function fixAudioItem(rawAudioItem: any) : any {
+
+}
+
+// TBD
+function fixMediaListItem(fixMediaListItem: any) : any {
+
+}
+
+// TBD
+function fixEventHandlerItem(fixEventHandlerItem: any) : any {
+
+}
+
+// TBD
+function fixSuperStateItem(fixSuperStateItem: any) : any {
+
 }
 
 function fixLiveVideoItem(rawLiveVideoItem: any) : any {
