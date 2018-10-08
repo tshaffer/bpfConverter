@@ -979,21 +979,26 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
             index === 0));
           break;
         }
+        case 'audioItem':
+        case 'mediaListItem':
+        case 'eventHandler2Item':
+        case 'superStateItem':
         default:
-          // throw error
-          debugger;
+          console.log('buildZonePlaylist: ', state.type);
           break;
       }
     });
 
     bsdm = getState().bsdm;
 
-    // transition generation differs for interactive vs. non inactive playlists
-    if (bpfZone.playlist.type === 'interactive') {
-      dispatch(buildInteractiveTransitions(bpfZone));
-    }
-    else {
-      buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds);
+    if (bpfZone.playlist.states.length > 0) {
+      // transition generation differs for interactive vs. non inactive playlists
+      if (bpfZone.playlist.type === 'interactive') {
+        dispatch(buildInteractiveTransitions(bpfZone));
+      }
+      else {
+        buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds);
+      }
     }
   };
 }
@@ -1040,25 +1045,48 @@ function newBuildTransition(assignInputToUserVariable: boolean,
     const sourceMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaState });
     const targetMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaState });
 
-    if (userEvent.name === 'bp900AUserEvent') {
+    switch (userEvent.name) {
+      case 'bp900AUserEvent': {
+        eventType = EventType.Bp;
 
-      eventType = EventType.Bp;
+        let pressContinuous: any = null;
+        if (!isNil(userEvent.parameters.pressContinuous)) {
+          pressContinuous = {
+            repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
+            initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
+          };
+        }
 
-      let pressContinuous: any = null;
-      if (!isNil(userEvent.parameters.pressContinuous)) {
-        pressContinuous = {
-          repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
-          initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
-        };
+        eventData = {
+          bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
+          bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
+          buttonNumber: userEvent.parameters.buttonNumber,
+          pressContinuous,
+        } as DmBpEventData;
+
+        break;
       }
-
-      eventData = {
-        bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
-        bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
-        buttonNumber: userEvent.parameters.buttonNumber,
-        pressContinuous,
-      } as DmBpEventData;
-
+      case 'timeout':
+      case 'gpioUserEvent':
+      case 'rectangularTouchEvent':
+      case 'mediaEnd':
+      case 'synchronize':
+      case 'udp':
+      case 'serial':
+      case 'keyboard':
+      case 'usb':
+      case 'timeClockEvent':
+      case 'zoneMessage':
+      case 'remote':
+      case 'pluginMessageEvent':
+      case 'videoTimeCodeEvent':
+      case 'gpsEvent':
+      case 'audioTimeCodeEvent':
+      case 'mediaListEnd':
+      default:
+        console.log('newBuildTransition - userEvent name: ', userEvent.name);
+        userEvent.parameters = null;
+        return;
     }
 
     const eventSpecification: DmEventSpecification =

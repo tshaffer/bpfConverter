@@ -832,42 +832,47 @@ function fixZonePlaylist(zoneType : string, rawZonePlaylist : any) : any {
     console.log(zonePlaylist);
   }
   else {
-    switch (zoneType) {
-      case 'VideoOrImages': {
-        zonePlaylist.states = fixVideoOrImagesZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'VideoOnly': {
-        zonePlaylist.states = fixVideoOnlyZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'Images': {
-        zonePlaylist.states = fixImagesZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'AudioOnly': {
-        zonePlaylist.states = fixAudioOnlyZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'EnhancedAudio': {
-        zonePlaylist.states = fixEnhancedAudioZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'Clock': {
-        zonePlaylist.states = fixClockZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'BackgroundImage': {
-        zonePlaylist.states = fixBackgroundImageZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      case 'Ticker': {
-        zonePlaylist.states = fixTickerZonePlaylist(rawZonePlaylist);
-        break;
-      }
-      default: {
-        // throw error
-        debugger;
+    if (isNil(rawZonePlaylist)) {
+      zonePlaylist.states = [];
+    }
+    else {
+      switch (zoneType) {
+        case 'VideoOrImages': {
+          zonePlaylist.states = fixVideoOrImagesZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'VideoOnly': {
+          zonePlaylist.states = fixVideoOnlyZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'Images': {
+          zonePlaylist.states = fixImagesZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'AudioOnly': {
+          zonePlaylist.states = fixAudioOnlyZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'EnhancedAudio': {
+          zonePlaylist.states = fixEnhancedAudioZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'Clock': {
+          zonePlaylist.states = fixClockZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'BackgroundImage': {
+          zonePlaylist.states = fixBackgroundImageZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        case 'Ticker': {
+          zonePlaylist.states = fixTickerZonePlaylist(rawZonePlaylist);
+          break;
+        }
+        default: {
+          // throw error
+          debugger;
+        }
       }
     }
   }
@@ -1393,28 +1398,30 @@ function fixJson(parametersSpec: any[], parameters: any) : any {
 
   const convertedParameters: any = {};
 
-  parametersSpec.forEach( (parameterSpec : any) => {
-    if (parameters.hasOwnProperty(parameterSpec.name)) {
-      const parameterValue = parameters[parameterSpec.name];
-      switch (parameterSpec.type) {
-        case 'string':
-          if (typeof parameterValue === 'string') {
-            convertedParameters[parameterSpec.name] = parameterValue;
-          }
-          else {
-            // TODO - or should it be null?
-            convertedParameters[parameterSpec.name] = '';
-          }
-          break;
-        case 'boolean':
-          convertedParameters[parameterSpec.name] = Converters.stringToBool(parameterValue);
-          break;
-        case 'number':
-          convertedParameters[parameterSpec.name] = Converters.stringToNumber(parameterValue);
-          break;
+  if (!isNil(parameters)) {
+    parametersSpec.forEach( (parameterSpec : any) => {
+      if (parameters.hasOwnProperty(parameterSpec.name)) {
+        const parameterValue = parameters[parameterSpec.name];
+        switch (parameterSpec.type) {
+          case 'string':
+            if (typeof parameterValue === 'string') {
+              convertedParameters[parameterSpec.name] = parameterValue;
+            }
+            else {
+              // TODO - or should it be null?
+              convertedParameters[parameterSpec.name] = '';
+            }
+            break;
+          case 'boolean':
+            convertedParameters[parameterSpec.name] = Converters.stringToBool(parameterValue);
+            break;
+          case 'number':
+            convertedParameters[parameterSpec.name] = Converters.stringToNumber(parameterValue);
+            break;
+        }
       }
-    }
-  });
+    });
+  }
 
   return convertedParameters;
 }
