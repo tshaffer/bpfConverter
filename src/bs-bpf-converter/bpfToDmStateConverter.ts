@@ -55,6 +55,7 @@ import {
   dmGetMediaStateByName,
   DmBpEventData,
   DmGpioEventData,
+  DmPluginMessageEventData,
   DmRectangularTouchEventData,
   DmTimer,
 
@@ -147,7 +148,7 @@ import {
   dmUpdateSignSerialPorts,
   dmUpdateZone,
   dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams, DmcMediaState, DmEvent, BsDmIdNone,
-  DmSimpleEventData, DmUdpEventData,
+  DmSimpleEventData, DmUdpEventData, DmSerialEventData,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -1183,7 +1184,19 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         break;
       }
       case 'serial':
-      case 'keyboard':
+        eventType = EventType.Serial;
+        eventData = {
+          port: userEvent.parameters.parameter,
+          data: userEvent.parameters.parameter2,
+        } as DmSerialEventData;
+        break;
+      case 'keyboard': {
+        eventType = EventType.Keyboard;
+        eventData = {
+          data: userEvent.parameters.parameter
+        } as DmSimpleEventData;
+        break;
+      }
       case 'usb': {
         eventType = EventType.Usb;
         eventData = {
@@ -1192,6 +1205,7 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         break;
       }
       case 'timeClockEvent':
+        break;
       case 'zoneMessage': {
         eventType = EventType.ZoneMessage;
         eventData = {
@@ -1206,11 +1220,27 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         } as DmSimpleEventData;
         break;
       }
-      case 'pluginMessageEvent':
-      case 'videoTimeCodeEvent':
-      case 'gpsEvent':
-      case 'audioTimeCodeEvent':
-      case 'mediaListEnd':
+      // TODO - other members of EventType.PluginMessage
+      case 'pluginMessageEvent': {
+        eventType = EventType.PluginMessage;
+        eventData = {
+          name: userEvent.parameters.name,
+          message: userEvent.parameters.message,
+        } as DmPluginMessageEventData;
+        break;
+      }
+      case 'videoTimeCodeEvent': {
+        break;
+      }
+      case 'gpsEvent': {
+        break;
+      }
+      case 'audioTimeCodeEvent': {
+        break;
+      }
+      case 'mediaListEnd': {
+        break;
+      }
       default:
         console.log('newBuildTransition - userEvent name: ', userEvent.name);
         userEvent.parameters = null;

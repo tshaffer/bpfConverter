@@ -1244,7 +1244,8 @@ function fixRemoteEventParameters(rawParameters: any) : any {
 
 function fixPluginMessageEventParameters(rawParameters: any) : any {
   const parametersSpec: any[] = [
-    { name: 'parameter', type: 'string'},
+    { name: 'name', type: 'string'},
+    { name: 'message', type: 'string'},
   ];
   const parameters = fixJson(parametersSpec, rawParameters);
   return parameters;
