@@ -1112,6 +1112,9 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         } as DmRectangularTouchEventData;
         break;
       case 'mediaEnd':
+        eventType = EventType.MediaEnd;
+        eventData = null;
+        break;
       case 'synchronize':
       case 'udp':
       case 'serial':
