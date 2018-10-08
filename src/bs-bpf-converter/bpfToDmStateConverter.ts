@@ -7,6 +7,8 @@ import {
   BpType,
   BpIndex,
   ButtonDirection,
+  RegionDirection,
+  DistanceUnits,
 
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
@@ -55,9 +57,17 @@ import {
   dmGetMediaStateByName,
   DmBpEventData,
   DmGpioEventData,
+  DmGpsEventData,
   DmPluginMessageEventData,
   DmRectangularTouchEventData,
   DmTimer,
+
+  DmTimeClockEventData,
+  DmTimeClockEventType,
+  DmTimeClockDateTimeEventData,
+  DmTimeClockByUserVariableEventData,
+  DmTimeClockDailyOnceEventData,
+  DmTimeClockDailyPeriodicEventData,
 
   AudioSignPropertyMapParams,
   BrightScriptPluginParams,
@@ -1205,6 +1215,17 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         break;
       }
       case 'timeClockEvent':
+        eventType = EventType.TimeClock;
+        switch (userEvent.parameters.type) {
+          case 'timeClockDateTime':
+            eventData = {
+              type: DmTimeClockEventType.DailyOnce,
+              data: {
+                dateTime: new Date(userEvent.parameters.dateTime),
+              },
+            } as DmTimeClockEventData;
+            break;
+        }
         break;
       case 'zoneMessage': {
         eventType = EventType.ZoneMessage;
@@ -1232,13 +1253,25 @@ function newBuildTransition(assignInputToUserVariable: boolean,
       case 'videoTimeCodeEvent': {
         break;
       }
+      // TODO - as of 10/8/208, there's a bug in bscore for DistanceUnits
       case 'gpsEvent': {
+        eventType = EventType.Gps;
+        eventData = {
+          direction: userEvent.parameters.enterRegion ? RegionDirection.Enter : RegionDirection.Exit,
+          radius: userEvent.parameters.gpsRegion.radius,
+          distanceUnits:
+            userEvent.parameters.gpsRegion.radiusUnitsInMiles ? DistanceUnits.Miles : DistanceUnits.Kilometers,
+          latitude: userEvent.parameters.gpsRegion.latitude,
+          longitude: userEvent.parameters.gpsRegion.longitude,
+        };
         break;
       }
       case 'audioTimeCodeEvent': {
         break;
       }
       case 'mediaListEnd': {
+        eventType = EventType.MediaListEnd;
+        eventData = null;
         break;
       }
       default:

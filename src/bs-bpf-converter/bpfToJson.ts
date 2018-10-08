@@ -1218,9 +1218,19 @@ function fixUsbEventParameters(rawParameters: any) : any {
 }
 
 // need more test cases!!
+// TODO - hardcoded currently
 function fixTimeClockEventEventParameters(rawParameters: any) : any {
   // TBD
   const parametersSpec: any[] = [
+  ];
+  const parameters = fixTimeClockDateTime(rawParameters.timeClockDateTime);
+  parameters.type = 'timeClockDateTime';
+  return parameters;
+}
+
+function fixTimeClockDateTime(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'dateTime', type: 'string'},
   ];
   const parameters = fixJson(parametersSpec, rawParameters);
   return parameters;
@@ -1260,11 +1270,22 @@ function fixVideoTimeCodeEventParameters(rawParameters: any) : any {
 }
 
 function fixGpsEventParameters(rawParameters: any) : any {
-  // TBD
   const parametersSpec: any[] = [
+    { name: 'enterRegion', type: 'boolean'}
   ];
   const parameters = fixJson(parametersSpec, rawParameters);
+  parameters.gpsRegion = fixGpsRegion(rawParameters.gpsRegion);
   return parameters;
+}
+
+function fixGpsRegion(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'radius', type: 'number'},
+    { name: 'radiusUnitsInMiles', type: 'boolean'},
+    { name: 'latitude', type: 'number'},
+    { name: 'longitude', type: 'number'},
+  ];
+  return fixJson(parametersSpec, rawParameters);
 }
 
 function fixAudioTimeCodeEventParameters(rawParameters: any) : any {
@@ -1328,7 +1349,7 @@ function fixRawUserEvent(rawUserEvent: any): any {
       userEvent.parameters = fixUsbEventParameters(rawUserEvent.parameters);
       break;
     case 'timeClockEvent':
-      userEvent.parameters = fixTimeClockEventEventParameters(rawUserEvent.parameters);
+      userEvent.parameters = fixTimeClockEventEventParameters(rawUserEvent.timeClockEvent);
       break;
     case 'zoneMessage':
       userEvent.parameters = fixZoneMessageEventParameters(rawUserEvent.parameters);
