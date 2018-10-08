@@ -1428,9 +1428,18 @@ function fixVideoItem(rawVideoItem : any) : any {
   return videoItem;
 }
 
-// TBD
 function fixAudioItem(rawAudioItem: any) : any {
 
+  const audioItemParametersSpec: any[] = [
+    { name: 'fileIsLocal', type: 'boolean'},
+    { name: 'volume', type: 'number'},
+  ];
+
+  const audioItem : any = fixJson(audioItemParametersSpec, rawAudioItem);
+  audioItem.file = fixRawFileItem(rawAudioItem.file.$);
+  audioItem.type = 'audioItem';
+
+  return audioItem;
 }
 
 // TBD

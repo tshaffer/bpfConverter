@@ -147,6 +147,7 @@ import {
   dmUpdateSignSerialPorts,
   dmUpdateZone,
   dmUpdateZoneProperties, DmZoneSpecificProperties, HtmlSiteHostedParams, DmcMediaState, DmEvent, BsDmIdNone,
+  DmSimpleEventData, DmUdpEventData,
 } from '@brightsign/bsdatamodel';
 
 import {
@@ -750,6 +751,49 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
   };
 }
 
+function addAudioItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
+                      eventIds: BsDmId[],
+                      transitionTypes: TransitionType[],
+                      transitionDurations: number[], initialState: boolean): Function {
+
+  return (dispatch: Function, getState: Function): any => {
+
+    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
+
+    // TODO - why are some of these parameters unused?
+    const {file, fileIsLocal, volume} = state;
+
+    const fileName = file.name;
+    const filePath = file.path;
+    let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
+    const linkBroken : boolean = bsAssetItem === null;
+    if (!bsAssetItem) {
+      bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
+        filePath);
+    }
+
+    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams: MediaStateParams = mediaStateAction.payload;
+
+    // const eventAction: any = dispatch(dmAddEvent('mediaEnd', EventType.MediaEnd, mediaStateParams.id));
+    // const eventParams: EventParams = eventAction.payload;
+
+    mediaStateIds.push(mediaStateParams.id);
+    // eventIds.push(eventParams.id);
+    transitionTypes.push(null);
+    transitionDurations.push(0);
+
+    // TODO - do this for all states?
+    if (initialState) {
+      dispatch(dmUpdateZone({
+        id: zoneId,
+        initialMediaStateId: mediaStateParams.id,
+      }));
+    }
+  };
+}
+
 function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
                           eventIds: BsDmId[],
                           transitionTypes: TransitionType[],
@@ -938,6 +982,13 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           bsdm = getState().bsdm;
           break;
         }
+        case 'audioItem': {
+          bsdm = getState().bsdm;
+          dispatch(addAudioItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
+            index === 0));
+          bsdm = getState().bsdm;
+          break;
+        }
         case 'liveVideoItem': {
           dispatch(addLiveVideoItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
             index === 0));
@@ -987,7 +1038,6 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
             index === 0));
           break;
         }
-        case 'audioItem':
         case 'mediaListItem':
         case 'eventHandler2Item':
         case 'superStateItem':
@@ -1086,7 +1136,6 @@ function newBuildTransition(assignInputToUserVariable: boolean,
       }
       case 'gpioUserEvent': {
         eventType = EventType.Gpio;
-
         const buttonDirection: ButtonDirection = userEvent.parameters.buttonDirection.toLowerCase() === 'down' ?
           ButtonDirection.Down : ButtonDirection.Up;
         eventData = {
@@ -1096,9 +1145,8 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         } as DmGpioEventData;
         break;
       }
-      case 'rectangularTouchEvent':
+      case 'rectangularTouchEvent': {
         eventType = EventType.RectangularTouch;
-
         eventData = {
           regions: [
             {
@@ -1111,18 +1159,53 @@ function newBuildTransition(assignInputToUserVariable: boolean,
           ]
         } as DmRectangularTouchEventData;
         break;
-      case 'mediaEnd':
+      }
+      case 'mediaEnd': {
         eventType = EventType.MediaEnd;
         eventData = null;
         break;
-      case 'synchronize':
-      case 'udp':
+      }
+      case 'synchronize': {
+        eventType = EventType.Synchronize;
+        eventData = {
+          data: userEvent.parameters.parameter
+        } as DmSimpleEventData;
+        break;
+      }
+      case 'udp': {
+        // TODO - other members of EventType.Udp
+        eventType = EventType.Udp;
+        eventData = {
+          data: userEvent.parameters.parameter,
+          label: userEvent.parameters.label,
+          export: userEvent.parameters.export,
+        } as DmUdpEventData;
+        break;
+      }
       case 'serial':
       case 'keyboard':
-      case 'usb':
+      case 'usb': {
+        eventType = EventType.Usb;
+        eventData = {
+          data: userEvent.parameters.parameter
+        } as DmSimpleEventData;
+        break;
+      }
       case 'timeClockEvent':
-      case 'zoneMessage':
-      case 'remote':
+      case 'zoneMessage': {
+        eventType = EventType.ZoneMessage;
+        eventData = {
+          data: userEvent.parameters.parameter
+        } as DmSimpleEventData;
+        break;
+      }
+      case 'remote': {
+        eventType = EventType.Remote;
+        eventData = {
+          data: userEvent.parameters.parameter
+        } as DmSimpleEventData;
+        break;
+      }
       case 'pluginMessageEvent':
       case 'videoTimeCodeEvent':
       case 'gpsEvent':
