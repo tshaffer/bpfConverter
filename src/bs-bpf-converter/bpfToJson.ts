@@ -239,7 +239,6 @@ function fixLiveDataFeeds(rawLiveDataFeedSpec: any) : any {
   if (rawLiveDataFeedSpec && rawLiveDataFeedSpec.liveDataFeed) {
     const rawLiveDataFeeds = getParameterArray(rawLiveDataFeedSpec.liveDataFeed);
     rawLiveDataFeeds.forEach((rawLiveDataFeed: any) => {
-      console.log(rawLiveDataFeed);
 
       const liveDataFeed: any = fixJson(liveDataFeedConfigurationSpec, rawLiveDataFeed);
 
@@ -570,9 +569,17 @@ function fixZones(rawZoneSpecs: any) : any {
 
   const zones : any = [];
 
-  rawZoneSpecs.forEach( (rawZoneSpec: any) => {
-    zones.push(fixZone(rawZoneSpec.zone));
-  });
+  if (isArray(rawZoneSpecs[0].zone)) {
+    rawZoneSpecs[0].zone.forEach( (rawZoneSpec: any) => {
+      zones.push(fixZone(rawZoneSpec));
+    });
+  }
+  else if (isObject(rawZoneSpecs[0].zone)) {
+    console.log(rawZoneSpecs[0].zone);
+    rawZoneSpecs.forEach( (rawZoneSpec: any) => {
+      zones.push(fixZone(rawZoneSpec.zone));
+    });
+  }
 
   return zones;
 }
@@ -963,12 +970,17 @@ function fixEnhancedAudioZonePlaylist(rawEnhancedAudioZonePlaylist : any) : any 
       'fixEnhancedAudioZonePlaylist: interactive playlist not supported');
   }
 }
+
 function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
 
   const rawStates = rawZonePlaylist.states.state;
   const states: any[] = [];
   rawStates.forEach ( (state: any) => {
-    states.push(fixInteractiveState(state));
+    // states.push(fixInteractiveState(state));
+    const interactiveState = fixInteractiveState(state);
+    if (!isNil(interactiveState)) {
+      states.push(interactiveState);
+    }
   });
 
   const rawTransitions = rawZonePlaylist.states.transition;
@@ -989,9 +1001,41 @@ function fixInteractiveState(rawInteractiveState: any): any {
   let interactiveState: any;
 
   if (isObject(rawInteractiveState.imageItem)) {
-    // interactiveState.mediaItem = fixImageItem(rawInteractiveState.imageItem);
     interactiveState = fixImageItem(rawInteractiveState.imageItem);
   }
+  if (isObject(rawInteractiveState.videoItem)) {
+    console.log('videoItem');
+    return null;
+  }
+  if (isObject(rawInteractiveState.audioItem)) {
+    console.log('audioItem');
+    return null;
+  }
+  if (isObject(rawInteractiveState.html5Item)) {
+    console.log('html5Item');
+    return null;
+  }
+  if (isObject(rawInteractiveState.liveVideoItem)) {
+    console.log('liveVideoItem');
+    return null;
+  }
+  if (isObject(rawInteractiveState.mrssDataFeedPlaylistItem)) {
+    console.log('mrssDataFeedPlaylistItem');
+    return null;
+  }
+  if (isObject(rawInteractiveState.mediaListItem)) {
+    console.log('mediaListItem');
+    return null;
+  }
+  if (isObject(rawInteractiveState.eventHandler2Item)) {
+    console.log('eventHandler2Item');
+    return null;
+  }
+  if (isObject(rawInteractiveState.superStateItem)) {
+    console.log('superStateItem');
+    return null;
+  }
+
   if (isArray(rawInteractiveState.brightSignCmd)) {
     interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
   }
@@ -1120,6 +1164,25 @@ function fixRawUserEvent(rawUserEvent: any): any {
     case 'bp900AUserEvent':
       userEvent.parameters = fixRawBpUserEventParameters(rawUserEvent.parameters);
       break;
+    case 'timeout':
+    case 'gpioUserEvent':
+    case 'rectangularTouchEvent':
+    case 'mediaEnd':
+    case 'synchronize':
+    case 'udp':
+    case 'serial':
+    case 'keyboard':
+    case 'usb':
+    case 'timeClockEvent':
+    case 'zoneMessage':
+    case 'remote':
+    case 'pluginMessageEvent':
+    case 'videoTimeCodeEvent':
+    case 'gpsEvent':
+    case 'audioTimeCodeEvent':
+    case 'mediaListEnd':
+      console.log('userEvent name: ', userEvent.name);
+      userEvent.parameters = null;
   }
 
   return userEvent;
