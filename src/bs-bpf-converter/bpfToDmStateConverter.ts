@@ -1250,9 +1250,6 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         } as DmPluginMessageEventData;
         break;
       }
-      case 'videoTimeCodeEvent': {
-        break;
-      }
       // TODO - as of 10/8/208, there's a bug in bscore for DistanceUnits
       case 'gpsEvent': {
         eventType = EventType.Gps;
@@ -1263,10 +1260,13 @@ function newBuildTransition(assignInputToUserVariable: boolean,
             userEvent.parameters.gpsRegion.radiusUnitsInMiles ? DistanceUnits.Miles : DistanceUnits.Kilometers,
           latitude: userEvent.parameters.gpsRegion.latitude,
           longitude: userEvent.parameters.gpsRegion.longitude,
-        };
+        } as DmGpsEventData;
         break;
       }
       case 'audioTimeCodeEvent': {
+        break;
+      }
+      case 'videoTimeCodeEvent': {
         break;
       }
       case 'mediaListEnd': {

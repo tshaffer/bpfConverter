@@ -1287,7 +1287,6 @@ function fixTimedBrightSignCmdParameters(rawParameters: any) : any {
 }
 
 function fixVideoTimeCodeEventParameters(rawParameters: any) : any {
-  // TBD
   const parameters = fixTimedBrightSignCmdParameters(rawParameters.timedBrightSignCmd);
   return parameters;
 }
@@ -1312,7 +1311,6 @@ function fixGpsRegion(rawParameters: any) : any {
 }
 
 function fixAudioTimeCodeEventParameters(rawParameters: any) : any {
-  // TBD
   const parameters = fixTimedBrightSignCmdParameters(rawParameters.timedBrightSignCmd);
   return parameters;
 }
