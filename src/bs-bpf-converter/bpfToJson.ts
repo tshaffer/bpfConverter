@@ -1090,7 +1090,9 @@ function fixBrightSignCmdParameter(bsCommandParameter: any): any {
     { name: 'name', type: 'string'},
   ];
   const parameter: any = fixJson(parameterParametersSpec, bsCommandParameter);
-  parameter.parameterValue = fixParameterValue(bsCommandParameter.parameterValue);
+  if (isObject(bsCommandParameter.parameterValue)) {
+    parameter.parameterValue = fixParameterValue(bsCommandParameter.parameterValue);
+  }
   return parameter;
 }
 
@@ -1261,11 +1263,32 @@ function fixPluginMessageEventParameters(rawParameters: any) : any {
   return parameters;
 }
 
+// TODO - is timedBrightSignCmd.brightSignCmd ever an array? or timedBrightSignCmd.brightSignCmd.command? SetAudio?
+function fixTimedBrightSignCmdParameters(rawParameters: any) : any {
+  const parametersSpec: any[] = [
+    { name: 'timeout', type: 'number'},
+  ];
+  let brightSignCmd: any = {};
+  const timedBrightSignCmds: any[] = [];
+  if (isArray(rawParameters)) {
+    rawParameters.forEach( (timedBrightSignCmd: any) => {
+      brightSignCmd = {};
+      brightSignCmd.timeout = fixJson(parametersSpec, timedBrightSignCmd);
+      brightSignCmd.command = fixBrightSignCommand(timedBrightSignCmd.brightSignCmd);
+      timedBrightSignCmds.push(brightSignCmd);
+    });
+  }
+  else {
+    brightSignCmd.timeout = fixJson(parametersSpec, rawParameters);
+    brightSignCmd.command = fixBrightSignCommand(rawParameters.brightSignCmd);
+    timedBrightSignCmds.push(brightSignCmd);
+  }
+  return timedBrightSignCmds;
+}
+
 function fixVideoTimeCodeEventParameters(rawParameters: any) : any {
   // TBD
-  const parametersSpec: any[] = [
-  ];
-  const parameters = fixJson(parametersSpec, rawParameters);
+  const parameters = fixTimedBrightSignCmdParameters(rawParameters.timedBrightSignCmd);
   return parameters;
 }
 
@@ -1290,9 +1313,7 @@ function fixGpsRegion(rawParameters: any) : any {
 
 function fixAudioTimeCodeEventParameters(rawParameters: any) : any {
   // TBD
-  const parametersSpec: any[] = [
-  ];
-  const parameters = fixJson(parametersSpec, rawParameters);
+  const parameters = fixTimedBrightSignCmdParameters(rawParameters.timedBrightSignCmd);
   return parameters;
 }
 
