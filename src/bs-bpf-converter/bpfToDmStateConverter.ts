@@ -896,70 +896,55 @@ function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Functio
   };
 }
 
+function createTimeoutEventData(mediaStateId: BsDmId, timeout: number) {
+  return {
+    mediaStateId,
+    eventSpecification: {
+      type: EventType.Timer,
+      data: {
+        interval: timeout
+      }
+    }
+  };
+}
+
+function createMediaEndEventData(mediaStateId: BsDmId) {
+  return {
+    mediaStateId,
+    eventSpecification: {
+      type: EventType.MediaEnd,
+      data: null as any
+    }
+  };
+}
+
 function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
 
   return (dispatch: Function, getState: Function): any => {
 
-    let bsdm : DmState = getState().bsdm;
-
-    const mediaStateIds: BsDmId[] = [];
-    const eventSpecifications: DmEventSpecification[] = [];
+    const eventData: any[] = [];
 
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
-          bsdm = getState().bsdm;
           const mediaStateId: string = dispatch(addImageItem(zoneId, state, index === 0));
-          bsdm = getState().bsdm;
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.Timer,
-            data: {
-              interval: Number(state.slideDelayInterval),
-            } as DmTimer
-          } as DmEventSpecification);
-
+          eventData.push(createTimeoutEventData(mediaStateId, state.slideDelayInterval));
           break;
         }
         case 'videoItem': {
-          bsdm = getState().bsdm;
           const mediaStateId: string = dispatch(addVideoItem(zoneId, state, index === 0));
-          bsdm = getState().bsdm;
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.MediaEnd,
-            data: null
-          } as DmEventSpecification);
-
+          eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'audioItem': {
-          bsdm = getState().bsdm;
           const mediaStateId: string = dispatch(addAudioItem(zoneId, state, index === 0));
-          bsdm = getState().bsdm;
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.MediaEnd,
-            data: null
-          } as DmEventSpecification);
-
+          eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'liveVideoItem': {
           const mediaStateId: string = dispatch(addLiveVideoItem(zoneId, state, index === 0));
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.Timer,
-            data: {
-              interval: Number(state.timeOnScreen),
-            } as DmTimer
-          } as DmEventSpecification);
-
+          eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
         case 'audioStreamItem':
@@ -969,9 +954,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
 
           const { timeOnScreen } = state;
 
-          const url = convertParameterValue(bsdm, state.url);
-
-          // TODO - volume
+          const url = convertParameterValue(getState().bsdm, state.url);
 
           const videoStreamContentItem : DmVideoStreamContentItem =
             dmCreateVideoStreamContentItem('videoStream', url);
@@ -981,57 +964,27 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           const mediaStateAction : MediaStateAction = dispatch(addMediaStateThunkAction);
           const mediaStateParams : MediaStateParams = mediaStateAction.payload;
 
-          const eventAction : any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-            { interval : timeOnScreen } ));
-          const eventParams : EventParams = eventAction.payload;
-
-          mediaStateIds.push(mediaStateParams.id);
-
           if (timeOnScreen === 0) {
-            eventSpecifications.push({
-              type: EventType.MediaEnd,
-              data: null
-            } as DmEventSpecification);
+            eventData.push(createMediaEndEventData(mediaStateParams.id));
           }
           else {
-            eventSpecifications.push({
-              type: EventType.Timer,
-              data: {
-                interval: timeOnScreen,
-              } as DmTimer
-            } as DmEventSpecification);
+            eventData.push(createTimeoutEventData(mediaStateParams.id, timeOnScreen));
           }
-
           break;
         }
-        // ?? time interval?
+        // TODO - what is this? finish coding once I figure that out
         case 'rssDataFeedPlaylistItem':
           dispatch(addRssDataFeedPlaylistItem(zoneId, state, index === 0));
           break;
 
-        // ?? time interval?
         case 'mrssDataFeedItem': {
           const mediaStateId: string = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, index === 0));
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.MediaEnd,
-            data: null
-          } as DmEventSpecification);
-
+          eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'html5Item': {
           const mediaStateId: string = dispatch(addHtmlItem(zoneId, state, index === 0));
-
-          mediaStateIds.push(mediaStateId);
-          eventSpecifications.push({
-            type: EventType.Timer,
-            data: {
-              interval: Number(state.timeOnScreen),
-            } as DmTimer
-          } as DmEventSpecification);
-
+          eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
         case 'mediaListItem':
@@ -1043,14 +996,12 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
       }
     });
 
-    bsdm = getState().bsdm;
-
     if (bpfZone.playlist.states.length > 0) {
       if (bpfZone.playlist.type === 'interactive') {
         dispatch(buildInteractiveTransitions(bpfZone));
       }
       else {
-        buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds, eventSpecifications);
+        dispatch(buildNonInteractiveTransitions(eventData));
       }
     }
   };
@@ -1273,10 +1224,16 @@ function buildInteractiveTransition(assignInputToUserVariable: boolean,
         } as DmGpsEventData;
         break;
       }
+      // TODO - temporary
       case 'audioTimeCodeEvent': {
+        eventType = EventType.MediaEnd;
+        eventData = null;
         break;
       }
+      // TODO - temporary
       case 'videoTimeCodeEvent': {
+        eventType = EventType.MediaEnd;
+        eventData = null;
         break;
       }
       case 'mediaListEnd': {
@@ -1303,27 +1260,31 @@ function buildInteractiveTransition(assignInputToUserVariable: boolean,
   };
 }
 
-function buildNonInteractiveTransitions(dispatch: Function, bsdm: DmState, mediaStateIds: BsDmId[],
-                                        eventSpecifications: DmEventSpecification[]) {
-  for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-    buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1], eventSpecifications[i]);
-  }
-  buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0],
-    eventSpecifications[mediaStateIds.length - 1]);
+function buildNonInteractiveTransitions(eventData: any[]) {
+  return (dispatch: Function) => {
+    for (let i = 0; i < (eventData.length - 1); i++) {
+      dispatch(buildTransition(eventData[i].mediaStateId, eventData[i + 1].mediaStateId,
+        eventData[i].eventSpecification));
+    }
+    dispatch(buildTransition(eventData[eventData.length - 1].mediaStateId, eventData[0].mediaStateId,
+      eventData[eventData.length - 1].eventSpecification));
+  };
 }
 
-function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string, targetIndex: string,
+function buildTransition(sourceIndex: string, targetIndex: string,
                          eventSpecification: DmEventSpecification) {
+  return (dispatch: Function, getState: Function) => {
+    const bsdm: DmState = getState().bsdm;
+    const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
+    const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
 
-  const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
-  const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
-
-  const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
-    dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
-      sourceMediaState.id,
-      targetMediaState.id,
-      eventSpecification);
-  dispatch(thunkAction as any);
+    const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
+      dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
+        sourceMediaState.id,
+        targetMediaState.id,
+        eventSpecification);
+    dispatch(thunkAction as any);
+  };
 }
 
 function convertParameterValue(bsdm: DmState, bpfParameterValue : any) : DmParameterizedString {
