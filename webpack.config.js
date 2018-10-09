@@ -10,7 +10,6 @@ module.exports = {
     filename: "bundle.js",
     path: __dirname + "/build"
   },
-  devtool: 'source-map',
   target: 'electron',
   
   resolve: {
