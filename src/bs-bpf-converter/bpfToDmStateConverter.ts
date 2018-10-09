@@ -1,6 +1,6 @@
 import path from 'isomorphic-path';
 
-import { isNil } from 'lodash';
+import { isNil, isString } from 'lodash';
 
 import {
   EventIntrinsicAction,
@@ -9,6 +9,7 @@ import {
   ButtonDirection,
   RegionDirection,
   DistanceUnits,
+  MediaListPlaybackType,
 
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
@@ -61,6 +62,8 @@ import {
   DmPluginMessageEventData,
   DmRectangularTouchEventData,
   DmTimer,
+  dmCreateMediaListContentItem,
+  DmMediaListContentItem,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -862,6 +865,36 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: b
   };
 }
 
+function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+
+  return (dispatch: Function, getState: Function): any => {
+    console.log(state);
+
+    const { advanceOnImageTimeout, advanceOnMediaEnd, imageTimeout, liveDataFeedName, mediaType, nextEvent,
+      nextTransitionCommand, playFromBeginning,
+      populateFromMediaLibrary, previousEvent, previousTransitionCommand, sendZoneMessage,
+      shuffle, slideTransition, startIndex, support4KImages, transitionDuration } = state;
+
+    // TODO - name TBD
+    const name = 'mediaListName';
+
+    const mediaListPlaybackType: MediaListPlaybackType = playFromBeginning ? MediaListPlaybackType.FromIndex :
+        MediaListPlaybackType.NextInList;
+
+    // TODO - convert slideTransition
+    
+    // TODO - DataFeed
+    const dataFeedId = BsDmIdNone;
+
+    const mediaList: DmMediaListContentItem =
+      dmCreateMediaListContentItem(name, mediaListPlaybackType, startIndex, shuffle, support4KImages,
+        isString(liveDataFeedName) && liveDataFeedName.length > 0, dataFeedId, slideTransition, transitionDuration,
+        false, sendZoneMessage);
+
+    debugger;
+  }
+}
+
 function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
@@ -947,6 +980,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
+        // TODO
         case 'audioStreamItem':
         case 'mjpegStreamItem':
           break;
@@ -988,6 +1022,8 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           break;
         }
         case 'mediaListItem':
+          const mediaStateId: string = dispatch(addMediaListItem(zoneId, state, index === 0));
+          break;
         case 'eventHandler2Item':
         case 'superStateItem':
         default:

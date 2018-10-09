@@ -997,11 +997,14 @@ function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
     }
   });
 
-  const rawTransitions = rawZonePlaylist.states.transition;
   const transitions: any[] = [];
-  rawTransitions.forEach ( (transition: any) => {
-    transitions.push(fixInteractiveTransition(transition));
-  });
+
+  if (isObject(rawZonePlaylist.states.transition)) {
+    const rawTransitions = rawZonePlaylist.states.transition;
+    rawTransitions.forEach ( (transition: any) => {
+      transitions.push(fixInteractiveTransition(transition));
+    });
+  }
 
   return {
     initialState: rawZonePlaylist.states.initialState,
@@ -1537,6 +1540,8 @@ function fixMediaListItem(rawMediaListItem: any) : any {
     mediaListItem.previousTransitionCommand =
       fixMediaListTransitionCommand(rawMediaListItem.brightSignCmdsTransitionPreviousItem);
   }
+
+  mediaListItem.type = 'mediaListItem';
 
   console.log(mediaListItem);
   return mediaListItem;
