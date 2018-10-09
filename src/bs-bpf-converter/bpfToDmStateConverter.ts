@@ -716,6 +716,8 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
   };
 }
 
@@ -759,6 +761,8 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
   };
 }
 
@@ -802,6 +806,8 @@ function addAudioItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
   };
 }
 
@@ -840,6 +846,8 @@ function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
   };
 }
 
@@ -881,6 +889,8 @@ function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: B
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
   };
 }
 
@@ -919,6 +929,9 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: 
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
+
   };
 }
 
@@ -962,6 +975,9 @@ function addHtmlItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
         initialMediaStateId: mediaStateParams.id,
       }));
     }
+
+    return mediaStateParams.id;
+
   };
 }
 
@@ -972,6 +988,9 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     let bsdm : DmState = getState().bsdm;
 
     const mediaStateIds: BsDmId[] = [];
+    const eventSpecifications: DmEventSpecification[] = [];
+
+    const oldMediaStateIds: BsDmId[] = [];
     const eventIds: BsDmId[] = [];
     const transitionTypes: TransitionType[] = [];
     const transitionDurations: number[] = [];
@@ -981,30 +1000,67 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
       switch (state.type) {
         case 'imageItem': {
           bsdm = getState().bsdm;
-          dispatch(addImageItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
+          const mediaStateId: string = dispatch(addImageItem(zoneId, state, oldMediaStateIds, eventIds,
+            transitionTypes, transitionDurations,
             index === 0));
           bsdm = getState().bsdm;
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.Timer,
+            data: {
+              interval: Number(state.slideDelayInterval),
+            } as DmTimer
+          } as DmEventSpecification);
+
           break;
         }
         case 'videoItem': {
           bsdm = getState().bsdm;
-          dispatch(addVideoItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
+          const mediaStateId: string = dispatch(addVideoItem(zoneId, state, oldMediaStateIds, eventIds,
+            transitionTypes, transitionDurations,
             index === 0));
           bsdm = getState().bsdm;
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.MediaEnd,
+            data: null
+          } as DmEventSpecification);
+
           break;
         }
         case 'audioItem': {
           bsdm = getState().bsdm;
-          dispatch(addAudioItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
+          const mediaStateId: string = dispatch(addAudioItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes, transitionDurations,
             index === 0));
           bsdm = getState().bsdm;
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.MediaEnd,
+            data: null
+          } as DmEventSpecification);
+
           break;
         }
         case 'liveVideoItem': {
-          dispatch(addLiveVideoItem(zoneId, state, mediaStateIds, eventIds, transitionTypes, transitionDurations,
+          const mediaStateId: string = dispatch(addLiveVideoItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes, transitionDurations,
             index === 0));
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.Timer,
+            data: {
+              interval: Number(state.timeOnScreen),
+            } as DmTimer
+          } as DmEventSpecification);
+
           break;
         }
+        case 'audioStreamItem':
+        case 'mjpegStreamItem':
+          break;
         case 'videoStreamItem': {
 
           const { timeOnScreen } = state;
@@ -1025,28 +1081,64 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
             { interval : timeOnScreen } ));
           const eventParams : EventParams = eventAction.payload;
 
-          mediaStateIds.push(mediaStateParams.id);
+          oldMediaStateIds.push(mediaStateParams.id);
           eventIds.push(eventParams.id);
           transitionTypes.push(null);
           transitionDurations.push(0);
+
+          mediaStateIds.push(mediaStateParams.id);
+
+          if (timeOnScreen === 0) {
+            eventSpecifications.push({
+              type: EventType.MediaEnd,
+              data: null
+            } as DmEventSpecification);
+          }
+          else {
+            eventSpecifications.push({
+              type: EventType.Timer,
+              data: {
+                interval: timeOnScreen,
+              } as DmTimer
+            } as DmEventSpecification);
+          }
+
           break;
         }
+        // ?? time interval?
         case 'rssDataFeedPlaylistItem':
-          dispatch(addRssDataFeedPlaylistItem(zoneId, state, mediaStateIds, eventIds, transitionTypes,
+          dispatch(addRssDataFeedPlaylistItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
             transitionDurations,
             index === 0));
           break;
 
+        // ?? time interval?
         case 'mrssDataFeedItem': {
-          dispatch(addMrssDataFeedPlaylistItem(zoneId, state, mediaStateIds, eventIds, transitionTypes,
+          const mediaStateId: string = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
             transitionDurations,
             index === 0));
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.MediaEnd,
+            data: null
+          } as DmEventSpecification);
+
           break;
         }
         case 'html5Item': {
-          dispatch(addHtmlItem(zoneId, state, mediaStateIds, eventIds, transitionTypes,
+          const mediaStateId: string = dispatch(addHtmlItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
             transitionDurations,
             index === 0));
+
+          mediaStateIds.push(mediaStateId);
+          eventSpecifications.push({
+            type: EventType.Timer,
+            data: {
+              interval: Number(state.timeOnScreen),
+            } as DmTimer
+          } as DmEventSpecification);
+
           break;
         }
         case 'mediaListItem':
@@ -1066,7 +1158,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         dispatch(buildInteractiveTransitions(bpfZone));
       }
       else {
-        buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds);
+        buildNonInteractiveTransitions(dispatch, bsdm, mediaStateIds, eventSpecifications);
       }
     }
   };
@@ -1365,29 +1457,25 @@ function buildInteractiveTransitions(bpfZone: any) {
   };
 }
 
-function buildNonInteractiveTransitions(dispatch: Function, bsdm: DmState, mediaStateIds: string[]) {
+function buildNonInteractiveTransitions(dispatch: Function, bsdm: DmState, mediaStateIds: BsDmId[],
+                                        eventSpecifications: DmEventSpecification[]) {
   for (let i = 0; i < (mediaStateIds.length - 1); i++) {
-    buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1]);
+    buildTransition(dispatch, bsdm, mediaStateIds[i], mediaStateIds[i + 1], eventSpecifications[i]);
   }
-  buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0]);
+  buildTransition(dispatch, bsdm, mediaStateIds[mediaStateIds.length - 1], mediaStateIds[0],
+    eventSpecifications[mediaStateIds.length - 1]);
 }
 
-function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string, targetIndex: string) {
+function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string, targetIndex: string,
+                         eventSpecification: DmEventSpecification) {
 
   const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
   const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
 
-  // TEDDY - event type must be state dependent
-  // TEDDY - event parameters must come from bpf data
-  const dmEventType = EventType.Timer;
-  const eventData: DmEventData =
-    dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
-  // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
-  // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
+  // const eventSpecification: DmEventSpecification =
+  //   dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
+  //     EventIntrinsicAction.None);
 
-  const eventSpecification: DmEventSpecification =
-    dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
-      EventIntrinsicAction.None);
   const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
     dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
       sourceMediaState.id,
@@ -1396,6 +1484,28 @@ function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string,
   const addEventResults = dispatch(thunkAction as any);
   const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
   console.log(eventId);
+
+  // console.log(getState().bsdm.events);
+
+  // TEDDY - event type must be state dependent
+  // TEDDY - event parameters must come from bpf data
+  // const dmEventType = EventType.Timer;
+  // const eventData: DmEventData =
+  //   dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
+  // // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
+  // // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
+  //
+  // const eventSpecification: DmEventSpecification =
+  //   dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
+  //     EventIntrinsicAction.None);
+  // const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
+  //   dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
+  //     sourceMediaState.id,
+  //     targetMediaState.id,
+  //     eventSpecification);
+  // const addEventResults = dispatch(thunkAction as any);
+  // const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
+  // console.log(eventId);
 }
 
 function convertParameterValue(bsdm: DmState, bpfParameterValue : any) : DmParameterizedString {

@@ -1410,6 +1410,10 @@ function fixZonePlaylistStates(rawPlaylistItems: any) : any {
         playlistStates.push(fixVideoItem(rawPlaylistItem));
         break;
       }
+      case 'audioItem': {
+        playlistStates.push(fixAudioItem(rawPlaylistItem));
+        break;
+      }
       case 'html5Item': {
         const html5Item = fixHtml5Item(rawPlaylistItem);
         playlistStates.push(html5Item);
@@ -1420,7 +1424,15 @@ function fixZonePlaylistStates(rawPlaylistItems: any) : any {
         break;
       }
       case 'videoStreamItem': {
-        playlistStates.push(fixVideoStreamItem(rawPlaylistItem));
+        playlistStates.push(fixAVStreamItem('videoStreamItem', rawPlaylistItem));
+        break;
+      }
+      case 'mjpegItem': {
+        playlistStates.push(fixMjpegStreamItem(rawPlaylistItem));
+        break;
+      }
+      case 'audioStreamItem': {
+        playlistStates.push(fixAVStreamItem('audioStreamItem', rawPlaylistItem));
         break;
       }
       case 'mrssDataFeedPlaylistItem': {
@@ -1513,22 +1525,38 @@ function fixLiveVideoItem(rawLiveVideoItem: any) : any {
   return liveVideoItem;
 }
 
-function fixVideoStreamItem(rawVideoStreamItem: any) : any {
+function fixAVStreamItem(streamType: string, rawAVStreamItem: any) : any {
 
-  // TODO
-  const name: string = rawVideoStreamItem.streamSpec.$.name;
-  const timeOnScreen: number = Number(rawVideoStreamItem.streamSpec.$.timeOnScreen);
+  const name: string = rawAVStreamItem.streamSpec.$.name;
+  const timeOnScreen: number = Number(rawAVStreamItem.streamSpec.$.timeOnScreen);
 
-  const url : any = fixParameterValue(rawVideoStreamItem.url.parameterValue);
+  const url : any = fixParameterValue(rawAVStreamItem.url.parameterValue);
 
-  const videoStreamItem: any = {
+  const avStreamItem: any = {
     name,
     timeOnScreen,
     url
   };
-  videoStreamItem.type = 'videoStreamItem';
+  avStreamItem.type = streamType;
 
-  return videoStreamItem;
+  return avStreamItem;
+}
+
+function fixMjpegStreamItem(rawMjpegStreamItem: any) : any {
+
+  const name: string = rawMjpegStreamItem.mjpegSpec.$.name;
+  const timeOnScreen: number = Number(rawMjpegStreamItem.mjpegSpec.$.timeOnScreen);
+
+  const url : any = fixParameterValue(rawMjpegStreamItem.url.parameterValue);
+
+  const mjpegStreamItem: any = {
+    name,
+    timeOnScreen,
+    url
+  };
+  mjpegStreamItem.type = 'mjpegStreamItem';
+
+  return mjpegStreamItem;
 }
 
 function fixMrssDataFeedItem(rawMrssDataFeedItem : any) : any {
