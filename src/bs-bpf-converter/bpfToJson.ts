@@ -978,9 +978,18 @@ function fixEnhancedAudioZonePlaylist(rawEnhancedAudioZonePlaylist : any) : any 
 
 function fixInteractiveZonePlaylist(rawZonePlaylist: any) : any {
 
+  let interactiveStates: any[] = [];
+
   const rawStates = rawZonePlaylist.states.state;
+  if (isArray(rawStates)) {
+    interactiveStates = rawStates;
+  }
+  else {
+    interactiveStates.push(rawStates);
+  }
+
   const states: any[] = [];
-  rawStates.forEach ( (state: any) => {
+  interactiveStates.forEach ( (state: any) => {
     // states.push(fixInteractiveState(state));
     const interactiveState = fixInteractiveState(state);
     if (!isNil(interactiveState)) {
@@ -1495,9 +1504,79 @@ function fixAudioItem(rawAudioItem: any) : any {
   return audioItem;
 }
 
-// TBD
-function fixMediaListItem(fixMediaListItem: any) : any {
+function fixMediaListItem(rawMediaListItem: any) : any {
+  const mediaListParametersSpec: any[] = [
+    { name: 'mediaType', type: 'string'},
+    { name: 'advanceOnMediaEnd', type: 'boolean'},
+    { name: 'advanceOnImageTimeout', type: 'boolean'},
+    { name: 'playFromBeginning', type: 'boolean'},
+    { name: 'imageTimeout', type: 'number'},
+    { name: 'support4KImages', type: 'boolean'},
+    { name: 'shuffle', type: 'boolean'},
+    { name: 'slideTransition', type: 'string'},
+    { name: 'sendZoneMessage', type: 'boolean'},
+    { name: 'startIndex', type: 'number'},
+    { name: 'transitionDuration', type: 'boolean'},
+    { name: 'populateFromMediaLibrary', type: 'boolean'},
+    { name: 'liveDataFeedName', type: 'string'},
+  ];
 
+  const mediaListItem : any = fixJson(mediaListParametersSpec, rawMediaListItem);
+  mediaListItem.nextEvent = fixMediaListTransition(rawMediaListItem.next);
+  mediaListItem.previousEvent = fixMediaListTransition(rawMediaListItem.previous);
+  mediaListItem.files = fixMediaListFiles(rawMediaListItem.files);
+  
+  mediaListItem.nextTransitionCommand = {};
+  if (isObject(rawMediaListItem.brightSignCmdsTransitionNextItem)) {
+    mediaListItem.nextTransitionCommand =
+      fixMediaListTransitionCommand(rawMediaListItem.brightSignCmdsTransitionNextItem);
+  }
+
+  mediaListItem.previousTransitionCommand = {};
+  if (isObject(rawMediaListItem.brightSignCmdsTransitionPreviousItem)) {
+    mediaListItem.previousTransitionCommand =
+      fixMediaListTransitionCommand(rawMediaListItem.brightSignCmdsTransitionPreviousItem);
+  }
+
+  console.log(mediaListItem);
+  return mediaListItem;
+}
+
+function fixMediaListTransition(rawMediaListTransition: any) {
+  const mediaListTransitionEvent = fixRawUserEvent(rawMediaListTransition.userEvent);
+  return mediaListTransitionEvent;
+}
+
+function fixMediaListFiles(rawMediaListFiles: any): any[] {
+  console.log(rawMediaListFiles);
+
+  const mediaListFiles: any[] = [];
+
+  rawMediaListFiles.$$.forEach( (rawMediaListFile: any) => {
+    mediaListFiles.push(fixMediaListFile(rawMediaListFile));
+  });
+  return mediaListFiles;
+}
+
+function fixMediaListFile(rawMediaListFile: any) {
+
+  const index = '#name';
+  switch (rawMediaListFile[index]) {
+    case 'imageItem':
+      return fixImageItem(rawMediaListFile);
+    case 'videoItem':
+      return fixVideoItem(rawMediaListFile);
+    default:
+      return {};
+  }
+}
+
+function fixMediaListTransitionCommand(rawMediaListTransitionCommand: any) {
+  let transitionCommand: any;
+  if (isObject(rawMediaListTransitionCommand.brightSignCmd)) {
+    transitionCommand = fixInteractiveCommands(rawMediaListTransitionCommand.brightSignCmd);
+  }
+  return transitionCommand;
 }
 
 // TBD
@@ -1637,12 +1716,12 @@ function fixHtmlWidgetItemProperty(rawHtmlWidgetItemProperty : any) : any {
 }
 
 function fixRawFileItem(rawFileItem : any) : any {
-  const imageItemParametersSpec: any[] = [
+  const fileItemParametersSpec: any[] = [
     { name: 'name', type: 'string'},
     { name: 'path', type: 'string'},
   ];
 
-  return fixJson(imageItemParametersSpec, rawFileItem);
+  return fixJson(fileItemParametersSpec, rawFileItem);
 }
 
 function fixRawBackgroundBitmap(rawBackgroundBitmap: any): any {
