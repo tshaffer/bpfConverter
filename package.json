@@ -11,6 +11,7 @@
   "author": "Ted Shaffer",
   "license": "ISC",
   "dependencies": {
+    "@brightsign/bs-bpf-converter": "0.0.4",
     "@brightsign/bs-content-manager": "0.5.13",
     "@brightsign/bs-playlist-dm": "0.1.10",
     "@brightsign/bscore": "0.4.3",
