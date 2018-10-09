@@ -4,6 +4,12 @@
   "description": "convert bpf files",
   "main": "main.js",
   "scripts": {
+    "package-link": "npm link typescript webpack tslint",
+    "package-install": "npm install --only=production",
+    "package-submodule": "npm run generateTypeFiles && npm run package",
+    "generateTypeFiles": "gulp cleanTypes && tsc -p tsconfig.decl.json && gulp indexTypescript",
+    "package": "npm run build",
+    "prepublishOnly": "npm run generateTypeFiles && npm run build",
     "build": "node node_modules/webpack/bin/webpack --config ./webpack.config.js --watch",
     "run": "electron .",
     "tsLint": "tslint -c tslint.json 'lib/**/*.ts' 'tests/**/*.ts'"
