@@ -1,13 +1,13 @@
 import * as fse from 'fs-extra';
 import path from 'isomorphic-path';
 
-// import {
-//   bsBpfCConvertPresentation
-// } from '@brightsign/bs-bpf-converter';
-
 import {
   bsBpfCConvertPresentation
-} from '../bs-bpf-converter/bpfConverter';
+} from '@brightsign/bs-bpf-converter';
+
+// import {
+//   bsBpfCConvertPresentation
+// } from '../bs-bpf-converter/bpfConverter';
 
 export const convertBpf = (bpfPath: string) => {
   return (dispatch: any) => {
