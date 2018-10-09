@@ -1199,14 +1199,40 @@ function getPressContinuous(userEvent: any) {
   return pressContinuous;
 }
 
-function newBuildTransition(assignInputToUserVariable: boolean,
-                            assignWildcardToUserVariable: boolean,
-                            displayMode: string,
-                            labelLocation: string,
-                            remainOnCurrentStateActions: any,
-                            sourceMediaState: string,
-                            targetMediaState: string,
-                            userEvent: any) {
+// TODO - investigate refactoring some of the transition code.
+function buildInteractiveTransitions(bpfZone: any) {
+
+  return (dispatch: Function, getState: Function) => {
+
+    bpfZone.playlist.transitions.forEach( (transition: any) => {
+      console.log(transition);
+
+      const {
+        assignInputToUserVariable,
+        assignWildcardToUserVariable,
+        displayMode,
+        labelLocation,
+        remainOnCurrentStateActions,
+        sourceMediaState,
+        targetMediaState,
+        userEvent,
+      } = transition;
+
+      dispatch(buildInteractiveTransition(assignInputToUserVariable, assignWildcardToUserVariable, displayMode,
+        labelLocation, remainOnCurrentStateActions, sourceMediaState, targetMediaState, userEvent));
+
+    });
+  };
+}
+
+function buildInteractiveTransition(assignInputToUserVariable: boolean,
+                                    assignWildcardToUserVariable: boolean,
+                                    displayMode: string,
+                                    labelLocation: string,
+                                    remainOnCurrentStateActions: any,
+                                    sourceMediaStateId: BsDmId,
+                                    targetMediaStateId: BsDmId,
+                                    userEvent: any) {
 
   return (dispatch: Function, getState: Function) => {
 
@@ -1214,8 +1240,8 @@ function newBuildTransition(assignInputToUserVariable: boolean,
     let eventData: DmEventData;
 
     const bsdm: DmState = getState().bsdm;
-    const sourceMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaState });
-    const targetMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaState });
+    const sourceMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaStateId });
+    const targetMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaStateId });
 
     switch (userEvent.name) {
       case 'bp900AUserEvent': {
@@ -1367,93 +1393,21 @@ function newBuildTransition(assignInputToUserVariable: boolean,
         break;
       }
       default:
-        console.log('newBuildTransition - userEvent name: ', userEvent.name);
+        console.log('buildInteractiveTransition - userEvent name: ', userEvent.name);
         userEvent.parameters = null;
         return;
     }
 
     const eventSpecification: DmEventSpecification =
-      dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
+      dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaState.contentItem.type,
         EventIntrinsicAction.None);
 
-    let targetMediaStateId: string;
-    if (isNil(targetMediaStateObj)) {
-      targetMediaStateId = BsDmIdNone;
-    }
-    else {
-      targetMediaStateId = targetMediaStateObj.id;
-    }
-
     const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
-      dmInteractiveAddTransitionForEventSpecification(sourceMediaStateObj.name + '_ev',
-        sourceMediaStateObj.id,
+      dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
+        sourceMediaState.id,
         targetMediaStateId,
         eventSpecification);
-    const addEventResults = dispatch(thunkAction as any);
-    const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
-    console.log(eventId);
-
-    console.log(getState().bsdm.events);
-  };
-}
-
-function buildInteractiveTransitions(bpfZone: any) {
-
-  return (dispatch: Function, getState: Function) => {
-
-    bpfZone.playlist.transitions.forEach( (transition: any) => {
-      console.log(transition);
-
-      const {
-        assignInputToUserVariable,
-        assignWildcardToUserVariable,
-        displayMode,
-        labelLocation,
-        remainOnCurrentStateActions,
-        sourceMediaState,
-        targetMediaState,
-        userEvent,
-      } = transition;
-
-      dispatch(newBuildTransition(assignInputToUserVariable, assignWildcardToUserVariable, displayMode,
-        labelLocation, remainOnCurrentStateActions, sourceMediaState, targetMediaState, userEvent));
-
-      // const sourceMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaState });
-      // const targetMediaStateObj: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaState });
-      //
-      // // TEDDY - only support bp event for now
-      // if (userEvent.name === 'bp900AUserEvent') {
-      //
-      //   const eventType: EventType = EventType.Bp;
-      //
-      //   let pressContinuous: any = null;
-      //   if (!isNil(userEvent.parameters.pressContinuous)) {
-      //     pressContinuous = {
-      //       repeatInterval: userEvent.parameters.pressContinuous.repeatInterval,
-      //       initialHoldOff: userEvent.parameters.pressContinuous.initialHoldoff,
-      //     };
-      //   }
-      //
-      //   const eventData: DmBpEventData = {
-      //     bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
-      //     bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
-      //     buttonNumber: userEvent.parameters.buttonNumber,
-      //     pressContinuous,
-      //   };
-      //
-      //   const eventSpecification: DmEventSpecification =
-      //     dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
-      //       EventIntrinsicAction.None);
-      //   const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
-      //     dmInteractiveAddTransitionForEventSpecification(sourceMediaStateObj.name + '_ev',
-      //       sourceMediaStateObj.id,
-      //       targetMediaStateObj.id,
-      //       eventSpecification);
-      //   const addEventResults = dispatch(thunkAction as any);
-      //   const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
-      //   console.log(eventId);
-      // }
-    });
+    dispatch(thunkAction as any);
   };
 }
 
@@ -1472,40 +1426,12 @@ function buildTransition(dispatch: Function, bsdm: DmState, sourceIndex: string,
   const sourceMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: sourceIndex}) as DmcMediaState;
   const targetMediaState: DmcMediaState = dmGetMediaStateById(bsdm, { id: targetIndex}) as DmcMediaState;
 
-  // const eventSpecification: DmEventSpecification =
-  //   dmCreateDefaultEventSpecificationForEventType(eventType, eventData, sourceMediaStateObj.contentItem.type,
-  //     EventIntrinsicAction.None);
-
   const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
     dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
       sourceMediaState.id,
       targetMediaState.id,
       eventSpecification);
-  const addEventResults = dispatch(thunkAction as any);
-  const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
-  console.log(eventId);
-
-  // console.log(getState().bsdm.events);
-
-  // TEDDY - event type must be state dependent
-  // TEDDY - event parameters must come from bpf data
-  // const dmEventType = EventType.Timer;
-  // const eventData: DmEventData =
-  //   dmCreateEventDataForEventType(dmEventType, sourceMediaState.contentItem.type) as DmEventData;
-  // // eventData = updateEventDataFromUiEventType(eventData, uiEventType);
-  // // eventData = updateEventDataFromUserPreferences(dmEventType, eventData, state.bauwdm);
-  //
-  // const eventSpecification: DmEventSpecification =
-  //   dmCreateDefaultEventSpecificationForEventType(dmEventType, eventData, sourceMediaState.contentItem.type,
-  //     EventIntrinsicAction.None);
-  // const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
-  //   dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
-  //     sourceMediaState.id,
-  //     targetMediaState.id,
-  //     eventSpecification);
-  // const addEventResults = dispatch(thunkAction as any);
-  // const eventId = (addEventResults as InteractiveAddEventTransitionAction).payload.eventId;
-  // console.log(eventId);
+  dispatch(thunkAction as any);
 }
 
 function convertParameterValue(bsdm: DmState, bpfParameterValue : any) : DmParameterizedString {
