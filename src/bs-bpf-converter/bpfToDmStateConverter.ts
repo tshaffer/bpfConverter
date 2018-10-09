@@ -672,10 +672,7 @@ function getBsColor(bpfColorSpec: any): BsColor {
   return color;
 }
 
-function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                      eventIds: BsDmId[],
-                      transitionTypes: TransitionType[],
-                      transitionDurations: number[], initialState: boolean): Function {
+function addImageItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -699,16 +696,6 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    // const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-    //   {interval: slideDelayInterval}));
-    // const eventParams: EventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    eventIds.push('');
-    transitionTypes.push(TransitionType.NoEffect);
-    transitionDurations.push(transitionDuration);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -721,10 +708,7 @@ function addImageItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
   };
 }
 
-function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                      eventIds: BsDmId[],
-                      transitionTypes: TransitionType[],
-                      transitionDurations: number[], initialState: boolean): Function {
+function addVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -746,14 +730,6 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    // const eventAction: any = dispatch(dmAddEvent('mediaEnd', EventType.MediaEnd, mediaStateParams.id));
-    // const eventParams: EventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -766,10 +742,7 @@ function addVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
   };
 }
 
-function addAudioItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                      eventIds: BsDmId[],
-                      transitionTypes: TransitionType[],
-                      transitionDurations: number[], initialState: boolean): Function {
+function addAudioItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -791,14 +764,6 @@ function addAudioItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    // const eventAction: any = dispatch(dmAddEvent('mediaEnd', EventType.MediaEnd, mediaStateParams.id));
-    // const eventParams: EventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -811,10 +776,7 @@ function addAudioItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
   };
 }
 
-function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                          eventIds: BsDmId[],
-                          transitionTypes: TransitionType[],
-                          transitionDurations: number[], initialState: boolean): Function {
+function addLiveVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -830,15 +792,6 @@ function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
 
-    // const eventAction: any = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-    //   {interval: timeOnScreen}));
-    // const eventParams: EventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -851,10 +804,7 @@ function addLiveVideoItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
   };
 }
 
-function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                                    eventIds: BsDmId[],
-                                    transitionTypes: TransitionType[],
-                                    transitionDurations: number[], initialState: boolean): Function {
+function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -872,16 +822,6 @@ function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: B
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
 
-    // TODO - HACK!!
-    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-    //   {interval: 10}));
-    // const eventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -894,10 +834,7 @@ function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: B
   };
 }
 
-function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                                     eventIds: BsDmId[],
-                                     transitionTypes: TransitionType[],
-                                     transitionDurations: number[], initialState: boolean): Function {
+function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -912,16 +849,6 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: 
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
 
-    // TODO - timeOnScreen??
-    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-    //   {interval: 10}));
-    // const eventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
-
     // TODO - do this for all states?
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -935,10 +862,7 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, mediaStateIds: 
   };
 }
 
-function addHtmlItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
-                     eventIds: BsDmId[],
-                     transitionTypes: TransitionType[],
-                     transitionDurations: number[], initialState: boolean): Function {
+function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -958,15 +882,6 @@ function addHtmlItem(zoneId: BsDmId, state: any, mediaStateIds: BsDmId[],
       htmlContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
-
-    // const eventAction = dispatch(dmAddEvent('timeout', EventType.Timer, mediaStateParams.id,
-    //   {interval: timeOnScreen}));
-    // const eventParams = eventAction.payload;
-
-    mediaStateIds.push(mediaStateParams.id);
-    // eventIds.push(eventParams.id);
-    transitionTypes.push(null);
-    transitionDurations.push(0);
 
     // TODO - do this for all states?
     if (initialState) {
@@ -990,19 +905,12 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     const mediaStateIds: BsDmId[] = [];
     const eventSpecifications: DmEventSpecification[] = [];
 
-    const oldMediaStateIds: BsDmId[] = [];
-    const eventIds: BsDmId[] = [];
-    const transitionTypes: TransitionType[] = [];
-    const transitionDurations: number[] = [];
-
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
           bsdm = getState().bsdm;
-          const mediaStateId: string = dispatch(addImageItem(zoneId, state, oldMediaStateIds, eventIds,
-            transitionTypes, transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addImageItem(zoneId, state, index === 0));
           bsdm = getState().bsdm;
 
           mediaStateIds.push(mediaStateId);
@@ -1017,9 +925,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         }
         case 'videoItem': {
           bsdm = getState().bsdm;
-          const mediaStateId: string = dispatch(addVideoItem(zoneId, state, oldMediaStateIds, eventIds,
-            transitionTypes, transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addVideoItem(zoneId, state, index === 0));
           bsdm = getState().bsdm;
 
           mediaStateIds.push(mediaStateId);
@@ -1032,8 +938,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         }
         case 'audioItem': {
           bsdm = getState().bsdm;
-          const mediaStateId: string = dispatch(addAudioItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes, transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addAudioItem(zoneId, state, index === 0));
           bsdm = getState().bsdm;
 
           mediaStateIds.push(mediaStateId);
@@ -1045,8 +950,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           break;
         }
         case 'liveVideoItem': {
-          const mediaStateId: string = dispatch(addLiveVideoItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes, transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addLiveVideoItem(zoneId, state, index === 0));
 
           mediaStateIds.push(mediaStateId);
           eventSpecifications.push({
@@ -1081,11 +985,6 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
             { interval : timeOnScreen } ));
           const eventParams : EventParams = eventAction.payload;
 
-          oldMediaStateIds.push(mediaStateParams.id);
-          eventIds.push(eventParams.id);
-          transitionTypes.push(null);
-          transitionDurations.push(0);
-
           mediaStateIds.push(mediaStateParams.id);
 
           if (timeOnScreen === 0) {
@@ -1107,16 +1006,12 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         }
         // ?? time interval?
         case 'rssDataFeedPlaylistItem':
-          dispatch(addRssDataFeedPlaylistItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
-            transitionDurations,
-            index === 0));
+          dispatch(addRssDataFeedPlaylistItem(zoneId, state, index === 0));
           break;
 
         // ?? time interval?
         case 'mrssDataFeedItem': {
-          const mediaStateId: string = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
-            transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, index === 0));
 
           mediaStateIds.push(mediaStateId);
           eventSpecifications.push({
@@ -1127,9 +1022,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           break;
         }
         case 'html5Item': {
-          const mediaStateId: string = dispatch(addHtmlItem(zoneId, state, oldMediaStateIds, eventIds, transitionTypes,
-            transitionDurations,
-            index === 0));
+          const mediaStateId: string = dispatch(addHtmlItem(zoneId, state, index === 0));
 
           mediaStateIds.push(mediaStateId);
           eventSpecifications.push({
@@ -1153,7 +1046,6 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     bsdm = getState().bsdm;
 
     if (bpfZone.playlist.states.length > 0) {
-      // transition generation differs for interactive vs. non inactive playlists
       if (bpfZone.playlist.type === 'interactive') {
         dispatch(buildInteractiveTransitions(bpfZone));
       }
