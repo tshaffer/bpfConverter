@@ -1075,10 +1075,14 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       getEventSpecificationFromUserEvent(previousEvent);
     dispatch(addMediaListTransitionEvent(mediaStateParams.id, previousEventSpecification, false));
 
-    dispatch(addMediaListTransitionCommands(mediaStateParams.id, nextTransitionCommands,
-      CommandSequenceType.SequenceItemNext));
-    dispatch(addMediaListTransitionCommands(mediaStateParams.id, previousTransitionCommands,
-      CommandSequenceType.SequenceItemNext));
+    if (!isNil(nextTransitionCommands)) {
+      dispatch(addMediaListTransitionCommands(mediaStateParams.id, nextTransitionCommands,
+        CommandSequenceType.SequenceItemNext));
+    }
+    if (!isNil(previousTransitionCommands)) {
+      dispatch(addMediaListTransitionCommands(mediaStateParams.id, previousTransitionCommands,
+        CommandSequenceType.SequenceItemNext));
+    }
 
     if (initialState) {
       dispatch(dmUpdateZone({
@@ -1544,8 +1548,8 @@ function buildInteractiveTransition(assignInputToUserVariable: boolean,
                                     displayMode: string,
                                     labelLocation: string,
                                     remainOnCurrentStateActions: any,
-                                    sourceMediaStateId: BsDmId,
-                                    targetMediaStateId: BsDmId,
+                                    sourceMediaStateName: BsDmId,
+                                    targetMediaStateName: BsDmId,
                                     userEvent: any) {
 
   return (dispatch: Function, getState: Function) => {
@@ -1554,8 +1558,8 @@ function buildInteractiveTransition(assignInputToUserVariable: boolean,
     let eventData: DmEventData;
 
     const bsdm: DmState = getState().bsdm;
-    const sourceMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaStateId });
-    const targetMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaStateId });
+    const sourceMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: sourceMediaStateName });
+    const targetMediaState: DmcMediaState = dmGetMediaStateByName(bsdm, { name: targetMediaStateName });
 
     switch (userEvent.name) {
       case 'bp900AUserEvent': {
@@ -1725,7 +1729,7 @@ function buildInteractiveTransition(assignInputToUserVariable: boolean,
     const thunkAction: BsDmThunkAction<InteractiveAddEventTransitionParams> =
       dmInteractiveAddTransitionForEventSpecification(sourceMediaState.name + '_ev',
         sourceMediaState.id,
-        targetMediaStateId,
+        targetMediaState.id,
         eventSpecification);
     dispatch(thunkAction as any);
   };
