@@ -71,6 +71,10 @@ import {
   dmMediaSequenceAddItemRange,
 
   MediaStateContainerType,
+  DmcMediaStateContainer,
+  dmGetMediaStateContainer,
+  dmMediaListAddGlobalEvent,
+  DmcMediaListMediaState,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -919,6 +923,39 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
     const addMediaListItemsAction = dmMediaSequenceAddItemRange(0, mediaListStateContainer, assetItems);
     dispatch(addMediaListItemsAction as any);
 
+    // nextTransitionCommand
+    // previousTransitionCommand
+
+    let eventType: EventType;
+    let eventData: DmEventData;
+
+    if (advanceOnImageTimeout) {
+      eventType = EventType.Timer;
+      eventData = {
+        interval: imageTimeout,
+      } as DmTimer;
+      const advanceOnImageTimeoutEventSpecification: DmEventSpecification =
+        dmCreateDefaultEventSpecificationForEventType(eventType, eventData);
+      dispatch(addMediaListTransitionEvent(mediaStateParams.id, advanceOnImageTimeoutEventSpecification, true));
+    }
+
+    if (advanceOnMediaEnd) {
+      eventType = EventType.MediaEnd;
+      eventData = null;
+      const advanceOnMediaEndEventSpecification: DmEventSpecification =
+        dmCreateDefaultEventSpecificationForEventType(eventType, eventData);
+      dispatch(addMediaListTransitionEvent(mediaStateParams.id, advanceOnMediaEndEventSpecification, true));
+    }
+
+    // TODO check for existence of nextEvent, previousEvent before using
+    const nextEventSpecification: DmEventSpecification =
+      getEventSpecificationFromUserEvent(nextEvent);
+    dispatch(addMediaListTransitionEvent(mediaStateParams.id, nextEventSpecification, true));
+
+    const previousEventSpecification: DmEventSpecification =
+      getEventSpecificationFromUserEvent(previousEvent);
+    dispatch(addMediaListTransitionEvent(mediaStateParams.id, previousEventSpecification, false));
+
     if (initialState) {
       dispatch(dmUpdateZone({
         id: zoneId,
@@ -926,9 +963,21 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       }));
     }
 
-    console.log(getState().bsdm);
+    const mediaListState: DmcMediaListMediaState =
+      dmGetMediaStateById(getState().bsdm, { id: mediaStateParams.id}) as DmcMediaListMediaState;
+    console.log(mediaListState);
   };
 }
+
+function addMediaListTransitionEvent(mediaListStateId: BsDmId, eventSpecification: DmEventSpecification,
+                                     forwardEvent: boolean) {
+  return (dispatch: Function, getState: Function) => {
+    const mediaStateContainer: DmcMediaStateContainer =
+      dmGetMediaStateContainer(mediaListStateId, MediaStateContainerType.MediaList);
+    dispatch(dmMediaListAddGlobalEvent('mediaListEventName', mediaStateContainer, eventSpecification, !forwardEvent));
+  };
+}
+
 
 function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
@@ -1140,6 +1189,178 @@ function buildInteractiveTransitions(bpfZone: any) {
   };
 }
 
+function getEventSpecificationFromUserEvent(userEvent: any): DmEventSpecification {
+  let eventType: EventType;
+  let eventData: DmEventData;
+
+  switch (userEvent.name) {
+    case 'bp900AUserEvent': {
+      eventType = EventType.Bp;
+
+      eventData = {
+        bpType: getBpTypeFromButtonPanelType(userEvent.parameters.buttonPanelType),
+        bpIndex: getBpIndexFromButtonPanelIndex(userEvent.parameters.buttonPanelIndex),
+        buttonNumber: userEvent.parameters.buttonNumber,
+        pressContinuous: getPressContinuous(userEvent),
+      } as DmBpEventData;
+
+      break;
+    }
+    case 'timeout': {
+      eventType = EventType.Timer;
+      eventData = {
+        interval: userEvent.parameters.parameter,
+      } as DmTimer;
+      break;
+    }
+    case 'gpioUserEvent': {
+      eventType = EventType.Gpio;
+      const buttonDirection: ButtonDirection = userEvent.parameters.buttonDirection.toLowerCase() === 'down' ?
+        ButtonDirection.Down : ButtonDirection.Up;
+      eventData = {
+        buttonNumber: userEvent.parameters.buttonNumber,
+        buttonDirection,
+        pressContinuous: getPressContinuous(userEvent),
+      } as DmGpioEventData;
+      break;
+    }
+    case 'rectangularTouchEvent': {
+      eventType = EventType.RectangularTouch;
+      eventData = {
+        regions: [
+          {
+            x: userEvent.parameters.x,
+            y: userEvent.parameters.y,
+            width: userEvent.parameters.width,
+            height: userEvent.parameters.height,
+            pct: false,
+          }
+        ]
+      } as DmRectangularTouchEventData;
+      break;
+    }
+    case 'mediaEnd': {
+      eventType = EventType.MediaEnd;
+      eventData = null;
+      break;
+    }
+    case 'synchronize': {
+      eventType = EventType.Synchronize;
+      eventData = {
+        data: userEvent.parameters.parameter
+      } as DmSimpleEventData;
+      break;
+    }
+    case 'udp': {
+      // TODO - other members of EventType.Udp
+      eventType = EventType.Udp;
+      eventData = {
+        data: userEvent.parameters.parameter,
+        label: userEvent.parameters.label,
+        export: userEvent.parameters.export,
+      } as DmUdpEventData;
+      break;
+    }
+    case 'serial':
+      eventType = EventType.Serial;
+      eventData = {
+        port: userEvent.parameters.parameter,
+        data: userEvent.parameters.parameter2,
+      } as DmSerialEventData;
+      break;
+    case 'keyboard': {
+      eventType = EventType.Keyboard;
+      eventData = {
+        data: userEvent.parameters.parameter
+      } as DmSimpleEventData;
+      break;
+    }
+    case 'usb': {
+      eventType = EventType.Usb;
+      eventData = {
+        data: userEvent.parameters.parameter
+      } as DmSimpleEventData;
+      break;
+    }
+    case 'timeClockEvent':
+      eventType = EventType.TimeClock;
+      switch (userEvent.parameters.type) {
+        case 'timeClockDateTime':
+          eventData = {
+            type: DmTimeClockEventType.DailyOnce,
+            data: {
+              dateTime: new Date(userEvent.parameters.dateTime),
+            },
+          } as DmTimeClockEventData;
+          break;
+      }
+      break;
+    case 'zoneMessage': {
+      eventType = EventType.ZoneMessage;
+      eventData = {
+        data: userEvent.parameters.parameter
+      } as DmSimpleEventData;
+      break;
+    }
+    case 'remote': {
+      eventType = EventType.Remote;
+      eventData = {
+        data: userEvent.parameters.parameter
+      } as DmSimpleEventData;
+      break;
+    }
+    // TODO - other members of EventType.PluginMessage
+    case 'pluginMessageEvent': {
+      eventType = EventType.PluginMessage;
+      eventData = {
+        name: userEvent.parameters.name,
+        message: userEvent.parameters.message,
+      } as DmPluginMessageEventData;
+      break;
+    }
+    // TODO - as of 10/8/208, there's a bug in bscore for DistanceUnits
+    case 'gpsEvent': {
+      eventType = EventType.Gps;
+      eventData = {
+        direction: userEvent.parameters.enterRegion ? RegionDirection.Enter : RegionDirection.Exit,
+        radius: userEvent.parameters.gpsRegion.radius,
+        distanceUnits:
+          userEvent.parameters.gpsRegion.radiusUnitsInMiles ? DistanceUnits.Miles : DistanceUnits.Kilometers,
+        latitude: userEvent.parameters.gpsRegion.latitude,
+        longitude: userEvent.parameters.gpsRegion.longitude,
+      } as DmGpsEventData;
+      break;
+    }
+    // TODO - temporary
+    case 'audioTimeCodeEvent': {
+      eventType = EventType.MediaEnd;
+      eventData = null;
+      break;
+    }
+    // TODO - temporary
+    case 'videoTimeCodeEvent': {
+      eventType = EventType.MediaEnd;
+      eventData = null;
+      break;
+    }
+    case 'mediaListEnd': {
+      eventType = EventType.MediaListEnd;
+      eventData = null;
+      break;
+    }
+    default:
+      console.log('buildInteractiveTransition - userEvent name: ', userEvent.name);
+      userEvent.parameters = null;
+      return;
+  }
+
+  const eventSpecification: DmEventSpecification =
+    dmCreateDefaultEventSpecificationForEventType(eventType, eventData);
+
+  return eventSpecification;
+}
+
+// TODO - use getEventSpecificationFromUserEvent
 function buildInteractiveTransition(assignInputToUserVariable: boolean,
                                     assignWildcardToUserVariable: boolean,
                                     displayMode: string,
