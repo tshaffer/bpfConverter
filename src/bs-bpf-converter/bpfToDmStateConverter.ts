@@ -15,6 +15,8 @@ import {
   bscAssetLocatorForLocalAsset,
   BsAssetLocator,
 
+  CommandType,
+
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
   AccessType,
@@ -27,6 +29,7 @@ import {
   BsColor,
   BsnFeedProperties,
   BsRect,
+  CommandSequenceType,
   DataFeedUsageType,
   DeviceWebPageDisplay,
   GraphicsZOrderType,
@@ -75,6 +78,11 @@ import {
   dmGetMediaStateContainer,
   dmMediaListAddGlobalEvent,
   DmcMediaListMediaState,
+  CommandAddParams,
+  DmCommand,
+  dmCreateCommand,
+  dmAddCommand,
+  CommandDataParams,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -923,9 +931,6 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
     const addMediaListItemsAction = dmMediaSequenceAddItemRange(0, mediaListStateContainer, assetItems);
     dispatch(addMediaListItemsAction as any);
 
-    // nextTransitionCommand
-    // previousTransitionCommand
-
     let eventType: EventType;
     let eventData: DmEventData;
 
@@ -956,6 +961,12 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       getEventSpecificationFromUserEvent(previousEvent);
     dispatch(addMediaListTransitionEvent(mediaStateParams.id, previousEventSpecification, false));
 
+    // nextTransitionCommand
+    // previousTransitionCommand
+
+    dispatch(addMediaListTransitionCommands(mediaStateParams.id, nextTransitionCommand,
+      CommandSequenceType.SequenceItemNext));
+
     if (initialState) {
       dispatch(dmUpdateZone({
         id: zoneId,
@@ -978,6 +989,54 @@ function addMediaListTransitionEvent(mediaListStateId: BsDmId, eventSpecificatio
   };
 }
 
+function addMediaListTransitionCommands(mediaListStateId: BsDmId, mediaListTransitionCommands: any[],
+                                        commandSequenceType: CommandSequenceType) {
+  return (dispatch: Function, getState: Function) => {
+    const mediaStateContainer: DmcMediaStateContainer =
+      dmGetMediaStateContainer(mediaListStateId, MediaStateContainerType.MediaList);
+
+    mediaListTransitionCommands.forEach( (mediaListTransitionCommand) => {
+      // const command: DmCommand = dmCreateCommand('Pause Video', CommandType.PauseVideo);
+      const command: DmCommand = buildCommand(getState().bsdm, mediaListTransitionCommand.command);
+      const addCommandAction : BsDmThunkAction<CommandAddParams> =
+        dmAddCommand(commandSequenceType, mediaStateContainer.id, command);
+      dispatch(addCommandAction);
+    });
+  };
+}
+
+function buildCommand(bsdm: DmState, bpfCommand: any): DmCommand | null {
+
+  let command = null;
+  let commandDataParams: CommandDataParams;
+  let ps: DmParameterizedString;
+
+  debugger;
+
+  switch (bpfCommand.name) {
+    case 'synchronize':
+      ps = convertParameterValue(bsdm, bpfCommand.parameters[0].parameterValue);
+      commandDataParams = {
+        messageData: ps,
+      };
+      command = dmCreateCommand('synchronize', CommandType.Synchronize, commandDataParams);
+      break;
+    // TODO - parameterizedNumber, not parameterizedString
+    // case 'pause':
+    //   ps = convertParameterValue(bsdm, bpfCommand.parameters[0].parameterValue);
+    //   console.log(ps);
+    //   commandDataParams = {
+    //     pauseTime: 69, // number | DmParameterizedNumber
+    //   };
+    //   command = dmCreateCommand('pause', CommandType.Pause, commandDataParams);
+    //   break;
+    case 'resetVariables':
+      command = dmCreateCommand('resetVariables', CommandType.ResetVariables);
+      break;
+  }
+
+  return command;
+}
 
 function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
