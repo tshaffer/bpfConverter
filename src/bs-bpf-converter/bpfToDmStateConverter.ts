@@ -11,6 +11,10 @@ import {
   DistanceUnits,
   MediaListPlaybackType,
 
+  bscAssetItemFromAssetLocator,
+  bscAssetLocatorForLocalAsset,
+  BsAssetLocator,
+
   bscAssetItemFromBasicAssetInfo,
   getEnumKeyOfValue,
   AccessType,
@@ -64,6 +68,9 @@ import {
   DmTimer,
   dmCreateMediaListContentItem,
   DmMediaListContentItem,
+  dmMediaSequenceAddItemRange,
+
+  MediaStateContainerType,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -875,6 +882,8 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       populateFromMediaLibrary, previousEvent, previousTransitionCommand, sendZoneMessage,
       shuffle, slideTransition, startIndex, support4KImages, transitionDuration } = state;
 
+    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
+
     // TODO - name TBD
     const name = 'mediaListName';
 
@@ -882,17 +891,43 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
         MediaListPlaybackType.NextInList;
 
     // TODO - convert slideTransition
-    
+
     // TODO - DataFeed
     const dataFeedId = BsDmIdNone;
 
-    const mediaList: DmMediaListContentItem =
+    const mediaListContentItem: DmMediaListContentItem =
       dmCreateMediaListContentItem(name, mediaListPlaybackType, startIndex, shuffle, support4KImages,
         isString(liveDataFeedName) && liveDataFeedName.length > 0, dataFeedId, slideTransition, transitionDuration,
         false, sendZoneMessage);
 
-    debugger;
-  }
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+      mediaListContentItem);
+    const mediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams = mediaStateAction.payload;
+    const mediaListStateId = mediaStateParams.id;
+    const mediaListStateContainer = { id: mediaListStateId, type: MediaStateContainerType.MediaList };
+
+    const assetItems: any[] = [];
+
+    state.files.forEach( (file: any) => {
+      const fullPath = file.file.path;
+      const assetLocator: BsAssetLocator = bscAssetLocatorForLocalAsset(AssetType.Content, fullPath);
+      const assetItem: BsAssetItem = bscAssetItemFromAssetLocator(assetLocator);
+      assetItems.push(assetItem);
+    });
+
+    const addMediaListItemsAction = dmMediaSequenceAddItemRange(0, mediaListStateContainer, assetItems);
+    dispatch(addMediaListItemsAction as any);
+
+    if (initialState) {
+      dispatch(dmUpdateZone({
+        id: zoneId,
+        initialMediaStateId: mediaStateParams.id,
+      }));
+    }
+
+    console.log(getState().bsdm);
+  };
 }
 
 function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
@@ -955,28 +990,29 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
 
   return (dispatch: Function, getState: Function): any => {
 
+    let mediaStateId: string;
     const eventData: any[] = [];
 
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
-          const mediaStateId: string = dispatch(addImageItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addImageItem(zoneId, state, index === 0));
           eventData.push(createTimeoutEventData(mediaStateId, state.slideDelayInterval));
           break;
         }
         case 'videoItem': {
-          const mediaStateId: string = dispatch(addVideoItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addVideoItem(zoneId, state, index === 0));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'audioItem': {
-          const mediaStateId: string = dispatch(addAudioItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addAudioItem(zoneId, state, index === 0));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'liveVideoItem': {
-          const mediaStateId: string = dispatch(addLiveVideoItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addLiveVideoItem(zoneId, state, index === 0));
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
@@ -1012,17 +1048,17 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           break;
 
         case 'mrssDataFeedItem': {
-          const mediaStateId: string = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, index === 0));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'html5Item': {
-          const mediaStateId: string = dispatch(addHtmlItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addHtmlItem(zoneId, state, index === 0));
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
         case 'mediaListItem':
-          const mediaStateId: string = dispatch(addMediaListItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addMediaListItem(zoneId, state, index === 0));
           break;
         case 'eventHandler2Item':
         case 'superStateItem':
