@@ -1584,13 +1584,30 @@ function fixMediaListTransitionCommand(rawMediaListTransitionCommand: any) {
   return transitionCommand;
 }
 
-// TBD
-function fixEventHandlerItem(fixEventHandlerItem: any) : any {
+function fixEventHandlerItem(rawEventHandlerItem: any) : any {
+  const eventHandlerParametersSpec: any[] = [
+    { name: 'stopPlayback', type: 'boolean'},
+  ];
 
+  const eventHandlerItem: any = fixJson(eventHandlerParametersSpec, rawEventHandlerItem);
+  eventHandlerItem.type = 'eventHandlerItem';
+
+  return eventHandlerItem;
 }
 
 // TBD
-function fixSuperStateItem(fixSuperStateItem: any) : any {
+function fixSuperStateItem(rawSuperStateItem: any) : any {
+  const superStateParametersSpec: any[] = [
+    { name: 'stateName', type: 'string'},
+    { name: 'initialState', type: 'string'},
+  ];
+
+  const superStateItem: any = fixJson(superStateParametersSpec, rawSuperStateItem);
+  superStateItem.type = 'superStateItem';
+
+  // TODO - retrieve children
+
+  return superStateItem;
 
 }
 

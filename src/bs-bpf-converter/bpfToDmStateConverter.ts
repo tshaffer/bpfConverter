@@ -55,6 +55,8 @@ import {
 import { fsGetAssetItemFromFile } from '@brightsign/fsconnector';
 
 import {
+  dmCreateEventHandlerContentItem,
+  DmEventHandlerContentItem,
   dmCreateEventDataForEventType,
   DmEventSpecification,
   dmCreateDefaultEventSpecificationForEventType,
@@ -83,6 +85,8 @@ import {
   dmCreateCommand,
   dmAddCommand,
   CommandDataParams,
+  dmCreateSuperStateContentItem,
+  DmSuperStateContentItem,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -880,6 +884,56 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: b
     }
 
     return mediaStateParams.id;
+  };
+}
+
+function addEventHandlerItem(zoneId: BsDmId, state: any, initialState: boolean) {
+  return (dispatch: Function, getState: Function): any => {
+
+    const { stopPlayback } = state;
+
+    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
+
+    const eventHandlerContentItem : DmEventHandlerContentItem =
+      dmCreateEventHandlerContentItem('eventHandlerItem', stopPlayback);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+      eventHandlerContentItem);
+    const mediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams = mediaStateAction.payload;
+
+    if (initialState) {
+      dispatch(dmUpdateZone({
+        id: zoneId,
+        initialMediaStateId: mediaStateParams.id,
+      }));
+    }
+
+    console.log(getState().bsdm);
+  };
+}
+
+function addSuperStateItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
+  return (dispatch: Function, getState: Function): any => {
+
+    const { stateName, initialState } = state;
+
+    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
+
+    const superStateHandlerContentItem : DmSuperStateContentItem =
+      dmCreateSuperStateContentItem(stateName);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+      superStateHandlerContentItem);
+    const mediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams = mediaStateAction.payload;
+
+    if (isInitialState) {
+      dispatch(dmUpdateZone({
+        id: zoneId,
+        initialMediaStateId: mediaStateParams.id,
+      }));
+    }
+
+    console.log(getState().bsdm);
 
   };
 }
@@ -887,7 +941,6 @@ function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: b
 function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
 
   return (dispatch: Function, getState: Function): any => {
-    console.log(state);
 
     const { advanceOnImageTimeout, advanceOnMediaEnd, imageTimeout, liveDataFeedName, mediaType, nextEvent,
       nextTransitionCommands, playFromBeginning,
@@ -1167,8 +1220,12 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         case 'mediaListItem':
           mediaStateId = dispatch(addMediaListItem(zoneId, state, index === 0));
           break;
-        case 'eventHandler2Item':
+        case 'eventHandlerItem':
+          dispatch(addEventHandlerItem(zoneId, state, index === 0));
+          break;
         case 'superStateItem':
+          dispatch(addSuperStateItem(zoneId, state, index === 0));
+          break;
         default:
           console.log('buildZonePlaylist: ', state.type);
           break;
