@@ -42,6 +42,7 @@ import {
   LiveVideoStandardType,
   MediaType,
   MonitorOrientationType,
+  PlayFileTriggerType,
   RotationType,
   SystemVariableType,
   TextHAlignmentType,
@@ -87,6 +88,11 @@ import {
   CommandDataParams,
   dmCreateSuperStateContentItem,
   DmSuperStateContentItem,
+
+  dmCreatePlayFileContentItem,
+  DmPlayFileContentItem,
+  DmMediaStateSequence,
+  dmGetMediaStateSequenceForContainer,
 
   DmTimeClockEventData,
   DmTimeClockEventType,
@@ -912,6 +918,61 @@ function addEventHandlerItem(zoneId: BsDmId, state: any, initialState: boolean) 
   };
 }
 
+function addPlayFileItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
+  return (dispatch: Function, getState: Function): any => {
+    const { filesTable, liveDataFeedName, mediaType, slideTransition, specifyLocalFiles, stateName,
+      type, useDefaultMedia, useUserVariable } = state;
+
+    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
+
+    // dmCreatePlayFileContentItem(name: string, triggerType?: PlayFileTriggerType, useDefaultMedia?: boolean,
+    // userVariableIdOrName?: string, useDataFeed?: boolean, dataFeedId?: BsDmId): DmPlayFileContentItem;
+    const playFileContentItem: DmPlayFileContentItem =
+      dmCreatePlayFileContentItem(stateName, PlayFileTriggerType.ByEventData, useDefaultMedia, '',
+        liveDataFeedName !== '', BsDmIdNone);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone, playFileContentItem);
+    const mediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams = mediaStateAction.payload;
+    const playFileStateId: BsDmId = mediaStateParams.id;
+
+    const assetItems: BsAssetItem[] = [];
+    const mediaSequenceContentItemData: any[] = [];
+
+    state.filesTable.forEach( (file: any) => {
+      // const { export, key, label, name, path, suffix, type, videoDisplayMode } = file;
+      const { key, label, name, suffix, videoDisplayMode } = file;
+      const exportKey: boolean = file.export;
+      const filePath: string = file.path;   // broken link issue - problem here? TODO
+      const fileType: string = file.type;
+
+      const assetLocator: BsAssetLocator = bscAssetLocatorForLocalAsset(AssetType.Content, filePath);
+      const assetItem = bscAssetItemFromAssetLocator(assetLocator);
+
+      assetItems.push(assetItem);
+
+      mediaSequenceContentItemData.push({
+        key,
+        name: label,
+        exportKey,
+      });
+    });
+
+    const mediaStateSequence: DmMediaStateSequence | null = dmGetMediaStateSequenceForContainer(getState().bsdm,
+      { id: playFileStateId });
+    let targetIndex = 0;
+    if (!isNil(mediaStateSequence)) {
+      targetIndex = (mediaStateSequence as DmMediaStateSequence).sequence.length;
+    }
+
+    const playFileStateContainer = { id: playFileStateId, type: MediaStateContainerType.PlayFile };
+    // dispatch(dmMediaSequenceAddItemRange(targetIndex, playFileStateContainer, assetItems));
+
+    const addPlayFileItemsAction = dmMediaSequenceAddItemRange(targetIndex, playFileStateContainer, assetItems,
+      mediaSequenceContentItemData);
+    dispatch(addPlayFileItemsAction as any);
+  };
+}
+
 function addSuperStateItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
   return (dispatch: Function, getState: Function): any => {
 
@@ -1226,6 +1287,8 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         case 'superStateItem':
           dispatch(addSuperStateItem(zoneId, state, index === 0));
           break;
+        case 'playFileItem':
+          dispatch(addPlayFileItem(zoneId, state, index === 0));
         default:
           console.log('buildZonePlaylist: ', state.type);
           break;

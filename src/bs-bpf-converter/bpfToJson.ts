@@ -1044,6 +1044,9 @@ function fixInteractiveState(rawInteractiveState: any): any {
   else if (isObject(rawInteractiveState.superStateItem)) {
     interactiveState = fixSuperStateItem(rawInteractiveState.superStateItem);
   }
+  else if (isObject(rawInteractiveState.playFileItem)) {
+    interactiveState = fixPlayFileItem(rawInteractiveState.playFileItem);
+  }
 
   if (isArray(rawInteractiveState.brightSignCmd)) {
     interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
@@ -1593,6 +1596,46 @@ function fixEventHandlerItem(rawEventHandlerItem: any) : any {
   eventHandlerItem.type = 'eventHandlerItem';
 
   return eventHandlerItem;
+}
+
+function fixPlayFileItem(rawPlayFileItem: any) : any {
+  const playFileParametersSpec: any[] = [
+    { name: 'mediaType', type: 'string' },
+    { name: 'stateName', type: 'string' },
+    { name: 'slideTransition', type: 'string' },
+    { name: 'specifyLocalFiles', type: 'boolean' },
+    { name: 'useDefaultMedia', type: 'boolean' },
+    { name: 'useUserVariable', type: 'boolean' },
+    { name: 'liveDataFeedName', type: 'string' },
+  ];
+
+  const playFileItem: any = fixJson(playFileParametersSpec, rawPlayFileItem);
+  playFileItem.filesTable = fixPlayFileFilesTable(rawPlayFileItem.filesTable);
+  playFileItem.type = 'playFileItem';
+
+  return playFileItem;
+}
+
+function fixPlayFileFilesTable(rawPlayFileFilesTable: any) : any {
+  const files: any[] = [];
+  rawPlayFileFilesTable.file.forEach( (rawFile: any) => {
+    files.push(fixPlayFileFile(rawFile));
+  });
+  return files;
+}
+
+function fixPlayFileFile(rawFile: any): any {
+  const playFileParametersSpec: any[] = [
+    { name: 'key', type: 'string'},
+    { name: 'label', type: 'string'},
+    { name: 'export', type: 'boolean'},
+    { name: 'path', type: 'string'},
+    { name: 'name', type: 'string'},
+    { name: 'suffix', type: 'string'},
+    { name: 'videoDisplayMode', type: 'string'},
+    { name: 'type', type: 'string'},
+  ];
+  return fixJson(playFileParametersSpec, rawFile.$);
 }
 
 // TBD
