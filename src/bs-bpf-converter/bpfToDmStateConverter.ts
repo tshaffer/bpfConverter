@@ -890,8 +890,8 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
     console.log(state);
 
     const { advanceOnImageTimeout, advanceOnMediaEnd, imageTimeout, liveDataFeedName, mediaType, nextEvent,
-      nextTransitionCommand, playFromBeginning,
-      populateFromMediaLibrary, previousEvent, previousTransitionCommand, sendZoneMessage,
+      nextTransitionCommands, playFromBeginning,
+      populateFromMediaLibrary, previousEvent, previousTransitionCommands, sendZoneMessage,
       shuffle, slideTransition, startIndex, support4KImages, transitionDuration } = state;
 
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
@@ -961,10 +961,9 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       getEventSpecificationFromUserEvent(previousEvent);
     dispatch(addMediaListTransitionEvent(mediaStateParams.id, previousEventSpecification, false));
 
-    // nextTransitionCommand
-    // previousTransitionCommand
-
-    dispatch(addMediaListTransitionCommands(mediaStateParams.id, nextTransitionCommand,
+    dispatch(addMediaListTransitionCommands(mediaStateParams.id, nextTransitionCommands,
+      CommandSequenceType.SequenceItemNext));
+    dispatch(addMediaListTransitionCommands(mediaStateParams.id, previousTransitionCommands,
       CommandSequenceType.SequenceItemNext));
 
     if (initialState) {

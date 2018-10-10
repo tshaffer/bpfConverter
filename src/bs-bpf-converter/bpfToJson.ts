@@ -1531,13 +1531,13 @@ function fixMediaListItem(rawMediaListItem: any) : any {
   
   mediaListItem.nextTransitionCommand = {};
   if (isObject(rawMediaListItem.brightSignCmdsTransitionNextItem)) {
-    mediaListItem.nextTransitionCommand =
+    mediaListItem.nextTransitionCommands =
       fixMediaListTransitionCommand(rawMediaListItem.brightSignCmdsTransitionNextItem);
   }
 
   mediaListItem.previousTransitionCommand = {};
   if (isObject(rawMediaListItem.brightSignCmdsTransitionPreviousItem)) {
-    mediaListItem.previousTransitionCommand =
+    mediaListItem.previousTransitionCommands =
       fixMediaListTransitionCommand(rawMediaListItem.brightSignCmdsTransitionPreviousItem);
   }
 
