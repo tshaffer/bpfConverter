@@ -1,32 +1,14 @@
-var webpack = require('webpack');
-var CopyWebpackPlugin =  require('copy-webpack-plugin');
-var environment = require('./environment');
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  entry: "./src/index.tsx",
+  target: "node",
+  entry: {
+    app: ["./main.js"]
+  },
   output: {
-    libraryTarget: "umd",
-    publicPath: './build/',
-    filename: "bundle.js",
-    path: __dirname + "/build"
+    path: path.resolve(__dirname, "../build"),
+    filename: "bundle.js"
   },
-  target: 'electron',
-  
-  resolve: {
-    // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: [".ts", ".tsx", ".js", ".json"]
-  },
-
-  externals: {
-    'core-js/fn/object/assign' : 'commonjs core-js/fn/object/assign',
-  },
-
-  module: {
-    rules: [
-      // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-      { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
-
-      { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
-    ],
-  }
+  externals: [nodeExternals()],
 };

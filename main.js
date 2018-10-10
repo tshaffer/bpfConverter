@@ -1,63 +1,53 @@
 console.log("BPF Converter");
-const electron = require('electron');
+const fse = require('fs-extra');
+const path = require('isomorphic-path');
 
-// Module to control application life.
-const {app} = electron;
-
-// Module to create native browser window.
-const {BrowserWindow} = electron;
-
-app.on('window-all-closed', function() {
-  if (process.platform != 'darwin') {
-    app.quit();
-  }
-});
-
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let win;
-
-function createWindow() {
-  // Create the browser window.
-  // win = new BrowserWindow({width: 1400, height: 800});
-  win = new BrowserWindow({width: 1400, height: 1100});
-
-  console.log("__dirname=", __dirname);
-
-  // and load the index.html of the app.
-  win.loadURL(`file://${__dirname}/index.html`);
-
-  // Open the DevTools.
-  win.webContents.openDevTools();
-
-  // Emitted when the window is closed.
-  win.on('closed', () => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    win = null;
-});
+function convertBpf(bpfPath) {
+  console.log(bpfPath);
+  readFileAsBuffer(bpfPath).then( (buf) => {
+    console.log('file read complete');
+    console.log(buf.length);
+    console.log(buf);
+  });
+  // return (dispatch: any) => {
+  //   readFileAsBuffer(bpfPath)
+  //     .then((buf: any) => {
+  //       dispatch(bsBpfCConvertPresentation(buf)).then((bpfxState: any) => {
+  //         console.log(bpfxState);
+  //         const bpfFileName = path.basename(bpfPath, '.bpf');
+  //         const bpfxFileName = bpfFileName + '.bpfx';
+  //         const bpfDirName = path.dirname(bpfPath);
+  //         const bpfxFilePath = path.join(bpfDirName, bpfxFileName);
+  //         savePresentationFile(bpfxFilePath, bpfxState).then( () => {
+  //           console.log('presentation save complete');
+  //         });
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       debugger;
+  //     });
+  // };
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
-
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-  app.quit();
+function readFileAsBuffer(filePath = '') {
+  return new Promise((resolve) => {
+    readFsFileAsBuffer(filePath).then((buf) => {
+      resolve(buf);
+    });
+  });
 }
-});
 
-app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-  createWindow();
-}
-});
+const readFsFileAsBuffer = (filePath = '') => {
+  return new Promise((resolve, reject) => {
+    fse.readFile(filePath, (err, buf) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buf);
+      }
+    });
+  });
+};
+
+convertBpf('/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/sit-0-ImagesBpTo.bpf');
 
