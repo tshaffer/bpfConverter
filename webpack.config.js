@@ -10,5 +10,16 @@ module.exports = {
     path: path.resolve(__dirname, "../build"),
     filename: "bundle.js"
   },
-  externals: [nodeExternals()],
+  module: {
+    loaders: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        query: {
+          presets: ['es2015']
+        }
+      }
+    ]
+  },
+  externals: [nodeExternals()]
 };

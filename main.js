@@ -1,14 +1,19 @@
 console.log("BPF Converter");
 const fse = require('fs-extra');
 const path = require('isomorphic-path');
+const redux = require("redux");
+var ReduxThunk = require('redux-thunk').default
+const bsdm = require('@brightsign/bsdatamodel');
 
 function convertBpf(bpfPath) {
-  console.log(bpfPath);
-  readFileAsBuffer(bpfPath).then( (buf) => {
-    console.log('file read complete');
-    console.log(buf.length);
-    console.log(buf);
-  });
+  return function(dispatch)  {
+    console.log(bpfPath);
+    readFileAsBuffer(bpfPath).then( (buf) => {
+      console.log('file read complete');
+      console.log(buf.length);
+      console.log(buf);
+    });
+  }
   // return (dispatch: any) => {
   //   readFileAsBuffer(bpfPath)
   //     .then((buf: any) => {
@@ -49,5 +54,12 @@ const readFsFileAsBuffer = (filePath = '') => {
   });
 };
 
-convertBpf('/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/sit-0-ImagesBpTo.bpf');
+const rootReducer = redux.combineReducers({
+  bsdm : bsdm.bsDmReducer,
+});
+
+// const store = redux.createStore(rootReducer, redux.applyMiddleware(ReduxThunk.thunkMiddleware));
+const store = redux.createStore(rootReducer, redux.applyMiddleware());
+
+store.dispatch(convertBpf('/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/sit-0-ImagesBpTo.bpf'));
 
