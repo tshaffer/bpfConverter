@@ -1,7 +1,9 @@
 console.log("BPF Converter");
 const fse = require('fs-extra');
-const path = require('isomorphic-path');
+const path = require('isomorphic-path').default;
+console.log(path);
 const redux = require("redux");
+
 var ReduxThunk = require('redux-thunk').default
 const bsdm = require('@brightsign/bsdatamodel');
 const bsBpfConverter = require('@brightsign/bs-bpf-converter');
@@ -14,9 +16,20 @@ function convertBpf(bpfPath) {
       console.log(buf.length);
       console.log(buf);
       console.log(bsBpfConverter);
-      dispatch(bsBpfConverter.bsBpfCConvertPresentation(buf)).then((bpfxState) => {
-        console.log(bpfxState);
-      });
+      dispatch(bsBpfConverter.bsBpfCConvertPresentation(buf))
+        .then((bpfxState) => {
+          console.log(bpfxState);
+          const bpfFileName = path.basename(bpfPath, '.bpf');
+          const bpfxFileName = bpfFileName + '.bpfx';
+          const bpfDirName = path.dirname(bpfPath);
+          const bpfxFilePath = path.join(bpfDirName, bpfxFileName);
+          savePresentationFile(bpfxFilePath, bpfxState).then( () => {
+            console.log('presentation save complete');
+          });
+        })
+        .catch( (err) => {
+          debugger;
+        })
     });
   }
   // return (dispatch: any) => {
@@ -54,6 +67,20 @@ const readFsFileAsBuffer = (filePath = '') => {
         reject(err);
       } else {
         resolve(buf);
+      }
+    });
+  });
+};
+
+const savePresentationFile = (filePath, presentation) =>  {
+  return new Promise((resolve, reject) => {
+    const bpfStr = JSON.stringify(presentation, null, '\t');
+    fse.writeFile(filePath, bpfStr, (err) => {
+      if (err) {
+        reject(err);
+      }
+      else {
+        resolve();
       }
     });
   });
