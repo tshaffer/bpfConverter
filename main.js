@@ -4,6 +4,7 @@ const path = require('isomorphic-path');
 const redux = require("redux");
 var ReduxThunk = require('redux-thunk').default
 const bsdm = require('@brightsign/bsdatamodel');
+const bsBpfConverter = require('@brightsign/bs-bpf-converter');
 
 function convertBpf(bpfPath) {
   return function(dispatch)  {
@@ -12,6 +13,10 @@ function convertBpf(bpfPath) {
       console.log('file read complete');
       console.log(buf.length);
       console.log(buf);
+      console.log(bsBpfConverter);
+      dispatch(bsBpfConverter.bsBpfCConvertPresentation(buf)).then((bpfxState) => {
+        console.log(bpfxState);
+      });
     });
   }
   // return (dispatch: any) => {
