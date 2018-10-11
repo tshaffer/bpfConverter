@@ -730,11 +730,9 @@ function addImageItem(container: DmMediaStateContainer, state: any): Function {
   };
 }
 
-function addVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addVideoItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // TODO - why are some of these parameters unused?
     const {automaticallyLoop, file, fileIsLocal, videoDisplayMode, volume} = state;
@@ -748,27 +746,17 @@ function addVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Functi
         filePath);
     }
 
-    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, container, bsAssetItem);
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
 }
 
-function addAudioItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addAudioItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // TODO - why are some of these parameters unused?
     const {file, fileIsLocal, volume} = state;
@@ -782,27 +770,17 @@ function addAudioItem(zoneId: BsDmId, state: any, initialState: boolean): Functi
         filePath);
     }
 
-    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem);
+    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, container, bsAssetItem);
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
 }
 
-function addLiveVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addLiveVideoItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     const {overscan, timeOnScreen, volume} = state;
 
@@ -810,27 +788,17 @@ function addLiveVideoItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
     const liveVideoContentItem: DmLiveVideoContentItem =
       dmCreateLiveVideoContentItem('liveVideo', volume, overscan);
 
-    const addMediaStateThunkAction = dmAddMediaState('liveVideo', zone, liveVideoContentItem);
+    const addMediaStateThunkAction = dmAddMediaState('liveVideo', container, liveVideoContentItem);
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
 }
 
-function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addRssDataFeedPlaylistItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     const dmcDataFeed: DmcDataFeed = dmGetDataFeedByName(getState().bsdm, {name: state.liveDataFeedName});
 
@@ -840,87 +808,58 @@ function addRssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: bo
       state.stateName, dmcDataFeed.id
     );
 
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone, rssDataFeedContentItem);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container, rssDataFeedContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
 }
 
-function addMrssDataFeedPlaylistItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addMrssDataFeedPlaylistItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     const dmcDataFeed: DmcDataFeed = dmGetDataFeedByName(getState().bsdm, {name: state.liveDataFeedName});
 
     const mrssDataFeedContentItem: DmMrssDataFeedContentItem = dmCreateMrssDataFeedContentItem(
       state.stateName, dmcDataFeed.id, state.videoPlayerRequired);
 
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone, mrssDataFeedContentItem);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container, mrssDataFeedContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
 }
 
-function addEventHandlerItem(zoneId: BsDmId, state: any, initialState: boolean) {
+function addEventHandlerItem(container: DmMediaStateContainer, state: any) {
   return (dispatch: Function, getState: Function): any => {
 
     const { stopPlayback } = state;
 
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
-
     const eventHandlerContentItem : DmEventHandlerContentItem =
       dmCreateEventHandlerContentItem(state.stateName, stopPlayback);
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container,
       eventHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
-
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     console.log(getState().bsdm);
   };
 }
 
-function addPlayFileItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
+function addPlayFileItem(container: DmMediaStateContainer, state: any) {
   return (dispatch: Function, getState: Function): any => {
     const { filesTable, liveDataFeedName, mediaType, slideTransition, specifyLocalFiles, stateName,
       type, useDefaultMedia, useUserVariable } = state;
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // dmCreatePlayFileContentItem(name: string, triggerType?: PlayFileTriggerType, useDefaultMedia?: boolean,
     // userVariableIdOrName?: string, useDataFeed?: boolean, dataFeedId?: BsDmId): DmPlayFileContentItem;
     const playFileContentItem: DmPlayFileContentItem =
       dmCreatePlayFileContentItem(stateName, PlayFileTriggerType.ByEventData, useDefaultMedia, '',
         liveDataFeedName !== '', BsDmIdNone);
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone, playFileContentItem);
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container, playFileContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
     const playFileStateId: BsDmId = mediaStateParams.id;
@@ -955,7 +894,6 @@ function addPlayFileItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
     }
 
     const playFileStateContainer = { id: playFileStateId, type: MediaStateContainerType.PlayFile };
-    // dispatch(dmMediaSequenceAddItemRange(targetIndex, playFileStateContainer, assetItems));
 
     const addPlayFileItemsAction = dmMediaSequenceAddItemRange(targetIndex, playFileStateContainer, assetItems,
       mediaSequenceContentItemData);
@@ -963,42 +901,31 @@ function addPlayFileItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
   };
 }
 
-function addSuperStateItem(zoneId: BsDmId, state: any, isInitialState: boolean) {
+function addSuperStateItem(container: DmMediaStateContainer, state: any) {
   return (dispatch: Function, getState: Function): any => {
 
     const { stateName, initialState } = state;
 
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
-
     const superStateHandlerContentItem : DmSuperStateContentItem =
       dmCreateSuperStateContentItem(stateName);
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container,
       superStateHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
     const superStateStateId = mediaStateParams.id;
-
-    if (isInitialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: superStateStateId,
-      }));
-    }
 
     const mediaStateContainer: DmcMediaStateContainer =
       dmGetMediaStateContainer(superStateStateId, MediaStateContainerType.SuperState);
 
     console.log(mediaStateContainer);
 
+    // TODO - complete me, similar to buildZonePlaylist
     state.states.forEach( (subState: any, index: number) => {
       switch (subState.type) {
         case 'imageItem': {
           dispatch(addImageItem(mediaStateContainer, subState));
           break;
         }
-      }
-      if (index === 0) {
-        console.log('make me the home state?');
       }
     });
 
@@ -1007,7 +934,7 @@ function addSuperStateItem(zoneId: BsDmId, state: any, isInitialState: boolean) 
   };
 }
 
-function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addMediaListItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
 
@@ -1015,8 +942,6 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
       nextTransitionCommands, playFromBeginning,
       populateFromMediaLibrary, previousEvent, previousTransitionCommands, sendZoneMessage,
       shuffle, slideTransition, startIndex, support4KImages, transitionDuration } = state;
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // TODO - name TBD
     const name = 'mediaListName';
@@ -1034,7 +959,7 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
         isString(liveDataFeedName) && liveDataFeedName.length > 0, dataFeedId, slideTransition, transitionDuration,
         false, sendZoneMessage);
 
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container,
       mediaListContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
@@ -1090,13 +1015,6 @@ function addMediaListItem(zoneId: BsDmId, state: any, initialState: boolean): Fu
     if (!isNil(previousTransitionCommands)) {
       dispatch(addMediaListTransitionCommands(mediaStateParams.id, previousTransitionCommands,
         CommandSequenceType.SequenceItemNext));
-    }
-
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
     }
 
     const mediaListState: DmcMediaListMediaState =
@@ -1163,11 +1081,9 @@ function buildCommand(bsdm: DmState, bpfCommand: any): DmCommand | null {
   return command;
 }
 
-function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addHtmlItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     const {enableExternalData, enableMouseEvents, displayCursor, htmlSiteName, hwzOn, name, timeOnScreen, type,
       useUserStylesheet, userStylesheet} = state;
@@ -1179,21 +1095,12 @@ function addHtmlItem(zoneId: BsDmId, state: any, initialState: boolean): Functio
     const htmlContentItem: DmHtmlContentItem = dmCreateHtmlContentItem(name, dmcHtmlSite.id, enableExternalData,
       enableMouseEvents, displayCursor, hwzOn, useUserStylesheet);
 
-    const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
+    const addMediaStateThunkAction = dmAddMediaState(state.stateName, container,
       htmlContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
 
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
-
     return mediaStateParams.id;
-
   };
 }
 
@@ -1230,23 +1137,22 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
-          // mediaStateId = dispatch(addImageItem(zoneId, state, index === 0));
           mediaStateId = dispatch(addImageItem(zone, state));
           eventData.push(createTimeoutEventData(mediaStateId, state.slideDelayInterval));
           break;
         }
         case 'videoItem': {
-          mediaStateId = dispatch(addVideoItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addVideoItem(zone, state));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'audioItem': {
-          mediaStateId = dispatch(addAudioItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addAudioItem(zone, state));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'liveVideoItem': {
-          mediaStateId = dispatch(addLiveVideoItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addLiveVideoItem(zone, state));
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
@@ -1278,35 +1184,49 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
         }
         // TODO - what is this? finish coding once I figure that out
         case 'rssDataFeedPlaylistItem':
-          dispatch(addRssDataFeedPlaylistItem(zoneId, state, index === 0));
+          dispatch(addRssDataFeedPlaylistItem(zone, state));
           break;
 
         case 'mrssDataFeedItem': {
-          mediaStateId = dispatch(addMrssDataFeedPlaylistItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addMrssDataFeedPlaylistItem(zone, state));
           eventData.push(createMediaEndEventData(mediaStateId));
           break;
         }
         case 'html5Item': {
-          mediaStateId = dispatch(addHtmlItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addHtmlItem(zone, state));
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
         case 'mediaListItem':
-          mediaStateId = dispatch(addMediaListItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addMediaListItem(zone, state));
           break;
         case 'eventHandlerItem':
-          dispatch(addEventHandlerItem(zoneId, state, index === 0));
+          dispatch(addEventHandlerItem(zone, state));
           break;
         case 'superStateItem':
-          dispatch(addSuperStateItem(zoneId, state, index === 0));
+          dispatch(addSuperStateItem(zone, state));
           break;
         case 'playFileItem':
-          dispatch(addPlayFileItem(zoneId, state, index === 0));
+          dispatch(addPlayFileItem(zone, state));
         default:
           console.log('buildZonePlaylist: ', state.type);
           break;
       }
     });
+
+    // set initialState
+    // TODO - check that # of states > 0
+    if (bpfZone.playlist.type === 'interactive') {
+      const initialStateName = bpfZone.playlist.initialState;
+      const initialState: DmcMediaState = dmGetMediaStateByName(getState().bsdm, { name: initialStateName });
+      dispatch(dmUpdateZone( {
+        id: zone.id,
+        initialMediaStateId: initialState.id
+      }));
+    }
+    else {
+      debugger;
+    }
 
     if (bpfZone.playlist.states.length > 0) {
       if (bpfZone.playlist.type === 'interactive') {
