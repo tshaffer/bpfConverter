@@ -58,8 +58,7 @@ const rootReducer = redux.combineReducers({
   bsdm : bsdm.bsDmReducer,
 });
 
-// const store = redux.createStore(rootReducer, redux.applyMiddleware(ReduxThunk.thunkMiddleware));
-const store = redux.createStore(rootReducer, redux.applyMiddleware());
+const store = redux.createStore(rootReducer, redux.applyMiddleware(ReduxThunk));
 
 store.dispatch(convertBpf('/Users/tedshaffer/Documents/BrightAuthor/bacToBacon/sit-0-ImagesBpTo.bpf'));
 
