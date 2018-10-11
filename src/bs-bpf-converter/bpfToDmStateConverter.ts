@@ -704,11 +704,9 @@ function getBsColor(bpfColorSpec: any): BsColor {
   return color;
 }
 
-function addImageItem(zoneId: BsDmId, state: any, initialState: boolean): Function {
+function addImageItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
-
-    const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     // TODO - why are some of these parameters unused?
     const {file, fileIsLocal, slideDelayInterval, slideTransition, transitionDuration, videoPlayerRequired} = state;
@@ -723,18 +721,10 @@ function addImageItem(zoneId: BsDmId, state: any, initialState: boolean): Functi
     }
 
     // TEDDY - convert slideTransition to TransitionType and supply here instead of hardcoded value.
-    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, zone, bsAssetItem,
+    const addMediaStateThunkAction = dmAddMediaState(bsAssetItem.name, container, bsAssetItem,
       { defaultTransition: TransitionType.NoEffect, transitionDuration} );
     const mediaStateAction: MediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams: MediaStateParams = mediaStateAction.payload;
-
-    // TODO - do this for all states?
-    if (initialState) {
-      dispatch(dmUpdateZone({
-        id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
-      }));
-    }
 
     return mediaStateParams.id;
   };
@@ -901,7 +891,7 @@ function addEventHandlerItem(zoneId: BsDmId, state: any, initialState: boolean) 
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
 
     const eventHandlerContentItem : DmEventHandlerContentItem =
-      dmCreateEventHandlerContentItem('eventHandlerItem', stopPlayback);
+      dmCreateEventHandlerContentItem(state.stateName, stopPlayback);
     const addMediaStateThunkAction = dmAddMediaState(state.stateName, zone,
       eventHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
@@ -986,13 +976,31 @@ function addSuperStateItem(zoneId: BsDmId, state: any, isInitialState: boolean) 
       superStateHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
+    const superStateStateId = mediaStateParams.id;
 
     if (isInitialState) {
       dispatch(dmUpdateZone({
         id: zoneId,
-        initialMediaStateId: mediaStateParams.id,
+        initialMediaStateId: superStateStateId,
       }));
     }
+
+    const mediaStateContainer: DmcMediaStateContainer =
+      dmGetMediaStateContainer(superStateStateId, MediaStateContainerType.SuperState);
+
+    console.log(mediaStateContainer);
+
+    state.states.forEach( (subState: any, index: number) => {
+      switch (subState.type) {
+        case 'imageItem': {
+          dispatch(addImageItem(mediaStateContainer, subState));
+          break;
+        }
+      }
+      if (index === 0) {
+        console.log('make me the home state?');
+      }
+    });
 
     console.log(getState().bsdm);
 
@@ -1222,7 +1230,8 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     bpfZone.playlist.states.forEach((state: any, index: number) => {
       switch (state.type) {
         case 'imageItem': {
-          mediaStateId = dispatch(addImageItem(zoneId, state, index === 0));
+          // mediaStateId = dispatch(addImageItem(zoneId, state, index === 0));
+          mediaStateId = dispatch(addImageItem(zone, state));
           eventData.push(createTimeoutEventData(mediaStateId, state.slideDelayInterval));
           break;
         }

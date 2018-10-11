@@ -1047,6 +1047,12 @@ function fixInteractiveState(rawInteractiveState: any): any {
   else if (isObject(rawInteractiveState.playFileItem)) {
     interactiveState = fixPlayFileItem(rawInteractiveState.playFileItem);
   }
+  else {
+    // TODO
+    debugger;
+  }
+
+  interactiveState.stateName = rawInteractiveState.name;
 
   if (isArray(rawInteractiveState.brightSignCmd)) {
     interactiveState.brightSignEntryCommands = fixInteractiveCommands(rawInteractiveState.brightSignCmd);
@@ -1598,6 +1604,7 @@ function fixEventHandlerItem(rawEventHandlerItem: any) : any {
   return eventHandlerItem;
 }
 
+// TODO - stateName here conflicts with containing playFileState's name
 function fixPlayFileItem(rawPlayFileItem: any) : any {
   const playFileParametersSpec: any[] = [
     { name: 'mediaType', type: 'string' },
@@ -1638,7 +1645,8 @@ function fixPlayFileFile(rawFile: any): any {
   return fixJson(playFileParametersSpec, rawFile.$);
 }
 
-// TBD
+// TODO - probably not complete?
+// TODO - stateName here conflicts with containing superState's name
 function fixSuperStateItem(rawSuperStateItem: any) : any {
   const superStateParametersSpec: any[] = [
     { name: 'stateName', type: 'string'},
@@ -1647,11 +1655,21 @@ function fixSuperStateItem(rawSuperStateItem: any) : any {
 
   const superStateItem: any = fixJson(superStateParametersSpec, rawSuperStateItem);
   superStateItem.type = 'superStateItem';
+  superStateItem.states = [];
 
-  // TODO - retrieve children
+  if (isArray(rawSuperStateItem.state)) {
+    rawSuperStateItem.state.forEach( (subState: any) => {
+      const childState = fixInteractiveState(subState);
+      if (!isNil(childState)) {
+        superStateItem.states.push(childState);
+      }
+    });
+  }
+
+  console.log('superStateItem: ');
+  console.log(superStateItem);
 
   return superStateItem;
-
 }
 
 function fixLiveVideoItem(rawLiveVideoItem: any) : any {
