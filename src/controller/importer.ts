@@ -14,7 +14,6 @@ export const convertBpf = (bpfPath: string) => {
     readFileAsBuffer(bpfPath)
       .then((buf: any) => {
         dispatch(bsBpfCConvertPresentation(buf)).then((bpfxState: any) => {
-          console.log(bpfxState);
           const bpfFileName = path.basename(bpfPath, '.bpf');
           const bpfxFileName = bpfFileName + '.bpfx';
           const bpfDirName = path.dirname(bpfPath);

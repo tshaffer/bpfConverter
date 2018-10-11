@@ -714,7 +714,6 @@ function addImageItem(container: DmMediaStateContainer, state: any): Function {
     const fileName = file.name;
     const filePath = file.path;
     let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
-    const linkBroken: boolean = bsAssetItem === null;
     if (!bsAssetItem) {
       bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
         filePath);
@@ -740,7 +739,6 @@ function addVideoItem(container: DmMediaStateContainer, state: any): Function {
     const fileName = file.name;
     const filePath = file.path;
     let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
-    const linkBroken : boolean = bsAssetItem === null;
     if (!bsAssetItem) {
       bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
         filePath);
@@ -764,7 +762,6 @@ function addAudioItem(container: DmMediaStateContainer, state: any): Function {
     const fileName = file.name;
     const filePath = file.path;
     let bsAssetItem: BsAssetItem = fsGetAssetItemFromFile(filePath);
-    const linkBroken : boolean = bsAssetItem === null;
     if (!bsAssetItem) {
       bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.Content, fileName,
         filePath);
@@ -1975,7 +1972,6 @@ function addHtmlSites(htmlSites : any[]) : Function {
         if (isNil(bsAssetItem)) {
           bsAssetItem = bscAssetItemFromBasicAssetInfo(AssetType.HtmlSite, name, filePath);
         }
-
         const htmlSiteLocalThunkAction : BsDmThunkAction<HtmlSiteHostedParams> =
           dmAddHostedHtmlSite(name, bsAssetItem, queryString);
         const actionParams : BsDmAction<HtmlSiteHostedParams> = dispatch(htmlSiteLocalThunkAction);

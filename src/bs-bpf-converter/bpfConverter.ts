@@ -38,7 +38,6 @@ export function bsBpfCConvertPresentation(buffer: Buffer) : Function {
 
             // convert bpf json to dmState.
             dispatch(generateDmStateFromBpf(bpf)).then( (bsdm: any) => {
-              console.log(bsdm);
               const bpfxState : any = createProjectFileStateFromDmState(bsdm);
               resolve(bpfxState);
             });
