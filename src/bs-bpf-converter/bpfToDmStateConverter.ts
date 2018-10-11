@@ -1,6 +1,6 @@
 import path from 'isomorphic-path';
 
-import { isNil, isString } from 'lodash';
+import { cloneDeep, isNil, isString } from 'lodash';
 
 import {
   EventIntrinsicAction,
@@ -56,6 +56,7 @@ import {
 import { fsGetAssetItemFromFile } from '@brightsign/fsconnector';
 
 import {
+  dmUpdateMediaState,
   dmCreateEventHandlerContentItem,
   DmEventHandlerContentItem,
   dmCreateEventDataForEventType,
@@ -75,7 +76,7 @@ import {
   dmCreateMediaListContentItem,
   DmMediaListContentItem,
   dmMediaSequenceAddItemRange,
-
+  MediaStateUpdateParams,
   MediaStateContainerType,
   DmcMediaStateContainer,
   dmGetMediaStateContainer,
@@ -585,7 +586,6 @@ function setZoneProperties(bpfZone : any, zoneId : BsDmId, zoneType : ZoneType) 
         // const tickerZoneProperties: DmTickerZoneProperties = zoneProperties as DmTickerZoneProperties;
 
         const zoneSpecificParameters = bpfZone.zoneSpecificParameters;
-        console.log(zoneSpecificParameters);
 
         const textWidgetParameters: any = zoneSpecificParameters.textWidget;
         const widgetParameters: any = zoneSpecificParameters.widget;
@@ -862,8 +862,6 @@ function addEventHandlerItem(container: DmMediaStateContainer, state: any) {
       eventHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
-
-    console.log(getState().bsdm);
   };
 }
 
@@ -919,10 +917,12 @@ function addPlayFileItem(container: DmMediaStateContainer, state: any) {
   };
 }
 
+// TODO - test with nested superStates.
 function addSuperStateItem(container: DmMediaStateContainer, state: any) {
   return (dispatch: Function, getState: Function): any => {
 
-    const { stateName, initialState } = state;
+    const stateName: string = state.name;
+    const initialStateName: string = state.initialState;
 
     const superStateHandlerContentItem : DmSuperStateContentItem =
       dmCreateSuperStateContentItem(stateName);
@@ -930,25 +930,80 @@ function addSuperStateItem(container: DmMediaStateContainer, state: any) {
       superStateHandlerContentItem);
     const mediaStateAction = dispatch(addMediaStateThunkAction);
     const mediaStateParams = mediaStateAction.payload;
+
     const superStateStateId = mediaStateParams.id;
+    const superStateContentItem: DmSuperStateContentItem =
+      cloneDeep(mediaStateParams.contentItem as DmSuperStateContentItem);
 
     const mediaStateContainer: DmcMediaStateContainer =
       dmGetMediaStateContainer(superStateStateId, MediaStateContainerType.SuperState);
 
-    console.log(mediaStateContainer);
-
-    // TODO - complete me, similar to buildZonePlaylist
-    state.states.forEach( (subState: any, index: number) => {
+    // TODO - common code with buildZonePlaylist?
+    // TODO - if not, at least pull it out of here
+    state.states.forEach( (subState: any) => {
       switch (subState.type) {
         case 'imageItem': {
           dispatch(addImageItem(mediaStateContainer, subState));
           break;
         }
+        case 'videoItem': {
+          dispatch(addVideoItem(mediaStateContainer, state));
+          break;
+        }
+        case 'audioItem': {
+          dispatch(addAudioItem(mediaStateContainer, state));
+          break;
+        }
+        case 'liveVideoItem': {
+          dispatch(addLiveVideoItem(mediaStateContainer, state));
+          break;
+        }
+        // TODO - implement functions for the item types
+        case 'audioStreamItem':
+        case 'mjpegStreamItem':
+          break;
+        case 'videoStreamItem': {
+          dispatch(addVideoStreamItem(mediaStateContainer, state));
+          break;
+        }
+        // TODO - what is this? finish coding once I figure that out
+        case 'rssDataFeedPlaylistItem':
+          dispatch(addRssDataFeedPlaylistItem(mediaStateContainer, state));
+
+        case 'mrssDataFeedItem': {
+          dispatch(addMrssDataFeedPlaylistItem(mediaStateContainer, state));
+          break;
+        }
+        case 'html5Item': {
+          dispatch(addHtmlItem(mediaStateContainer, state));
+          break;
+        }
+        case 'mediaListItem':
+          dispatch(addMediaListItem(mediaStateContainer, state));
+          break;
+        case 'eventHandlerItem':
+          dispatch(addEventHandlerItem(mediaStateContainer, state));
+          break;
+        case 'superStateItem':
+          dispatch(addSuperStateItem(mediaStateContainer, state));
+          break;
+        case 'playFileItem':
+          dispatch(addPlayFileItem(mediaStateContainer, state));
+        default:
+          // TODO
+          debugger;
+          break;
       }
     });
 
-    console.log(getState().bsdm);
+    const initialState: DmcMediaState = dmGetMediaStateByName(getState().bsdm, { name: initialStateName });
 
+    superStateContentItem.initialMediaStateId = initialState.id;
+    const superStateUpdateParams: MediaStateUpdateParams = {
+      id: mediaStateContainer.id,
+      contentData: superStateContentItem,
+    };
+    dispatch(dmUpdateMediaState(superStateUpdateParams));
   };
 }
 
@@ -1037,7 +1092,6 @@ function addMediaListItem(container: DmMediaStateContainer, state: any): Functio
 
     const mediaListState: DmcMediaListMediaState =
       dmGetMediaStateById(getState().bsdm, { id: mediaStateParams.id}) as DmcMediaListMediaState;
-    console.log(mediaListState);
   };
 }
 
@@ -1286,7 +1340,6 @@ function buildInteractiveTransitions(bpfZone: any) {
   return (dispatch: Function, getState: Function) => {
 
     bpfZone.playlist.transitions.forEach( (transition: any) => {
-      console.log(transition);
 
       const {
         assignInputToUserVariable,
@@ -1772,7 +1825,6 @@ function addLiveDataFeeds(liveDataFeeds: any[]) : Function {
           const parserBrightScriptPlugin : DmcParserBrightScriptPlugin =
             dmGetParserPluginByName(bsdm, { name : parserPluginName });
           if (parserBrightScriptPlugin) {
-            console.log(parserBrightScriptPlugin);
             parserBrightScriptPluginId = parserBrightScriptPlugin.id;
           }
           // TODO
@@ -1833,7 +1885,6 @@ function addLiveDataFeeds(liveDataFeeds: any[]) : Function {
       });
 
       Promise.all(promises).then(() => {
-        console.log(getState());
         resolve();
       }).catch( (err) => {
         return reject(new BpfConverterError(BpfConverterErrorType.unexpectedError, 'addLiveDataFeeds: ' + err));
@@ -1880,8 +1931,6 @@ function addUserVariables(userVariables : any) : Function {
   return (dispatch : Function, getState : Function) : any => {
 
     userVariables.forEach( (userVariable : any) => {
-
-      console.log(userVariable);
 
       const { access, defaultValue, liveDataFeedName, name, networked, systemVariable } = userVariable;
 
@@ -1961,7 +2010,6 @@ function addScriptPlugins(scriptPlugins : any) : Function {
 
   return (dispatch : Function) : any => {
     scriptPlugins.forEach( (scriptPlugin : any) => {
-      console.log(scriptPlugin);
 
       const name = scriptPlugin.name;
       const filePath = scriptPlugin.path;
