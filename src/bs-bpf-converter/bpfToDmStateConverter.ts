@@ -796,6 +796,24 @@ function addLiveVideoItem(container: DmMediaStateContainer, state: any): Functio
   };
 }
 
+function addVideoStreamItem(container: DmMediaStateContainer, state: any): Function {
+
+  return (dispatch: Function, getState: Function): any => {
+
+    const url = convertParameterValue(getState().bsdm, state.url);
+
+    const videoStreamContentItem : DmVideoStreamContentItem =
+      dmCreateVideoStreamContentItem('videoStream', url);
+
+    const addMediaStateThunkAction : BsDmThunkAction<MediaStateParams> =
+      dmAddMediaState('videoStream', container, videoStreamContentItem);
+    const mediaStateAction : MediaStateAction = dispatch(addMediaStateThunkAction);
+    const mediaStateParams : MediaStateParams = mediaStateAction.payload;
+
+    return mediaStateParams.id;
+  };
+}
+
 function addRssDataFeedPlaylistItem(container: DmMediaStateContainer, state: any): Function {
 
   return (dispatch: Function, getState: Function): any => {
@@ -1134,7 +1152,7 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
     const eventData: any[] = [];
 
     const zone: DmMediaStateContainer = dmGetZoneMediaStateContainer(zoneId);
-    bpfZone.playlist.states.forEach((state: any, index: number) => {
+    bpfZone.playlist.states.forEach((state: any) => {
       switch (state.type) {
         case 'imageItem': {
           mediaStateId = dispatch(addImageItem(zone, state));
@@ -1156,29 +1174,17 @@ function buildZonePlaylist(bpfZone : any, zoneId : BsDmId) : Function {
           eventData.push(createTimeoutEventData(mediaStateId, Number(state.timeOnScreen)));
           break;
         }
-        // TODO
+        // TODO - implement functions for the item types
         case 'audioStreamItem':
         case 'mjpegStreamItem':
           break;
         case 'videoStreamItem': {
-
-          const { timeOnScreen } = state;
-
-          const url = convertParameterValue(getState().bsdm, state.url);
-
-          const videoStreamContentItem : DmVideoStreamContentItem =
-            dmCreateVideoStreamContentItem('videoStream', url);
-
-          const addMediaStateThunkAction : BsDmThunkAction<MediaStateParams> =
-          dmAddMediaState('videoStream', zone, videoStreamContentItem);
-          const mediaStateAction : MediaStateAction = dispatch(addMediaStateThunkAction);
-          const mediaStateParams : MediaStateParams = mediaStateAction.payload;
-
-          if (timeOnScreen === 0) {
-            eventData.push(createMediaEndEventData(mediaStateParams.id));
+          mediaStateId = dispatch(addVideoStreamItem(zone, state));
+          if (state.timeOnScreen === 0) {
+            eventData.push(createMediaEndEventData(mediaStateId));
           }
           else {
-            eventData.push(createTimeoutEventData(mediaStateParams.id, timeOnScreen));
+            eventData.push(createTimeoutEventData(mediaStateId, state.timeOnScreen));
           }
           break;
         }
